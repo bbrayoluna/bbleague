@@ -1,5 +1,9 @@
 
     <style>
+		.hide {
+		  display: none;
+		}
+
         table {
 		    font-family: 'nuffle';
             width: 80%;
