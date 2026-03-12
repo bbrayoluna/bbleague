@@ -159,9 +159,13 @@ th {
     width: 15rem;
     height: 6rem;
 }
-.logosizexl {
+.logosize15x15 {
     width: 15rem;
     height: 15rem;
+}
+.logosize6x6 {
+    width: 6rem;
+    height: 6rem;
 }
 
 .sublogosize {
