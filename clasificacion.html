@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="stylesheet" href="style.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ND8WV5PLDZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ND8WV5PLDZ');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación - League Rayo de Luna</title>
+</head>
+	<body>
+		<header>
+			<img src="images/logo.png" class="logosize"  alt="LogoBB"><h1>Clasificación</h1>
+		</header>
+		<div class="container">
+			<nav>
+				<ul>
+					<li><a href="index.html" class="nuffle yellow menu">Principal</a></li>
+					<li><a href="reglas.html" class="nuffle yellow menu">Bases</a></li>
+					<li class="nuffle yellow menu">Clasificación</li>
+					<li><a href="pairings.html" class="nuffle yellow menu">Emparejamientos</a></li>
+				</ul>
+				<img src="images/ganadores.PNG" class="sideimg" alt="ganadores">
+			</nav>
+			<main>
+				<a href="historico.html" class="nuffle red menu">Histórico de equipos</a>
+				<br>
+				<a href="jornada7.html" class="hide nuffle red menu">Resumen Jornada 7</a>
+				<table>
+					<thead>
+						<tr>
+							<th>Entrenador</th>
+							<th>Equipo</th>
+							<th>Ptos</th>
+							<th>Partidos Jugados</th>
+							<th>Ganados</th>
+							<th>Empatados</th>
+							<th>Perdidos</th>
+							<th>Touchdowns a favor</th>
+							<th>Touchdowns en contra</th>
+							<th>Heridos provocados</th>
+						</tr>
+					</thead>
+					<tbody>
+						<script>
+							const equipos = [
+								{"Entrenador": "Sergio", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
+								{"Entrenador": "Luis", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
+								{"Entrenador": "Miki", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
+								{"Entrenador": "Rodri H", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
+								{"Entrenador": "Raúl", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
+								{"Entrenador": "Santi", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"}
+							];
+							equipos.sort((a, b) => {
+							  // Primero se ordena por Ptos (de mayor a menor)
+							  if (b.Ptos !== a.Ptos) {
+								return b.Ptos - a.Ptos;
+							  }
+
+							  // Si hay empate en Ptos, se ordena por TA - TC (de mayor a menor)
+							  const aDiferencia = a.TA - a.TC;
+							  const bDiferencia = b.TA - b.TC;
+							  if (bDiferencia !== aDiferencia) {
+								return bDiferencia - aDiferencia;
+							  }
+
+							  // Si aún hay empate, se ordena por HP (de mayor a menor)
+							  return b.HP - a.HP;
+							});
+							function quitarAcentos(str) {
+								return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+							}
+
+							function formatoPDF(str){
+								return quitarAcentos(str).toLowerCase().trim();
+							}
+							equipos.forEach(equipo => {
+								document.write(`<tr><td>${equipo.Entrenador}</td><td class="linktd"><a href="PDF/equipos/jornada5/${formatoPDF(equipo.Entrenador)}-${formatoPDF(equipo.Equipo)}.pdf" download="${formatoPDF(equipo.Entrenador)}-${formatoPDF(equipo.Equipo)}.pdf">${equipo.Equipo}</a></td>
+								<td>${equipo.Ptos}</td><td>${equipo.Jugados}</td><td>${equipo.Ganados}</td><td>${equipo.Empatados}</td>
+								<td>${equipo.Perdidos}</td><td>${equipo.TA}</td><td>${equipo.TC}</td><td>${equipo.HP}</td></tr>`);
+							});
+						</script>
+					</tbody>
+				</table>
+				Plantilla Acta: <a href="plantillaActa.docx" download="plantillaActa.docx">Descargar</a>
+			</main>
+		</div>
+	</body>
+</html>
