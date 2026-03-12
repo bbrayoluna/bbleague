@@ -1,8 +1,5 @@
 
     <style>
-		.hide {
-		  display: none !important;
-		}
 
         table {
 		    font-family: 'nuffle';
@@ -123,6 +120,10 @@
 			font-family: 'nuffle';
 		}
     </style>
+	
+.hide {
+  display: none !important;
+}
 @font-face {
 	font-family: 'nuffle';
 	src: url('fonts/nuffle.ttf') format('truetype'),
