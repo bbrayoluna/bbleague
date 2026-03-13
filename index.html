@@ -121,9 +121,9 @@ async function fetchSheet(sheetName) {
 
 async function cargarEquipos() {
   const jsonConfig = await fetchSheet(CONFIG);
-  const rows = jsonConfig.table.rows;
+  const rowsConfig = jsonConfig.table.rows;
 
-  const jornada = rows[0].c[1]?.v; // B1
+  const jornada = rowsConfig[0].c[1]?.v; // B1
   document.getElementById("jornada").value = jornada;
   
   const json = await fetchSheet(RANKING_SUIZO);
