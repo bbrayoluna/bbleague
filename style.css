@@ -266,7 +266,7 @@ margin: auto;
 border: 1px solid #333;
 }
 .formulario label {
-color: #ac342f;
+color: #fac546;
 font-family: 'nuffle', sans-serif;
 font-weight: bold;
 display: block;
@@ -285,6 +285,7 @@ background: #ac342f;
 color: #fac546;
 }
 .formulario button {
+font-family: 'nuffle', sans-serif;
 color: #fac546;
 margin-top: 1.5rem;
 padding: 0.7rem 1rem;
@@ -296,6 +297,7 @@ font-weight: 600;
 width: 100%;
 }
 .formulario button:hover {
+font-weight: bold;
 background: #fac546;
 color: #25396c;
 }
