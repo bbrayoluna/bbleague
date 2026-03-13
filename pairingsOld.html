@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="stylesheet" href="style.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ND8WV5PLDZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ND8WV5PLDZ');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pairings - League Rayo de Luna</title>
+</head>
+<body>
+		<header>
+			<img src="images/logo.png" class="logosize"  alt="LogoBB">
+			<h1>Emparejamientos del Torneo</h1>
+			<img src="images/logoliga.png" class="logosize6x6" alt="logoliga">
+		</header>
+		<div class="container">
+			<nav>
+				<ul>
+				<li><a href="index.html" class="nuffle yellow menu">Principal</a></li>
+				<li><a href="reglas.html" class="nuffle yellow menu">Bases</a></li>
+				<li><a href="clasificacion.html" class="nuffle yellow menu">Clasificación</a></li>
+				<li class="nuffle yellow menu">Emparejamientos</li>
+				</ul>
+			</nav>
+			<main>
+				<p class="nuffle red big">
+					PENDING
+				</p>
+				<div class="hide" id="emparejamientos"></div>
+				<script>
+					const jornadas = [
+						[
+							["Sergio (Nobleza imperial)", "Rubén (Orcos negros)", "2-0"],
+							["Enric (Skaven)", "Frank (Ogros)", "2-0"],
+							["Miguel (Unión élfica)", "Raúl (Enanos)", "0-2"],
+							["Rodrigo H (Norses)", "Rodrigo M (No muertos)", "1-0"],
+							["Santi (Elfos oscuros)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", " Frank (Ogros)", "3-1"],
+							["Rubén (Orcos negros)", "Raúl (Enanos)", "0-1"],
+							["Enric (Skaven)", "Rodrigo M (No muertos)", "1-2"],
+							["Rodrigo H (Norses)", "Santi (Elfos oscuros)", "1-2"],
+							["Miguel (Unión élfica)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Raúl (Enanos)", "2-1"],
+							["Frank (Ogros)", "Rodrigo M (No muertos)", "1-2"],
+							["Enric (Skaven)", "Santi (Elfos oscuros)", "1-0"],
+							["Miguel (Unión élfica)", "Rodrigo H (Norses)", "0-3"],
+							["Rubén (Orcos negros)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Rodrigo M (No muertos)", "0-2"],
+							["Frank (Ogros)", "Santi (Elfos oscuros)", "0-2"],
+							["Rubén (Orcos negros)", "Rodrigo H (Norses)", "1-4"],
+							["Enric (Skaven)", "Miguel (Unión élfica)", "2-0"],
+							["Raúl (Enanos)", "DESCANSA", ""]
+						],
+						[
+							["Rodrigo M (No muertos)", "Santi (Elfos oscuros)", "2-0"],
+							["Raúl (Enanos)", "Rodrigo H (Norses)", "0-2"],
+							["Frank (Ogros)", "Miguel (Unión élfica)", "1-2"],
+							["Rubén (Orcos negros)", "Enric (Skaven)", "0-3"],
+							["Sergio (Nobleza imperial)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Santi (Elfos oscuros)", "0-1"],
+							["Rodrigo M (No muertos)", "Miguel (Unión élfica)", "4-1"],
+							["Raúl (Enanos)", "Enric (Skaven)", "1-0"],
+							["Frank (Ogros)", "Rubén (Orcos negros)", "1-1"],
+							["Rodrigo H (Norses)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Rodrigo H (Norses)", "0-0"],
+							["Santi (Elfos oscuros)", "Miguel (Unión élfica)", "1-0"],
+							["Rodrigo M (No muertos)", "Rubén (Orcos negros)", "3-0"],
+							["Raúl (Enanos)", "Frank (Ogros)", "2-0"],
+							["Enric (Skaven)", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Miguel (Unión élfica)", "3-0"],
+							["Rodrigo H (Norses)", "Enric (Skaven)", "2-1"],
+							["Santi (Elfos oscuros)", "Rubén (Orcos negros)", "2-0"],
+							["Rodrigo M (No muertos)", "Raúl (Enanos)", "2-1"],
+							["Frank (Ogros", "DESCANSA", ""]
+						],
+						[
+							["Sergio (Nobleza imperial)", "Enric (Skaven)", "2-0"],
+							["Miguel (Unión élfica)", "Rubén (Orcos negros)", "1-1"],
+							["Rodrigo H (Norses)", "Frank (Ogros)", "4-0"],
+							["Santi (Elfos oscuros)", "Raúl (Enanos)", "1-1"],
+							["Rodrigo M (No muertos)", "DESCANSA", ""]
+						]
+					];
+					const fechaLimite = ["15 de noviembre de 2024","15 de diciembre de 2024","31 de enero de 2025","28 de febrero de 2025","31 de marzo de 2025","15 de mayo de 2025","15 de junio de 2025","15 de agosto de 2025","15 de septiembre de 2025"]
+					const fechasEdited = ["Editado 11/11/2024","Editado 12/12/24","Editado 23/01/25","Editado 16/03/25","Editado 15/04/25","Editado 15/05/25","Editado 15/05/25","",""];
+
+					const emparejamientosDiv = document.getElementById('emparejamientos');
+					
+					const startDate = new Date(2024, 10, 15); // 15 de noviembre de 2024
+
+					jornadas.forEach((jornada, index) => {
+						const jornadaDiv = document.createElement('div');
+						jornadaDiv.classList.add('jornada');
+												
+						var details = document.createElement('details');
+						var fechaActual = new Date();
+						var fechaMasUnMes = new Date(fechaActual.setMonth(fechaActual.getMonth() + 1));
+						if (index == 7) {
+						  details.setAttribute('open', '');
+						}
+
+						var summary = document.createElement('summary');
+						summary.innerHTML = `Jornada ${index + 1} - Fecha límite: ${fechaLimite[index]}`;
+						details.appendChild(summary);
+						
+						const table = document.createElement('table');
+						const thead = document.createElement('thead');
+						thead.innerHTML = `<tr><th>Equipo 1</th><th>Equipo 2</th><th>Resultado</th></tr>`;
+						table.appendChild(thead);
+
+						const tbody = document.createElement('tbody');
+						jornada.forEach(partido => {
+							const tr = document.createElement('tr');
+							if (partido[1] === "DESCANSA") {
+								tr.style.backgroundColor = "#999";
+							} 
+							tr.innerHTML = `<td>${partido[0]}</td><td>${partido[1]}</td><td>${partido[2]}</td>`;
+							tbody.appendChild(tr);
+						});
+						table.appendChild(tbody);
+
+						details.appendChild(table);
+						const jornadalink = document.createElement('p');
+                        if(index<7){
+							jornadalink.innerHTML = `<a class="nuffle" href="jornada${index + 1}.html"  alt="jornada${index + 1}">Resumen de la Jornada ${index + 1}</a> <span class="date">${fechasEdited[index]}</span>`;
+                        }else{
+							jornadalink.innerHTML = `<a hidden class="nuffle" href="jornada${index + 1}.html"  alt="jornada${index + 1}">Resumen de la Jornada ${index + 1}</a> <span class="date">${fechasEdited[index]}</span>`;
+                        }
+						details.appendChild(jornadalink);			
+				
+						jornadaDiv.appendChild(details);
+						emparejamientosDiv.appendChild(jornadaDiv);
+					});
+
+				</script>
+			</main>
+		</div>
+
+    
+</body>
+</html>

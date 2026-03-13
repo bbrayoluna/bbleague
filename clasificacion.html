@@ -34,69 +34,77 @@
 			<main>
 				<br>
 				<a href="jornada7.html" class="hide nuffle red menu">Resumen Jornada 7</a>
-				<table>
-					<thead>
-						<tr>
-							<th>Entrenador</th>
-							<th>Equipo</th>
-							<th>Ptos</th>
-							<th>Partidos Jugados</th>
-							<th>Ganados</th>
-							<th>Empatados</th>
-							<th>Perdidos</th>
-							<th>Touchdowns a favor</th>
-							<th>Touchdowns en contra</th>
-							<th>Heridos provocados</th>
-						</tr>
-					</thead>
-					<tbody>
-						<script>
-							const equipos = [
-								{"Entrenador": "Sergio", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Luis", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Miki", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Rodri H", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Raúl", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Iván", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Enric", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Iker", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Meritxell", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Josemi", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Diego", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Gari", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"},
-								{"Entrenador": "Santi", "Equipo": "pending", "Ptos": "0", "Jugados": "0", "Ganados": "0", "Empatados": "0", "Perdidos": "0", "TA": "0", "TC": "0", "HP": "0"}
-							];
-							equipos.sort((a, b) => {
-							  // Primero se ordena por Ptos (de mayor a menor)
-							  if (b.Ptos !== a.Ptos) {
-								return b.Ptos - a.Ptos;
-							  }
+				<table id="clasificacion">
+				  <thead>
+					<tr>
+					  <th>#</th>
+					  <th>Equipo</th>
+					  <th>PJ</th>
+					  <th>PG</th>
+					  <th>PE</th>
+					  <th>PP</th>
+					  <th>TD+</th>
+					  <th>TD-</th>
+					  <th>TD±</th>
+					  <th>Puntos</th>
+					</tr>
+				  </thead>
+				  <tbody>
+					<script>
+					const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+					const TABLA_ORDENADA = "TablaOrdenada";
 
-							  // Si hay empate en Ptos, se ordena por TA - TC (de mayor a menor)
-							  const aDiferencia = a.TA - a.TC;
-							  const bDiferencia = b.TA - b.TC;
-							  if (bDiferencia !== aDiferencia) {
-								return bDiferencia - aDiferencia;
-							  }
+					async function loadClasificacion() {
+					  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${TABLA_ORDENADA}`;
+					  const res = await fetch(url);
+					  const text = await res.text();
 
-							  // Si aún hay empate, se ordena por HP (de mayor a menor)
-							  return b.HP - a.HP;
-							});
-							function quitarAcentos(str) {
-								return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-							}
+					  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+					  const rows = json.table.rows;
 
-							function formatoPDF(str){
-								return quitarAcentos(str).toLowerCase().trim();
-							}
-							equipos.forEach(equipo => {
-								document.write(`<tr><td>${equipo.Entrenador}</td><td>Pending</td><td class="hide linktd"><a href="descargas/2026/equipos/${formatoPDF(equipo.Entrenador)}-${formatoPDF(equipo.Equipo)}.pdf" download="${formatoPDF(equipo.Entrenador)}-${formatoPDF(equipo.Equipo)}.pdf">${equipo.Equipo}</a></td>
-								<td>${equipo.Ptos}</td><td>${equipo.Jugados}</td><td>${equipo.Ganados}</td><td>${equipo.Empatados}</td>
-								<td>${equipo.Perdidos}</td><td>${equipo.TA}</td><td>${equipo.TC}</td><td>${equipo.HP}</td></tr>`);
-							});
-						</script>
-					</tbody>
+					  const tbody = document.querySelector("#clasificacion tbody");
+					  tbody.innerHTML = "";
+
+					  rows.forEach((row, index) => {
+						if (!row.c) return;
+
+						const tr = document.createElement("tr");
+
+						// Posición
+						const pos = document.createElement("td");
+						pos.textContent = index + 1;
+						tr.appendChild(pos);
+
+						// Columnas de TablaOrdenada (A=Equipo, B=PJ, C=PG, D=PE, E=PP, F=TD+, G=TD-, H=TD±, I=Puntos)
+						const get = (i) => row.c[i] ? row.c[i].v : "";
+
+						const cols = [
+						  get(0), // Equipo
+						  get(1), // PJ
+						  get(2), // PG
+						  get(3), // PE
+						  get(4), // PP
+						  get(5), // TD+
+						  get(6), // TD-
+						  get(7), // TD±
+						  get(8)  // Puntos
+						];
+
+						cols.forEach(v => {
+						  const td = document.createElement("td");
+						  td.textContent = v;
+						  tr.appendChild(td);
+						});
+
+						tbody.appendChild(tr);
+					  });
+					}
+
+					document.addEventListener("DOMContentLoaded", loadClasificacion);
+					</script>
+				  </tbody>
 				</table>
+
 				Plantilla Acta: <a href="descargas/general/plantillaActa.docx" download="plantillaActa.docx">Descargar</a>
 			</main>
 		</div>
