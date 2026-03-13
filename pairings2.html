@@ -76,7 +76,7 @@ async function loadResultados() {
   rows.forEach(r => {
     if (!r.c) return;
 
-    const jornada = r.c[0]?.v;   // Columna A
+    const jornada = r.c[1]?.v;   // Columna B
     const equipoA = r.c[2]?.v;   // Columna C
     const equipoB = r.c[3]?.v;   // Columna D
     const tdA = r.c[4]?.v;       // Columna E
@@ -94,13 +94,17 @@ async function loadResultados() {
   Object.keys(jornadas)
     .sort((a, b) => Number(a) - Number(b))
     .forEach(j => {
-      const block = document.createElement("div");
-      block.className = "jornada-block";
 
-      const title = document.createElement("h3");
-      title.textContent = `Jornada ${j}`;
-      block.appendChild(title);
+      // Cabecera plegable
+      const header = document.createElement("div");
+      header.className = "jornada-header";
+      header.textContent = `Jornada ${j} ▼`;
 
+      // Contenedor plegable
+      const contenido = document.createElement("div");
+      contenido.className = "jornada-contenido";
+
+      // Tabla de resultados
       const table = document.createElement("table");
       table.innerHTML = `
         <thead>
@@ -127,8 +131,17 @@ async function loadResultados() {
         tbody.appendChild(tr);
       });
 
-      block.appendChild(table);
-      cont.appendChild(block);
+      contenido.appendChild(table);
+
+      // Evento de plegado/desplegado
+      header.addEventListener("click", () => {
+        const visible = contenido.style.display === "block";
+        contenido.style.display = visible ? "none" : "block";
+        header.textContent = visible ? `Jornada ${j} ▼` : `Jornada ${j} ▲`;
+      });
+
+      cont.appendChild(header);
+      cont.appendChild(contenido);
     });
 }
 
