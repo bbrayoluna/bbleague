@@ -142,31 +142,81 @@ async function loadResultados() {
     });
 }
 
-    async function loadPairings() {
-      const json = await fetchSheet(RANKING_SUIZO);
-      const rows = json.table.rows;
+async function loadPairings() {
+  // 1. Leer ranking suizo
+  const rankingJson = await fetchSheet(RANKING_SUIZO);
+  const rankingRows = rankingJson.table.rows;
 
-      const teams = rows
-        .map(r => (r.c && r.c[0] ? r.c[0].v : null))
-        .filter(Boolean);
+  const teams = rankingRows
+    .map(r => (r.c && r.c[0] ? r.c[0].v : null))
+    .filter(Boolean);
 
-      const tbody = document.querySelector("#pairings tbody");
-      tbody.innerHTML = "";
+  // 2. Leer resultados para saber qué partidos ya se jugaron
+  const resJson = await fetchSheet(RESULTADOS);
+  const resRows = resJson.table.rows;
 
-      let mesa = 1;
-      for (let i = 0; i < teams.length; i += 2) {
-        const team1 = teams[i];
-        const team2 = teams[i + 1] || "BYE";
+  // Set de partidos jugados (sin orden: "A|B" == "B|A")
+  const played = new Set();
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${mesa++}</td>
-          <td>${team1}</td>
-          <td>${team2}</td>
-        `;
-        tbody.appendChild(tr);
+  resRows.forEach(r => {
+    if (!r.c) return;
+    const A = r.c[2]?.v;
+    const B = r.c[3]?.v;
+    if (A && B) {
+      const key = [A, B].sort().join("|");
+      played.add(key);
+    }
+  });
+
+  // 3. Emparejar evitando repetidos
+  const used = new Set();
+  const pairings = [];
+
+  for (let i = 0; i < teams.length; i++) {
+    const t1 = teams[i];
+    if (used.has(t1)) continue;
+
+    let t2 = null;
+
+    // Buscar el primer rival disponible que NO haya jugado contra t1
+    for (let j = i + 1; j < teams.length; j++) {
+      const candidate = teams[j];
+      if (used.has(candidate)) continue;
+
+      const key = [t1, candidate].sort().join("|");
+      if (!played.has(key)) {
+        t2 = candidate;
+        break;
       }
     }
+
+    // Si no se encuentra rival, asignar BYE
+    if (!t2) {
+      pairings.push([t1, "BYE"]);
+      used.add(t1);
+      continue;
+    }
+
+    pairings.push([t1, t2]);
+    used.add(t1);
+    used.add(t2);
+  }
+
+  // 4. Pintar en la tabla
+  const tbody = document.querySelector("#pairings tbody");
+  tbody.innerHTML = "";
+
+  let mesa = 1;
+  pairings.forEach(([a, b]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${mesa++}</td>
+      <td>${a}</td>
+      <td>${b}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
     document.addEventListener("DOMContentLoaded", async () => {
       await loadResultados();
