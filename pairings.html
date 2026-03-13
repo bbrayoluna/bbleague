@@ -36,26 +36,28 @@
     <div id="resultados">
       <!-- JS rellenará aquí los resultados por jornada -->
     </div>
-
-    <h2 class="nuffle red big">Próximos emparejamientos</h2>
-    <table id="pairings">
-      <thead>
-        <tr>
-          <th>Mesa</th>
-          <th>Equipo 1</th>
-          <th>Equipo 2</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- JS rellenará aquí los pairings -->
-      </tbody>
-    </table>
+	<div id="netxMatch" class="hide">
+		<h2 class="nuffle red big">Próximos emparejamientos</h2>
+		<table id="pairings">
+		  <thead>
+			<tr>
+			  <th>Mesa</th>
+			  <th>Equipo 1</th>
+			  <th>Equipo 2</th>
+			</tr>
+		  </thead>
+		  <tbody>
+			<!-- JS rellenará aquí los pairings -->
+		  </tbody>
+		</table>
+	</div>
   </div>
 
   <script>
     const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
     const RANKING_SUIZO = "rankingSuizo";
     const RESULTADOS = "Resultados";
+    const CONFIG = "Config";
 
     async function fetchSheet(sheetName) {
       const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
@@ -143,6 +145,17 @@ async function loadResultados() {
 }
 
 async function loadPairings() {
+  // 0. Leer config
+  const configJson = await fetchSheet(CONFIG);
+  const configRows = rankingJson.table.rows;
+  const enabled = configRows[2].c[1]?.v; // B3
+  if(enabled != 1){
+	return;
+  }else{
+	const nextMatch = document.getElementById("nextMatch");
+	nextMatch.classList.remove("hide");
+  }
+  
   // 1. Leer ranking suizo
   const rankingJson = await fetchSheet(RANKING_SUIZO);
   const rankingRows = rankingJson.table.rows;
