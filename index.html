@@ -159,8 +159,6 @@ function validarFormulario() {
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  // Validaciones aquí si quieres
-
   const payload = {
     jornada: document.getElementById("jornada").value,
     equipoA: document.getElementById("equipoA").value,
@@ -179,6 +177,7 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
 
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
+
 
 
 
