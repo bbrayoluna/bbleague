@@ -35,6 +35,10 @@
 					PENDING
 				</p>
 				<div id="emparejamientos"></div>
+				<h2>Resultados previos</h2>
+				<div id="resultados"></div>
+
+				<h2>Próximos emparejamientos</h2>
 				<table id="pairings">
 				  <thead>
 					<tr>
@@ -45,56 +49,82 @@
 				  </thead>
 				  <tbody>
 					<script>
-					const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-					const RANKING_SUIZO = "rankingSuizo";
+						async function loadResultados() {
+						  const json = await fetchSheet(RESULTADOS);
+						  const rows = json.table.rows;
 
-					async function loadPairings() {
-					  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${RANKING_SUIZO}`;
-					  const res = await fetch(url);
-					  const text = await res.text();
+						  const jornadas = {};
 
-					  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-					  const rows = json.table.rows;
+						  rows.forEach(r => {
+							if (!r.c) return;
 
-					  // Columna A = Equipo ordenado por ranking suizo
-					  const teams = rows
-						.map(r => r.c && r.c[0] ? r.c[0].v : null)
-						.filter(Boolean);
+							const jornada = r.c[0]?.v;   // Columna A
+							const equipoA = r.c[2]?.v;   // Columna C
+							const equipoB = r.c[3]?.v;   // Columna D
+							const tdA = r.c[4]?.v;       // Columna E
+							const tdB = r.c[5]?.v;       // Columna F
 
-					  const tbody = document.querySelector("#pairings tbody");
-					  tbody.innerHTML = "";
+							if (!jornadas[jornada]) jornadas[jornada] = [];
+							jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
+						  });
 
-					  let mesa = 1;
-					  for (let i = 0; i < teams.length; i += 2) {
-						const team1 = teams[i];
-						const team2 = teams[i + 1] || "BYE";
+						  const cont = document.getElementById("resultados");
+						  cont.innerHTML = "";
 
-						const tr = document.createElement("tr");
+						  Object.keys(jornadas).sort((a,b)=>a-b).forEach(j => {
+							const div = document.createElement("div");
+							div.innerHTML = `<h3>Jornada ${j}</h3>`;
 
-						const tdMesa = document.createElement("td");
-						tdMesa.textContent = mesa++;
-						tr.appendChild(tdMesa);
+							const table = document.createElement("table");
+							table.innerHTML = `
+							  <thead>
+								<tr>
+								  <th>Equipo A</th>
+								  <th>TD</th>
+								  <th>TD</th>
+								  <th>Equipo B</th>
+								</tr>
+							  </thead>
+							  <tbody></tbody>
+							`;
 
-						const td1 = document.createElement("td");
-						td1.textContent = team1;
-						tr.appendChild(td1);
+							const tbody = table.querySelector("tbody");
 
-						const td2 = document.createElement("td");
-						td2.textContent = team2;
-						tr.appendChild(td2);
+							jornadas[j].forEach(p => {
+							  const tr = document.createElement("tr");
+							  tr.innerHTML = `
+								<td>${p.equipoA}</td>
+								<td>${p.tdA}</td>
+								<td>${p.tdB}</td>
+								<td>${p.equipoB}</td>
+							  `;
+							  tbody.appendChild(tr);
+							});
 
-						tbody.appendChild(tr);
-					  }
-					}
-
-					document.addEventListener("DOMContentLoaded", loadPairings);
+							div.appendChild(table);
+							cont.appendChild(div);
+						  });
+						}
 					</script>
+
 				  </tbody>
 				</table>
+
 
 			</main>
 		</div>
 
-    
+    <script>
+		const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+		const RANKING_SUIZO = "rankingSuizo";
+		const RESULTADOS = "Resultados";
+
+		async function fetchSheet(sheetName) {
+		  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
+		  const res = await fetch(url);
+		  const text = await res.text();
+		  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+		}
+	</script>
 </body>
 </html>
