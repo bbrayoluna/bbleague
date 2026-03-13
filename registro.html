@@ -63,14 +63,16 @@
 				.map(b => b.toString(16).padStart(2, "0"))
 				.join("");
 			}
-			const URL_SCRIPT = "https://script.google.com/macros/s/AKfycby8KvJLhvJouLQ74RvSjFDrigLilNc0szLUO-hvBjsQ3OK3ddfkYZ6DKpSUHJIB99qG2g/exec";
+			const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyyIBzi8xIq3Q8F7GeP3MsGl8Q7KepEDzJ-brFwBGMZaS0eZwVxJH0Tv7TB2NzYvwuNTg/exec";
+
+
 
 			document.getElementById("formRegistro").addEventListener("submit", async (e) => {
 			  e.preventDefault();
 
 			  const username = document.getElementById("username").value.trim();
-			  const equipo = document.getElementById("equipo").value.trim();
-			  const raza = document.getElementById("raza").value.trim();
+			  const equipo   = document.getElementById("equipo").value.trim();
+			  const raza     = document.getElementById("raza").value.trim();
 			  const password = document.getElementById("password").value;
 
 			  const password_hash = await sha256(password);
@@ -83,18 +85,25 @@
 				password_hash
 			  };
 
-				const res = await fetch(URL_SCRIPT, {
-				  method: "POST",
-				  headers: {
-					"Content-Type": "application/json"
-				  },
-				  body: JSON.stringify(data)
-				});
+			  const formData = new FormData();
+			  formData.append("data", JSON.stringify(data));
 
-			  const json = await res.json();
+			  const res  = await fetch(URL_SCRIPT, {
+				method: "POST",
+				body: formData
+			  });
+
+			  const text = await res.text();
+			  let json;
+			  try {
+				json = JSON.parse(text);
+			  } catch (e) {
+				json = { ok: false, error: "Respuesta no válida: " + text };
+			  }
 
 			  document.getElementById("mensaje").innerText = json.mensaje || json.error;
 			});
+
 
 		</script>
 	</body>
