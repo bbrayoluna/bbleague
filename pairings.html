@@ -70,7 +70,9 @@
 async function loadResultados() {
   const json = await fetchSheet(RESULTADOS);
   const rows = json.table.rows;
-	if (rows.length === 0) {
+  
+  const esFilaReal = first[0] && typeof first[0].v === "string";
+	if (rows.length === 1 && !esFilaReal) {
 		return;
 	}
 
