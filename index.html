@@ -43,7 +43,11 @@
 <div id="form-wrapper" class="hide">
   <h2>Enviar resultado</h2>
 
-  <form id="resultadoForm">
+ <form id="resultadoForm"
+      action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
+      method="POST"
+      target="hidden_iframe">
+
 
     <label for="jornada">Jornada</label>
     <input type="text" id="jornada" name="entry.1027995851" readonly>
@@ -76,6 +80,7 @@
 
   <div id="mensaje" style="margin-top:1rem;"></div>
 </div>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <div id="cerrado" class="hide nuffle red">
   <strong>El formulario está cerrado temporalmente.</strong>
