@@ -98,36 +98,16 @@
           block.className = "jornada-block";
 
           const title = document.createElement("h3");
-          title.textContent = `Jornada ${j}`;
+          title.textContent = `Jornada ${j}:`;
           block.appendChild(title);
 
-          const table = document.createElement("table");
-          table.innerHTML = `
-            <thead>
-              <tr>
-                <th>Equipo A</th>
-                <th>TD</th>
-                <th>TD</th>
-                <th>Equipo B</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          `;
-
-          const tbody = table.querySelector("tbody");
-
           jornadas[j].forEach(p => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${p.equipoA ?? ""}</td>
-              <td>${p.tdA ?? ""}</td>
-              <td>${p.tdB ?? ""}</td>
-              <td>${p.equipoB ?? ""}</td>
-            `;
-            tbody.appendChild(tr);
+            const linea = document.createElement("div");
+            linea.className = "resultado-linea";
+            linea.textContent = `${p.equipoA} ${p.tdA} - ${p.tdB} ${p.equipoB}`;
+            block.appendChild(linea);
           });
 
-          block.appendChild(table);
           cont.appendChild(block);
         });
     }
@@ -136,7 +116,6 @@
       const json = await fetchSheet(RANKING_SUIZO);
       const rows = json.table.rows;
 
-      // Columna A = nombre del equipo ordenado por ranking suizo
       const teams = rows
         .map(r => (r.c && r.c[0] ? r.c[0].v : null))
         .filter(Boolean);
@@ -164,4 +143,5 @@
       await loadPairings();
     });
   </script>
+</body>
 </html>
