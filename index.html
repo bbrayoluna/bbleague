@@ -55,7 +55,7 @@
 
 
 				<div id="form-wrapper" >
-				  <h2 class="hide nuffle red centered">Enviar resultado</h2>
+				  <h2 class="nuffle red centered">Enviar resultado</h2>
 
 				 <form class="formulario" id="resultadoForm"
 					  action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
@@ -92,8 +92,8 @@
 			</main>
 		</div>
 		<div id="overlay" class="hide">
-		  <div class="overlay-content">
-			Enviando...
+		  <div class="overlay-content nuffle red big">
+			Cargando...
 		  </div>
 		</div>
 
@@ -246,8 +246,9 @@ function mostrarLogin() {
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   const user_id = localStorage.getItem("user_id");
-
+	mostrarOverlay();
   if (!token) {
+	ocultarOverlay();
     mostrarLogin();
     return;
   }
@@ -269,10 +270,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const json = await res.json();
 
   if (json.ok) {
+	ocultarOverlay();
     await mostrarResultados();
   } else {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
+	ocultarOverlay();
     mostrarLogin();
   }
 });
