@@ -159,6 +159,7 @@ function validarFormulario() {
 
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
+  const token = localStorage.getItem("token");
 
   const jornada=document.getElementById("jornada").value;
   const equipoA=document.getElementById("equipoA").value;
@@ -175,7 +176,8 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
 				tdA,
 				tdB,
 				bajasA,
-				bajasB
+				bajasB,
+				token
 			  };
 
 			  const formData = new FormData();
