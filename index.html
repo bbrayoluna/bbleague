@@ -37,7 +37,7 @@
 				LIGA RAYO DE LUNA 2026 EDITION</br>
 				</p>
 				<div id="loginSection">
-				<div id="easter-egg" style="display:none;">
+				<div id="cheerme" style="display:none;">
 					<img src="images/bbPomPom.gif">
 				</div>
 				  <h2 class="nuffle red big centered">Iniciar sesión</h2>
@@ -201,7 +201,7 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   const username = document.getElementById("loginUser").value.trim();
   const password = document.getElementById("loginPass").value;
     if (username === "cheerme" && password === "please") {
-        egg.style.display = "block";   
+        document.getElementById("cheerme").classList.remove("hide");   
         return false;                  
     }
   const password_hash = await sha256(password);
