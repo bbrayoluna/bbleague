@@ -38,33 +38,126 @@
 					LIGA RAYO DE LUNA 2026 EDITION
 				<img src="images/logoliga.png" class="logosize15x15" alt="logoliga">
 				</p>
-				<select id="equipo"></select>
+				<iframe src="https://docs.google.com/forms/d/e/TU_FORM_ID/viewform?embedded=true"
+						width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0">
+				</iframe>
 
-<script>
-async function cargarEquipos() {
-  const url = "https://docs.google.com/spreadsheets/d/1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI/gviz/tq?sheet=rankingSuizo";
-  const res = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
 
-  const rows = json.table.rows;
-  const equipos = rows.map(r => r.c?.[0]?.v).filter(Boolean);
+<div id="form-wrapper" style="display:none;">
+  <h2>Enviar resultado</h2>
 
-  const select = document.getElementById("equipo");
-  select.innerHTML = "";
+  <form id="resultadoForm"
+        action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
+        method="POST" target="_self">
 
-  equipos.forEach(eq => {
-    const opt = document.createElement("option");
-    opt.value = eq;
-    opt.textContent = eq;
-    select.appendChild(opt);
-  });
-}
+    <label for="jornada">Jornada</label>
+    <input type="text" id="jornada" name="entry.999999999" readonly>
 
-document.addEventListener("DOMContentLoaded", cargarEquipos);
-</script>
+    <label for="equipoA">Equipo A</label>
+    <select id="equipoA" name="entry.2137984974"></select>
+
+    <label for="equipoB">Equipo B</label>
+    <select id="equipoB" name="entry.1439289912"></select>
+
+    <label for="tdA">Touchdowns A</label>
+    <input type="number" id="tdA" name="entry.2109790160" min="0">
+
+    <label for="tdB">Touchdowns B</label>
+    <input type="number" id="tdB" name="entry.1040828431" min="0">
+
+    <button type="submit">Enviar resultado</button>
+  </form>
+
+  <div id="mensaje" style="margin-top:1rem;"></div>
+</div>
+
+<div id="cerrado" style="display:none; padding:1rem; background:#331; border:1px solid #633; border-radius:6px;">
+  <strong>El formulario está cerrado temporalmente.</strong>
+</div>
 
 			</main>
 		</div>
 	</body>
+	<script>
+const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+const RANKING_SUIZO = "rankingSuizo";
+const CONFIG = "Config";
+
+async function fetchSheet(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+}
+
+async function cargarEquipos() {
+  const json = await fetchSheet(RANKING_SUIZO);
+  const rows = json.table.rows;
+  const equipos = rows.map(r => r.c?.[0]?.v).filter(Boolean);
+
+  const selA = document.getElementById("equipoA");
+  const selB = document.getElementById("equipoB");
+
+  equipos.forEach(eq => {
+    const optA = document.createElement("option");
+    optA.value = eq;
+    optA.textContent = eq;
+    selA.appendChild(optA);
+
+    const optB = document.createElement("option");
+    optB.value = eq;
+    optB.textContent = eq;
+    selB.appendChild(optB);
+  });
+}
+
+async function cargarConfig() {
+  const json = await fetchSheet(CONFIG);
+  const rows = json.table.rows;
+
+  const jornada = rows[0].c[1]?.v; // B1
+  const abierto = rows[1].c[1]?.v; // B2
+
+  document.getElementById("jornada").value = jornada;
+
+  if (abierto === "SI") {
+    document.getElementById("form-wrapper").style.display = "block";
+  } else {
+    document.getElementById("cerrado").style.display = "block";
+  }
+}
+
+function validarFormulario() {
+  const a = document.getElementById("equipoA").value;
+  const b = document.getElementById("equipoB").value;
+
+  if (a === b) {
+    alert("Equipo A y Equipo B deben ser distintos.");
+    return false;
+  }
+  return true;
+}
+
+document.getElementById("resultadoForm").addEventListener("submit", function(e) {
+  if (!validarFormulario()) {
+    e.preventDefault();
+    return;
+  }
+
+  const mensaje = document.getElementById("mensaje");
+  mensaje.style.color = "#ccc";
+  mensaje.textContent = "Enviando...";
+
+  setTimeout(() => {
+    mensaje.style.color = "#4a8";
+    mensaje.textContent = "Resultado enviado correctamente ✔";
+  }, 800);
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarEquipos();
+  await cargarConfig();
+});
+</script>
+
 </html>
