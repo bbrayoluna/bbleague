@@ -257,7 +257,7 @@ details > summary {
 }
 
 /* formulario resultados*/
-#form-wrapper form {
+.formulario form {
 background: #25396c;
 padding: 1.5rem;
 border-radius: 8px;
@@ -265,7 +265,7 @@ max-width: 500px;
 margin: auto;
 border: 1px solid #333;
 }
-#form-wrapper label {
+.formulario label {
 color: #ac342f;
 font-family: 'nuffle', sans-serif;
 font-weight: bold;
@@ -273,8 +273,8 @@ display: block;
 margin-top: 1rem;
 font-weight: 600;
 }
-#form-wrapper select,
-#form-wrapper input {
+.formulario select,
+.formulario input {
 width: 100%;
 padding: 0.5rem;
 margin-top: 0.3rem;
@@ -283,7 +283,7 @@ border: 1px solid #444;
 background: #ac342f;
 color: #eee;
 }
-#form-wrapper button {
+.formulario button {
 color: #25396c;
 margin-top: 1.5rem;
 padding: 0.7rem 1rem;
@@ -294,6 +294,6 @@ cursor: pointer;
 font-weight: 600;
 width: 100%;
 }
-#form-wrapper button:hover {
+.formulario button:hover {
 background: #fac546;
 color: #25396c;
