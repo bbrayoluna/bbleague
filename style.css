@@ -227,7 +227,32 @@ details > summary {
   padding: 0.5rem 0;
 }
 
-/* formulario */
+/* overlay */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#overlay .overlay-content {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px black;
+}
+
+.hide {
+  display: none;
+}
+
+/* formulario resultados*/
 #form-wrapper form {
 background: #fac546;
 padding: 1.5rem;
@@ -267,7 +292,7 @@ width: 100%;
 #form-wrapper button:hover {
 background: #ac342f;
 color: #eee;
-}/* formulario */
+}/* formulario login*/
 #loginSection form {
 background: #fac546;
 padding: 1.5rem;

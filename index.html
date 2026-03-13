@@ -92,6 +92,12 @@
 				</div>
 			</main>
 		</div>
+		<div id="overlay" class="hide">
+		  <div class="overlay-content">
+			Enviando...
+		  </div>
+		</div>
+
 	</body>
 <script>
 async function sha256(texto) {
@@ -114,8 +120,8 @@ async function fetchSheet(sheetName) {
 }
 
 async function cargarEquipos() {
-  const json = await fetchSheet(CONFIG);
-  const rows = json.table.rows;
+  const jsonConfig = await fetchSheet(CONFIG);
+  const rows = jsonConfig.table.rows;
 
   const jornada = rows[0].c[1]?.v; // B1
   document.getElementById("jornada").value = jornada;
@@ -190,7 +196,7 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
 
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
-
+ mostrarOverlay();
   const username = document.getElementById("loginUser").value.trim();
   const password = document.getElementById("loginPass").value;
 
@@ -212,16 +218,17 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   });
 
   const json = await res.json();
-
+	ocultarOverlay();
   if (json.ok) {
     // Guardar sesión
     localStorage.setItem("token", json.token);
     localStorage.setItem("user_id", json.user_id);
-
+	alert("Sesión iniciada correctamente");
     document.getElementById("loginMensaje").innerText = "Sesión iniciada";
 
     mostrarResultados();
   } else {
+	alert("Error: " + json.error);
     document.getElementById("loginMensaje").innerText = json.error;
   }
 });
@@ -271,6 +278,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+function mostrarOverlay() {
+  document.getElementById("overlay").classList.remove("hide");
+}
+
+function ocultarOverlay() {
+  document.getElementById("overlay").classList.add("hide");
+}
 
 </script>
 
