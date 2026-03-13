@@ -147,7 +147,7 @@ async function loadResultados() {
 async function loadPairings() {
   // 0. Leer config
   const configJson = await fetchSheet(CONFIG);
-  const configRows = rankingJson.table.rows;
+  const configRows = configJson.table.rows;
   const enabled = configRows[2].c[1]?.v; // B3
   console.log('enabled',enabled);
   if(enabled != 1){
