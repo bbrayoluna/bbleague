@@ -222,17 +222,16 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   }
 });
 
-function mostrarLogin() {
-  document.getElementById("loginSection").classList.remove("hide");
-  document.getElementById("form-wrapper").classList.add("hide");
-}
-
-function mostrarResultados() {
+async function mostrarResultados() {
   await cargarEquipos();
   document.getElementById("loginSection").classList.add("hide");
   document.getElementById("form-wrapper").classList.remove("hide");
 }
 
+function mostrarLogin() {
+  document.getElementById("loginSection").classList.remove("hide");
+  document.getElementById("form-wrapper").classList.add("hide");
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
@@ -260,13 +259,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const json = await res.json();
 
   if (json.ok) {
-    mostrarResultados();
+    await mostrarResultados();
   } else {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
     mostrarLogin();
   }
 });
+
 
 </script>
 
