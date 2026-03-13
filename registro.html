@@ -74,7 +74,7 @@
 
 			document.getElementById("formRegistro").addEventListener("submit", async (e) => {
 			  e.preventDefault();
-
+			mostrarOverlay();
 			  const username = document.getElementById("username").value.trim();
 			  const equipo   = document.getElementById("equipo").value.trim();
 			  const raza     = document.getElementById("raza").value.trim();
@@ -105,11 +105,18 @@
 			  } catch (e) {
 				json = { ok: false, error: "Respuesta no válida: " + text };
 			  }
-
+			ocultarOverlay();
+			alert("Resultado: " + json.mensaje || json.error);
 			  document.getElementById("mensaje").innerText = json.mensaje || json.error;
 			});
 
+			function mostrarOverlay() {
+			  document.getElementById("overlay").classList.remove("hide");
+			}
 
+			function ocultarOverlay() {
+			  document.getElementById("overlay").classList.add("hide");
+			}
 		</script>
 	</body>
 </html>
