@@ -156,16 +156,30 @@ function validarFormulario() {
   return true;
 }
 
-document.getElementById("resultadoForm").addEventListener("submit", function(e) {
-  // Validaciones aquí
-  if (!validarFormulario()) {
-    e.preventDefault();
-    return;
-  }
+document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
 
-  // Mostrar mensaje sin esperar respuesta
+  // Validaciones aquí si quieres
+
+  const payload = {
+    jornada: document.getElementById("jornada").value,
+    equipoA: document.getElementById("equipoA").value,
+    equipoB: document.getElementById("equipoB").value,
+    tdA: document.getElementById("tdA").value,
+    tdB: document.getElementById("tdB").value,
+    bajasA: document.getElementById("bajasA").value,
+    bajasB: document.getElementById("bajasB").value
+  };
+
+  await fetch("https://script.google.com/macros/s/AKfycbxOzAbIb6HXQHqmRzfcwS3vBn8pABDE4VrMGvrqMS_ouFroWZjz-9KQRsKcICQm3ANwvg/exec", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
+
 
 
 document.addEventListener("DOMContentLoaded", async () => {
