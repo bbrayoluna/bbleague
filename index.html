@@ -92,13 +92,6 @@
 
 				  <div id="mensaje" style="margin-top:1rem;"></div>
 				</div>
-
-
-				<div id="cerrado" class="hide nuffle red">
-				  <strong>El formulario está cerrado temporalmente.</strong>
-				</div>
-
-
 			</main>
 		</div>
 	</body>
@@ -143,26 +136,7 @@ async function cargarEquipos() {
   });
 }
 
-async function cargarConfig() {
-  const json = await fetchSheet(CONFIG);
-  const rows = json.table.rows;
 
-  const jornada = rows[0].c[1]?.v; // B1
-  const abierto = rows[1].c[1]?.v; // B2
-
-  document.getElementById("jornada").value = jornada;
-
-  const formWrapper = document.getElementById("form-wrapper");
-  const cerradoBox = document.getElementById("cerrado");
-
-  if (abierto === 1) {
-    formWrapper.classList.remove("hide");
-    cerradoBox.classList.add("hide");
-  } else {
-    formWrapper.classList.add("hide");
-    cerradoBox.classList.remove("hide");
-  }
-}
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
 
 
@@ -248,18 +222,13 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   }
 });
 
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await cargarEquipos();
-  await cargarConfig();
-});
-
 function mostrarLogin() {
   document.getElementById("loginSection").classList.remove("hide");
   document.getElementById("form-wrapper").classList.add("hide");
 }
 
 function mostrarResultados() {
+  await cargarEquipos();
   document.getElementById("loginSection").classList.add("hide");
   document.getElementById("form-wrapper").classList.remove("hide");
 }
