@@ -206,7 +206,7 @@ details > summary {
 }
 /* Tabla resultados */
 .jornada-header {
-  display: inline-block;
+  width: fit-content;
   font-family: 'nuffle', sans-serif;
   font-weight: bold;
   color: #fac546;
