@@ -127,7 +127,7 @@ async function cargarConfig() {
   const formWrapper = document.getElementById("form-wrapper");
   const cerradoBox = document.getElementById("cerrado");
 
-  if (abierto === "SI") {
+  if (abierto === 1) {
     formWrapper.classList.remove("hide");
     cerradoBox.classList.add("hide");
   } else {
