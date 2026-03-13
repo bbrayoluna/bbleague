@@ -70,11 +70,11 @@
 async function loadResultados() {
   const json = await fetchSheet(RESULTADOS);
   const rows = json.table.rows;
-  const first = rows[0].c;
-  const esFilaReal = first[0] && typeof first[0].v === "string";
-	if (rows.length === 1 && !esFilaReal) {
+  const valor = rows?.[0]?.c?.[0]?.v ?? "";
+
+	if (valor === "ignorar") {
 		return;
-	}
+	} 
 
   const jornadas = {};
 
