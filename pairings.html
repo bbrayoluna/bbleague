@@ -150,7 +150,7 @@ async function loadPairings() {
   const configRows = configJson.table.rows;
   const enabled = configRows[2].c[1]?.v; // B3
   console.log('enabled',enabled);
-  if(enabled != 1){
+  if(enabled === 1){
 	const nextMatch = document.getElementById("nextMatch");
 	nextMatch.classList.remove("hide");
   }else{
