@@ -39,53 +39,64 @@
 					LIGA RAYO DE LUNA 2026 EDITION
 				<img src="images/logoliga.png" class="logosize15x15" alt="logoliga">
 				</p>
+				<div id="loginSection">
+				  <h2>Iniciar sesión</h2>
+
+				  <form id="formLogin">
+					<label>Usuario</label>
+					<input type="text" id="loginUser" required>
+
+					<label>Contraseña</label>
+					<input type="password" id="loginPass" required>
+
+					<button type="submit">Entrar</button>
+				  </form>
+
+				  <div id="loginMensaje"></div>
+				</div>
 
 
-<div id="form-wrapper" class="hide">
-  <h2>Enviar resultado</h2>
 
- <form id="resultadoForm"
-      action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
-      method="POST"
-      target="hidden_iframe">
+				<div id="form-wrapper" class="hide">
+				  <h2>Enviar resultado</h2>
 
-
-    <label for="jornada">Jornada</label>
-    <input type="text" id="jornada" name="entry.1027995851" readonly>
-
-    <label for="equipoA">Equipo A</label>
-    <select id="equipoA" name="entry.2088777498"></select>
+				 <form id="resultadoForm"
+					  action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
+					  method="POST"
+					  target="hidden_iframe">
 
 
-    <label for="equipoB">Equipo B</label>
-    <select id="equipoB" name="entry.709949618"></select>
+					<label for="jornada">Jornada</label>
+					<input type="text" id="jornada" readonly>
+
+					<label for="equipoA">Equipo A</label>
+					<select id="equipoA"></select>
+
+					<label for="equipoB">Equipo B</label>
+					<select id="equipoB"></select>
+
+					<label for="tdA">Touchdowns A</label>
+					<input type="number" id="tdA" min="0">
+
+					<label for="tdB">Touchdowns B</label>
+					<input type="number" id="tdB" min="0">
+
+					<label for="bajasA">Bajas equipo A</label>
+					<input type="number" id="bajasA" min="0">
+
+					<label for="bajasB">Bajas equipo B</label>
+					<input type="number" id="bajasB" min="0">
+
+					<button type="submit">Enviar resultado</button>
+				  </form>
+
+				  <div id="mensaje" style="margin-top:1rem;"></div>
+				</div>
 
 
-    <label for="tdA">Touchdowns A</label>
-    <input type="number" id="tdA" name="entry.296439806" min="0">
-
-    <label for="tdB">Touchdowns B</label>
-    <input type="number" id="tdB" name="entry.1334922532" min="0">
-
-    <label for="bajasA">Bajas equipo A</label>
-    <input type="number" id="bajasA" name="entry.159054365" min="0">
-
-    <label for="bajasB">Bajas equipo B</label>
-    <input type="number" id="bajasB" name="entry.370521934" min="0">
-<input type="hidden" name="fvv" value="1">
-<input type="hidden" name="draftResponse" value="[]">
-<input type="hidden" name="pageHistory" value="0">
-
-    <button type="submit">Enviar resultado</button>
-  </form>
-
-  <div id="mensaje" style="margin-top:1rem;"></div>
-</div>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
-<div id="cerrado" class="hide nuffle red">
-  <strong>El formulario está cerrado temporalmente.</strong>
-</div>
+				<div id="cerrado" class="hide nuffle red">
+				  <strong>El formulario está cerrado temporalmente.</strong>
+				</div>
 
 
 			</main>
@@ -144,6 +155,7 @@ async function cargarConfig() {
     cerradoBox.classList.remove("hide");
   }
 }
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
 
 
 function validarFormulario() {
@@ -180,7 +192,7 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
 
 			  const formData = new FormData();
 			  formData.append("data", JSON.stringify(data));
-  await fetch("https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec", {
+  await fetch(URL_SCRIPT, {
     method: "POST",
     body: formData
   });
@@ -190,6 +202,43 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
 
 
 
+document.getElementById("formLogin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value;
+
+  const password_hash = await sha256(password);
+
+  const data = {
+    action: "login",
+    username,
+    password_hash,
+    user_agent: navigator.userAgent
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+
+  const json = await res.json();
+
+  if (json.ok) {
+    // Guardar sesión
+    localStorage.setItem("token", json.token);
+    localStorage.setItem("user_id", json.user_id);
+
+    document.getElementById("loginMensaje").innerText = "Sesión iniciada";
+
+    mostrarResultados();
+  } else {
+    document.getElementById("loginMensaje").innerText = json.error;
+  }
+});
 
 
 document.addEventListener("DOMContentLoaded", async () => {
