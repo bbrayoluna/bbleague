@@ -35,96 +35,133 @@
 					PENDING
 				</p>
 				<div id="emparejamientos"></div>
-				<h2>Resultados previos</h2>
-				<div id="resultados"></div>
+    <h2>Resultados previos</h2>
+    <div id="resultados">
+      <!-- JS rellenará aquí los resultados por jornada -->
+    </div>
 
-				<h2>Próximos emparejamientos</h2>
-				<table id="pairings">
-				  <thead>
-					<tr>
-					  <th>Mesa</th>
-					  <th>Equipo 1</th>
-					  <th>Equipo 2</th>
-					</tr>
-				  </thead>
-				  <tbody>
-					<script>
-						async function loadResultados() {
-						  const json = await fetchSheet(RESULTADOS);
-						  const rows = json.table.rows;
+    <h2>Próximos emparejamientos (suizo)</h2>
+    <table id="pairings">
+      <thead>
+        <tr>
+          <th>Mesa</th>
+          <th>Equipo 1</th>
+          <th>Equipo 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS rellenará aquí los pairings -->
+      </tbody>
+    </table>
+  </div>
 
-						  const jornadas = {};
+  <script>
+    const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+    const RANKING_SUIZO = "rankingSuizo";
+    const RESULTADOS = "Resultados";
 
-						  rows.forEach(r => {
-							if (!r.c) return;
+    async function fetchSheet(sheetName) {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    }
 
-							const jornada = r.c[0]?.v;   // Columna A
-							const equipoA = r.c[2]?.v;   // Columna C
-							const equipoB = r.c[3]?.v;   // Columna D
-							const tdA = r.c[4]?.v;       // Columna E
-							const tdB = r.c[5]?.v;       // Columna F
+    async function loadResultados() {
+      const json = await fetchSheet(RESULTADOS);
+      const rows = json.table.rows;
 
-							if (!jornadas[jornada]) jornadas[jornada] = [];
-							jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
-						  });
+      const jornadas = {};
 
-						  const cont = document.getElementById("resultados");
-						  cont.innerHTML = "";
+      rows.forEach(r => {
+        if (!r.c) return;
 
-						  Object.keys(jornadas).sort((a,b)=>a-b).forEach(j => {
-							const div = document.createElement("div");
-							div.innerHTML = `<h3>Jornada ${j}</h3>`;
+        const jornada = r.c[0]?.v;   // Columna A
+        const equipoA = r.c[2]?.v;   // Columna C
+        const equipoB = r.c[3]?.v;   // Columna D
+        const tdA = r.c[4]?.v;       // Columna E
+        const tdB = r.c[5]?.v;       // Columna F
 
-							const table = document.createElement("table");
-							table.innerHTML = `
-							  <thead>
-								<tr>
-								  <th>Equipo A</th>
-								  <th>TD</th>
-								  <th>TD</th>
-								  <th>Equipo B</th>
-								</tr>
-							  </thead>
-							  <tbody></tbody>
-							`;
+        if (!jornada) return;
 
-							const tbody = table.querySelector("tbody");
+        if (!jornadas[jornada]) jornadas[jornada] = [];
+        jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
+      });
 
-							jornadas[j].forEach(p => {
-							  const tr = document.createElement("tr");
-							  tr.innerHTML = `
-								<td>${p.equipoA}</td>
-								<td>${p.tdA}</td>
-								<td>${p.tdB}</td>
-								<td>${p.equipoB}</td>
-							  `;
-							  tbody.appendChild(tr);
-							});
+      const cont = document.getElementById("resultados");
+      cont.innerHTML = "";
 
-							div.appendChild(table);
-							cont.appendChild(div);
-						  });
-						}
-					</script>
+      Object.keys(jornadas)
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach(j => {
+          const block = document.createElement("div");
+          block.className = "jornada-block";
 
-				  </tbody>
-				</table>
+          const title = document.createElement("h3");
+          title.textContent = `Jornada ${j}`;
+          block.appendChild(title);
 
+          const table = document.createElement("table");
+          table.innerHTML = `
+            <thead>
+              <tr>
+                <th>Equipo A</th>
+                <th>TD</th>
+                <th>TD</th>
+                <th>Equipo B</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          `;
 
-			</main>
-		</div>
+          const tbody = table.querySelector("tbody");
 
-    <script>
-		const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-		const RANKING_SUIZO = "rankingSuizo";
-		const RESULTADOS = "Resultados";
+          jornadas[j].forEach(p => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${p.equipoA ?? ""}</td>
+              <td>${p.tdA ?? ""}</td>
+              <td>${p.tdB ?? ""}</td>
+              <td>${p.equipoB ?? ""}</td>
+            `;
+            tbody.appendChild(tr);
+          });
 
-		async function fetchSheet(sheetName) {
-		  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
-		  const res = await fetch(url);
-		  const text = await res.text();
-		  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-		}
-	</script>
-</body>
+          block.appendChild(table);
+          cont.appendChild(block);
+        });
+    }
+
+    async function loadPairings() {
+      const json = await fetchSheet(RANKING_SUIZO);
+      const rows = json.table.rows;
+
+      // Columna A = nombre del equipo ordenado por ranking suizo
+      const teams = rows
+        .map(r => (r.c && r.c[0] ? r.c[0].v : null))
+        .filter(Boolean);
+
+      const tbody = document.querySelector("#pairings tbody");
+      tbody.innerHTML = "";
+
+      let mesa = 1;
+      for (let i = 0; i < teams.length; i += 2) {
+        const team1 = teams[i];
+        const team2 = teams[i + 1] || "BYE";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${mesa++}</td>
+          <td>${team1}</td>
+          <td>${team2}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadResultados();
+      await loadPairings();
+    });
+  </script>
 </html>
