@@ -160,7 +160,6 @@ function validarFormulario() {
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  const formData = new FormData();
   const jornada=document.getElementById("jornada").value;
   const equipoA=document.getElementById("equipoA").value;
   const equipoB=document.getElementById("equipoB").value;
@@ -168,7 +167,7 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   const tdB=document.getElementById("tdB").value;
   const bajasA=document.getElementById("bajasA").value;
   const bajasB=document.getElementById("bajasB").value;
-			  const data = {
+  const data = {
 				action: "resultado",
 				jornada,
 				equipoA,
