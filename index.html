@@ -253,6 +253,52 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarEquipos();
   await cargarConfig();
 });
+
+function mostrarLogin() {
+  document.getElementById("loginSection").classList.remove("hide");
+  document.getElementById("resultadosSection").classList.add("hide");
+}
+
+function mostrarResultados() {
+  document.getElementById("loginSection").classList.add("hide");
+  document.getElementById("resultadosSection").classList.remove("hide");
+}
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  const user_id = localStorage.getItem("user_id");
+
+  if (!token) {
+    mostrarLogin();
+    return;
+  }
+
+  const data = {
+    action: "validar",
+    token,
+    user_id
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+
+  const json = await res.json();
+
+  if (json.ok) {
+    mostrarResultados();
+  } else {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    mostrarLogin();
+  }
+});
+
 </script>
 
 
