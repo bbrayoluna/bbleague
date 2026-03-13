@@ -149,11 +149,12 @@ async function loadPairings() {
   const configJson = await fetchSheet(CONFIG);
   const configRows = rankingJson.table.rows;
   const enabled = configRows[2].c[1]?.v; // B3
+  console.log('enabled',enabled);
   if(enabled != 1){
-	return;
-  }else{
 	const nextMatch = document.getElementById("nextMatch");
 	nextMatch.classList.remove("hide");
+  }else{
+	return;
   }
   
   // 1. Leer ranking suizo
