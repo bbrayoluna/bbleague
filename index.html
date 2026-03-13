@@ -74,9 +74,6 @@
 
 			</main>
 		</div>
-				<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/viewform?embedded=true"
-						width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0">
-				</iframe>
 	</body>
 	<script>
 const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
@@ -120,7 +117,7 @@ async function cargarConfig() {
 
   document.getElementById("jornada").value = jornada;
 
-  if (abierto === "SI") {
+  if (abierto === 1) {
     document.getElementById("form-wrapper").style.display = "block";
   } else {
     document.getElementById("cerrado").style.display = "block";
