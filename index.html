@@ -34,10 +34,36 @@
 				
 				<p class="nuffle red big">
 				<br>
-				<img src="images/logoliga.png" class="logosize15x15" alt="logoliga">
 				<br>
 					LIGA RAYO DE LUNA 2026 EDITION
+				<img src="images/logoliga.png" class="logosize15x15" alt="logoliga">
 				</p>
+				<select id="equipo"></select>
+
+<script>
+async function cargarEquipos() {
+  const url = "https://docs.google.com/spreadsheets/d/1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI/gviz/tq?sheet=rankingSuizo";
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+
+  const rows = json.table.rows;
+  const equipos = rows.map(r => r.c?.[0]?.v).filter(Boolean);
+
+  const select = document.getElementById("equipo");
+  select.innerHTML = "";
+
+  equipos.forEach(eq => {
+    const opt = document.createElement("option");
+    opt.value = eq;
+    opt.textContent = eq;
+    select.appendChild(opt);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", cargarEquipos);
+</script>
+
 			</main>
 		</div>
 	</body>
