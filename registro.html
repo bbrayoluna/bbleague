@@ -51,7 +51,7 @@
 				</form>
 
 				<div id="mensaje"></div>
-
+				<div class="hide nuffle red centered big" id="noregistros">Torneo en curso. Registro no permitido</div>
 			</main>
 		</div>
 		<div id="overlay" class="hide">
@@ -117,6 +117,39 @@
 			function ocultarOverlay() {
 			  document.getElementById("overlay").classList.add("hide");
 			}
+
+			function mostrarNoRegistro() {
+			  document.getElementById("noregistros").classList.remove("hide");
+			}
+
+			function ocultarNoRegistro() {
+			  document.getElementById("noregistros").classList.add("hide");
+			}
+
+			function mostrarFormulario() {
+			  document.getElementById("formRegistro").classList.remove("hide");
+			}
+
+			function ocultarFormulario() {
+			  document.getElementById("formRegistro").classList.add("hide");
+			}
+			
+			document.addEventListener("DOMContentLoaded", async () => {
+				mostrarOverlay();
+			  const jsonConfig = await fetchSheet(CONFIG);
+			  const rowsConfig = jsonConfig.table.rows;
+
+			  const registroActivo = rowsConfig[3].c[1]?.v; // B1
+			  if(registroActivo===1){
+				mostrarFormulario();
+				ocultarNoRegistro();
+			  }else{
+				ocultarFormulario();
+				mostrarNoRegistro();
+			  }
+			  document.getElementById("jornada").value = jornada;
+				ocultarOverlay();
+			});
 		</script>
 	</body>
 </html>
