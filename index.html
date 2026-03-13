@@ -40,27 +40,33 @@
 				</p>
 
 
-<div id="form-wrapper" style="display:none;">
-  <h2 class="nuffle red big">Enviar resultado</h2>
+<div id="form-wrapper" class="hide">
+  <h2>Enviar resultado</h2>
 
   <form id="resultadoForm"
         action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
         method="POST" target="_self">
 
     <label for="jornada">Jornada</label>
-    <input type="text" id="jornada" name="entry.999999999" readonly>
+    <input type="text" id="jornada" name="entry.1027995851" readonly>
 
     <label for="equipoA">Equipo A</label>
-    <select id="equipoA" name="entry.2137984974"></select>
+    <select id="equipoA" name="entry.2088777498"></select>
 
     <label for="equipoB">Equipo B</label>
-    <select id="equipoB" name="entry.1439289912"></select>
+    <select id="equipoB" name="entry.709949618"></select>
 
     <label for="tdA">Touchdowns A</label>
-    <input type="number" id="tdA" name="entry.2109790160" min="0">
+    <input type="number" id="tdA" name="entry.296439806" min="0">
 
     <label for="tdB">Touchdowns B</label>
-    <input type="number" id="tdB" name="entry.1040828431" min="0">
+    <input type="number" id="tdB" name="entry.1334922532" min="0">
+
+    <label for="bajasA">Bajas equipo A</label>
+    <input type="number" id="bajasA" name="entry.159054365" min="0">
+
+    <label for="bajasB">Bajas equipo B</label>
+    <input type="number" id="bajasB" name="entry.370521934" min="0">
 
     <button type="submit">Enviar resultado</button>
   </form>
@@ -68,14 +74,15 @@
   <div id="mensaje" style="margin-top:1rem;"></div>
 </div>
 
-<div id="cerrado" style="display:none; padding:1rem; background:#331; border:1px solid #633; border-radius:6px;">
+<div id="cerrado" class="hide nuffle red">
   <strong>El formulario está cerrado temporalmente.</strong>
 </div>
+
 
 			</main>
 		</div>
 	</body>
-	<script>
+<script>
 const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
 const RANKING_SUIZO = "rankingSuizo";
 const CONFIG = "Config";
@@ -117,12 +124,18 @@ async function cargarConfig() {
 
   document.getElementById("jornada").value = jornada;
 
-  if (abierto === 1) {
-    document.getElementById("form-wrapper").style.display = "block";
+  const formWrapper = document.getElementById("form-wrapper");
+  const cerradoBox = document.getElementById("cerrado");
+
+  if (abierto === "SI") {
+    formWrapper.classList.remove("hide");
+    cerradoBox.classList.add("hide");
   } else {
-    document.getElementById("cerrado").style.display = "block";
+    formWrapper.classList.add("hide");
+    cerradoBox.classList.remove("hide");
   }
 }
+
 
 function validarFormulario() {
   const a = document.getElementById("equipoA").value;
@@ -156,5 +169,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarConfig();
 });
 </script>
+
 
 </html>
