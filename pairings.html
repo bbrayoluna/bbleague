@@ -70,7 +70,7 @@
 async function loadResultados() {
   const json = await fetchSheet(RESULTADOS);
   const rows = json.table.rows;
-	if (rows.length <= 1) {
+	if (rows.length === 0) {
 		return;
 	}
 
