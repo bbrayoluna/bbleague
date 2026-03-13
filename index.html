@@ -161,20 +161,31 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   e.preventDefault();
 
   const formData = new FormData();
-  formData.append("action","resultado");
-  formData.append("jornada", document.getElementById("jornada").value);
-  formData.append("equipoA", document.getElementById("equipoA").value);
-  formData.append("equipoB", document.getElementById("equipoB").value);
-  formData.append("tdA", document.getElementById("tdA").value);
-  formData.append("tdB", document.getElementById("tdB").value);
-  formData.append("bajasA", document.getElementById("bajasA").value);
-  formData.append("bajasB", document.getElementById("bajasB").value);
+  const jornada=document.getElementById("jornada").value;
+  const equipoA=document.getElementById("equipoA").value;
+  const equipoB=document.getElementById("equipoB").value;
+  const tdA=document.getElementById("tdA").value;
+  const tdB=document.getElementById("tdB").value;
+  const bajasA=document.getElementById("bajasA").value;
+  const bajasB=document.getElementById("bajasB").value;
+			  const data = {
+				action: "resultado",
+				jornada,
+				equipoA,
+				equipoB,
+				tdA,
+				tdB,
+				bajasA,
+				bajasB
+			  };
 
+			  const formData = new FormData();
+			  formData.append("data", JSON.stringify(data));
   await fetch("https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec", {
     method: "POST",
     body: formData
   });
-
+  
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
 
