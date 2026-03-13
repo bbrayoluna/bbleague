@@ -159,24 +159,23 @@ function validarFormulario() {
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  const payload = {
-    jornada: document.getElementById("jornada").value,
-    equipoA: document.getElementById("equipoA").value,
-    equipoB: document.getElementById("equipoB").value,
-    tdA: document.getElementById("tdA").value,
-    tdB: document.getElementById("tdB").value,
-    bajasA: document.getElementById("bajasA").value,
-    bajasB: document.getElementById("bajasB").value
-  };
+  const formData = new FormData();
+  formData.append("jornada", document.getElementById("jornada").value);
+  formData.append("equipoA", document.getElementById("equipoA").value);
+  formData.append("equipoB", document.getElementById("equipoB").value);
+  formData.append("tdA", document.getElementById("tdA").value);
+  formData.append("tdB", document.getElementById("tdB").value);
+  formData.append("bajasA", document.getElementById("bajasA").value);
+  formData.append("bajasB", document.getElementById("bajasB").value);
 
-  await fetch("https://script.google.com/macros/s/AKfycbzeYYjZ6cWw1CqERniZ9GBraRr92NT_1JUQOx5barkdNbo2Kdyf5PpgJhOJRMUGarg-Hw/exec", {
+  await fetch("https://script.google.com/macros/s/AKfycbx-4Jptg5vzfg3dfGIjc73RAiMmsrEu5Hm2dmUKBzIAyLVePRANWJEGhLAbmSVR2Q74rw/exec", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload)
+    body: formData
   });
 
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
+
 
 
 
