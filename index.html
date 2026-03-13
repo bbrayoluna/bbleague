@@ -161,18 +161,33 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   e.preventDefault();
 
   const formData = new FormData();
-  formData.append("jornada", document.getElementById("jornada").value);
-  formData.append("equipoA", document.getElementById("equipoA").value);
-  formData.append("equipoB", document.getElementById("equipoB").value);
-  formData.append("tdA", document.getElementById("tdA").value);
-  formData.append("tdB", document.getElementById("tdB").value);
-  formData.append("bajasA", document.getElementById("bajasA").value);
-  formData.append("bajasB", document.getElementById("bajasB").value);
+  const jornada=document.getElementById("jornada").value;
+  const equipoA=document.getElementById("equipoA").value;
+  const equipoB=document.getElementById("equipoB").value;
+  const tdA=document.getElementById("tdA").value;
+  const tdB=document.getElementById("tdB").value;
+  const bajasA=document.getElementById("bajasA").value;
+  const bajasB=document.getElementById("bajasB").value;
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyfZDD6kbW5uF-Dn6FOGhgjtPYOqa-KMYrLlg7Pt8RFNXQz8GrN8UxjLbUwTW_8g0m_9Q/exec";
+			  const data = {
+				action: "registrar",
+				jornada,
+				equipoA,
+				equipoB,
+				tdA,
+				tdB,
+				bajasA,
+				bajasB
+				
+			  };
 
-  await fetch("https://script.google.com/macros/s/AKfycbx-4Jptg5vzfg3dfGIjc73RAiMmsrEu5Hm2dmUKBzIAyLVePRANWJEGhLAbmSVR2Q74rw/exec", {
-    method: "POST",
-    body: formData
-  });
+				const res = await fetch(URL_SCRIPT, {
+				  method: "POST",
+				  headers: {
+					"Content-Type": "application/json"
+				  },
+				  body: JSON.stringify(data)
+				});
 
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
