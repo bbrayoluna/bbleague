@@ -267,4 +267,44 @@ width: 100%;
 #form-wrapper button:hover {
 background: #ac342f;
 color: #eee;
+}/* formulario */
+#loginSection form {
+background: #fac546;
+padding: 1.5rem;
+border-radius: 8px;
+max-width: 500px;
+margin: auto;
+border: 1px solid #333;
+}
+#loginSection label {
+color: #ac342f;
+font-family: 'nuffle', sans-serif;
+font-weight: bold;
+display: block;
+margin-top: 1rem;
+font-weight: 600;
+}
+#loginSection select,
+#loginSection input {
+width: 100%;
+padding: 0.5rem;
+margin-top: 0.3rem;
+border-radius: 4px;
+border: 1px solid #444;
+background: #ac342f;
+color: #eee;
+}
+#loginSection button {
+margin-top: 1.5rem;
+padding: 0.7rem 1rem;
+background: #ac342f;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+font-weight: 600;
+width: 100%;
+}
+#loginSection button:hover {
+background: #ac342f;
+color: #eee;
 }
