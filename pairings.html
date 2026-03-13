@@ -151,6 +151,7 @@ async function loadPairings() {
   const enabled = configRows[2].c[1]?.v; // B3
   console.log('enabled',enabled);
   if(enabled === 1){
+	console.log('visi',enabled);
 	const nextMatch = document.getElementById("nextMatch");
 	nextMatch.classList.remove("hide");
   }else{
