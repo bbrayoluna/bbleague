@@ -43,9 +43,7 @@
 <div id="form-wrapper" class="hide">
   <h2>Enviar resultado</h2>
 
-  <form id="resultadoForm"
-        action="https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse"
-        method="POST" target="_self">
+  <form id="resultadoForm">
 
     <label for="jornada">Jornada</label>
     <input type="text" id="jornada" name="entry.1027995851" readonly>
@@ -150,20 +148,59 @@ function validarFormulario() {
   return true;
 }
 
-document.getElementById("resultadoForm").addEventListener("submit", function(e) {
-  if (!validarFormulario()) {
-    e.preventDefault();
+document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
+  e.preventDefault(); // Evita la redirección
+
+  const equipoA = document.getElementById("equipoA").value.trim();
+  const equipoB = document.getElementById("equipoB").value.trim();
+  const tdA = document.getElementById("tdA").value;
+  const tdB = document.getElementById("tdB").value;
+  const bajasA = document.getElementById("bajasA").value;
+  const bajasB = document.getElementById("bajasB").value;
+
+  // VALIDACIONES
+  if (!equipoA || !equipoB) {
+    alert("Debes seleccionar ambos equipos.");
     return;
   }
 
-  const mensaje = document.getElementById("mensaje");
-  mensaje.style.color = "#ccc";
-  mensaje.textContent = "Enviando...";
+  if (equipoA === equipoB) {
+    alert("Equipo A y Equipo B deben ser distintos.");
+    return;
+  }
 
-  setTimeout(() => {
-    mensaje.style.color = "#4a8";
-    mensaje.textContent = "Resultado enviado correctamente ✔";
-  }, 800);
+  if (tdA === "" || tdB === "" || bajasA === "" || bajasB === "") {
+    alert("Todos los campos numéricos son obligatorios.");
+    return;
+  }
+
+  if (tdA < 0 || tdB < 0 || bajasA < 0 || bajasB < 0) {
+    alert("Los valores numéricos no pueden ser negativos.");
+    return;
+  }
+
+  // Enviar datos
+  const form = e.target;
+  const data = new FormData(form);
+
+  const url = "https://docs.google.com/forms/d/e/1FAIpQLSebNCAX2Fepm0uHFZHkzoCfAGJH_JBYTA4jxu45SHkIR0drIw/formResponse";
+
+  await fetch(url, {
+    method: "POST",
+    mode: "no-cors",
+    body: data
+  });
+
+  // Mensaje de éxito
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "Resultado enviado correctamente ✔";
+  mensaje.style.color = "#4a8";
+
+  // Opcional: limpiar campos numéricos
+  document.getElementById("tdA").value = "";
+  document.getElementById("tdB").value = "";
+  document.getElementById("bajasA").value = "";
+  document.getElementById("bajasB").value = "";
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
