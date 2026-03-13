@@ -60,6 +60,14 @@
 		  </div>
 		</div>
 		<script>
+			const CONFIG = "Config";
+			async function fetchSheet(sheetName) {
+			  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+			  const res = await fetch(url);
+			  const text = await res.text();
+			  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+			}
+
 			async function sha256(texto) {
 			  const encoder = new TextEncoder();
 			  const data = encoder.encode(texto);
