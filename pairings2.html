@@ -67,50 +67,70 @@
       return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
     }
 
-    async function loadResultados() {
-      const json = await fetchSheet(RESULTADOS);
-      const rows = json.table.rows;
+async function loadResultados() {
+  const json = await fetchSheet(RESULTADOS);
+  const rows = json.table.rows;
 
-      const jornadas = {};
+  const jornadas = {};
 
-      rows.forEach(r => {
-        if (!r.c) return;
+  rows.forEach(r => {
+    if (!r.c) return;
 
-        const jornada = r.c[0]?.v;   // Columna A
-        const equipoA = r.c[2]?.v;   // Columna C
-        const equipoB = r.c[3]?.v;   // Columna D
-        const tdA = r.c[4]?.v;       // Columna E
-        const tdB = r.c[5]?.v;       // Columna F
+    const jornada = r.c[0]?.v;   // Columna A
+    const equipoA = r.c[2]?.v;   // Columna C
+    const equipoB = r.c[3]?.v;   // Columna D
+    const tdA = r.c[4]?.v;       // Columna E
+    const tdB = r.c[5]?.v;       // Columna F
 
-        if (!jornada) return;
+    if (!jornada) return;
 
-        if (!jornadas[jornada]) jornadas[jornada] = [];
-        jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
+    if (!jornadas[jornada]) jornadas[jornada] = [];
+    jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
+  });
+
+  const cont = document.getElementById("resultados");
+  cont.innerHTML = "";
+
+  Object.keys(jornadas)
+    .sort((a, b) => Number(a) - Number(b))
+    .forEach(j => {
+      const block = document.createElement("div");
+      block.className = "jornada-block";
+
+      const title = document.createElement("h3");
+      title.textContent = `Jornada ${j}`;
+      block.appendChild(title);
+
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Equipo A</th>
+            <th>TD</th>
+            <th>TD</th>
+            <th>Equipo B</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+
+      const tbody = table.querySelector("tbody");
+
+      jornadas[j].forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p.equipoA ?? ""}</td>
+          <td>${p.tdA ?? ""}</td>
+          <td>${p.tdB ?? ""}</td>
+          <td>${p.equipoB ?? ""}</td>
+        `;
+        tbody.appendChild(tr);
       });
 
-      const cont = document.getElementById("resultados");
-      cont.innerHTML = "";
-
-      Object.keys(jornadas)
-        .sort((a, b) => Number(a) - Number(b))
-        .forEach(j => {
-          const block = document.createElement("div");
-          block.className = "jornada-block";
-
-          const title = document.createElement("h3");
-          title.textContent = `Jornada ${j}:`;
-          block.appendChild(title);
-
-          jornadas[j].forEach(p => {
-            const linea = document.createElement("div");
-            linea.className = "resultado-linea";
-            linea.textContent = `${p.equipoA} ${p.tdA} - ${p.tdB} ${p.equipoB}`;
-            block.appendChild(linea);
-          });
-
-          cont.appendChild(block);
-        });
-    }
+      block.appendChild(table);
+      cont.appendChild(block);
+    });
+}
 
     async function loadPairings() {
       const json = await fetchSheet(RANKING_SUIZO);
