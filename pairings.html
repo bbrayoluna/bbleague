@@ -275,7 +275,7 @@ function loadPairings(resultados,rankingSuizo) {
   document.getElementById("emparejamientos").innerHTML = tablaHtml;
 }
 function mostrarNextMatch(config) {
-	const showNextMatch=rowsConf[3].c[1].v;
+	const showNextMatch=config[3].c[1].v;
 	if(showNextMatch===1){
 		return true;
 	}
