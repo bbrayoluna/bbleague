@@ -274,14 +274,25 @@ function loadPairings(resultados,rankingSuizo) {
   const tablaHtml = renderEmparejamientosTable(emparejamientos);
   document.getElementById("emparejamientos").innerHTML = tablaHtml;
 }
-
+function mostrarNextMatch(config) {
+	const showNextMatch=rowsConf[3].c[1].v;
+	if(showNextMatch===1){
+		return true;
+	}
+	return false;
+}
     document.addEventListener("DOMContentLoaded", async () => {
   const jsonResultados = await fetchSheet(RESULTADOS);
   const rowsResultados = jsonResultados.table.rows;
   const jsonRS = await fetchSheet(RANKING_SUIZO);
   const rowsRs = jsonRS.table.rows;
+  const jsonConf = await fetchSheet(CONFIG);
+  const rowsConf = jsonConf.table.rows;
       await loadResultados(rowsResultados);
-      await loadPairings(rowsResultados,rowsRs);
+	  if(mostrarNextMatch(rowsConf)){	  
+		await loadPairings(rowsResultados,rowsRs);
+		document.getElementById("nextMatch").classList.remove("hide");
+	  }
     });
   </script>
 </body>
