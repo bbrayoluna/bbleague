@@ -252,10 +252,10 @@ function renderEmparejamientosTable(emparejamientos) {
   for (const emp of emparejamientos) {
     html += `
       <tr>
-        <td>${emp.parejaA.Vet}</td>
-        <td>${emp.parejaA.Nov}</td>
-        <td>${emp.parejaB.Vet}</td>
-        <td>${emp.parejaB.Nov}</td>
+        <td>${emp.parejaA.c[0].v}</td>
+        <td>${emp.parejaA.c[1].v}</td>
+        <td>${emp.parejaB.c[0].v}</td>
+        <td>${emp.parejaB.c[1].v}</td>
       </tr>
     `;
   }
