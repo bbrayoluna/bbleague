@@ -137,7 +137,7 @@ async function loadResultados(rows) {
 
 // Construye un id único de pareja
 function pairId(row) {
-  return `${row.Vet}::${row.Nov}`;
+  return `${row.c[0].v}::${row.c[1].v}`;
 }
 
 // Mapa jugador -> id de pareja
@@ -145,8 +145,8 @@ function buildPlayerToPairMap(rankingRows) {
   const map = new Map();
   for (const row of rankingRows) {
     const id = pairId(row);
-    map.set(row.Vet, id);
-    map.set(row.Nov, id);
+    map.set(row.c[0].v, id);
+    map.set(row.c[1].v, id);
   }
   return map;
 }
