@@ -157,8 +157,14 @@ function buildPlayedPairsSet(rankingRows, resultadosRows) {
   const played = new Set();
 
   for (const r of resultadosRows) {
-    const pairA = playerToPair.get(r.EquipoA);
-    const pairB = playerToPair.get(r.EquipoB);
+    if (!r.c) continue;
+
+    const equipoA = r.c[2]?.v; // Columna C
+    const equipoB = r.c[3]?.v; // Columna D
+    if (!equipoA || !equipoB) continue;
+
+    const pairA = playerToPair.get(equipoA);
+    const pairB = playerToPair.get(equipoB);
     if (!pairA || !pairB || pairA === pairB) continue;
 
     const key = [pairA, pairB].sort().join(" vs ");
@@ -168,19 +174,25 @@ function buildPlayedPairsSet(rankingRows, resultadosRows) {
   return played;
 }
 
-// Orden suizo usando solo RankingSuizo (ya trae los valores)
+
+function getVal(row, idx) {
+  return row.c?.[idx]?.v ?? 0;
+}
+
+// Orden suizo usando solo RankingSuizo (columnas gviz)
 function sortSwiss(rankingRows) {
   return [...rankingRows].sort((a, b) =>
-    b.Puntos        - a.Puntos        ||
-    b.TDDiff        - a.TDDiff        ||
-    b.TDPlus        - a.TDPlus        ||
-    b.BajasPlus     - a.BajasPlus     ||
-    b.PorcVictorias - a.PorcVictorias ||
-    b.OMW           - a.OMW           ||
-    b.SOS           - a.SOS           ||
-    b.SOSOS         - a.SOSOS
+    getVal(b, 2) - getVal(a, 2) || // Puntos
+    getVal(b, 3) - getVal(a, 3) || // TD Diff
+    getVal(b, 4) - getVal(a, 4) || // TD+
+    getVal(b, 5) - getVal(a, 5) || // Bajas+
+    getVal(b, 6) - getVal(a, 6) || // %Victorias
+    getVal(b, 7) - getVal(a, 7) || // OMW%
+    getVal(b, 8) - getVal(a, 8) || // SOS
+    getVal(b, 9) - getVal(a, 9)    // SOSOS
   );
 }
+
 
 // Generar emparejamientos suizos evitando repetidos
 function generarEmparejamientos(rankingRows, resultadosRows) {
