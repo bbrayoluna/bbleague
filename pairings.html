@@ -32,25 +32,12 @@
 				</ul>
 			</nav>
 			<main>
-				<div id="emparejamientos"></div>
     <h2 class="nuffle red big">Resultados previos</h2>
     <div id="resultados">
-      <!-- JS rellenará aquí los resultados por jornada -->
     </div>
 	<div id="nextMatch" class="hide">
 		<h2 class="nuffle red big">Próximos emparejamientos</h2>
-		<table id="pairings">
-		  <thead>
-			<tr>
-			  <th>Mesa</th>
-			  <th>Equipo 1</th>
-			  <th>Equipo 2</th>
-			</tr>
-		  </thead>
-		  <tbody>
-			<!-- JS rellenará aquí los pairings -->
-		  </tbody>
-		</table>
+		<div id="emparejamientos"></div>
 	</div>
   </div>
 
@@ -67,9 +54,7 @@
       return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
     }
 
-async function loadResultados() {
-  const json = await fetchSheet(RESULTADOS);
-  const rows = json.table.rows;
+async function loadResultados(rows) {
   const valor = rows?.[0]?.c?.[0]?.v ?? "";
 
 	if (valor === "ignorar") {
@@ -150,96 +135,153 @@ async function loadResultados() {
     });
 }
 
-async function loadPairings() {
-  // 0. Leer config
-  const configJson = await fetchSheet(CONFIG);
-  const configRows = configJson.table.rows;
-  const enabled = configRows[2].c[1]?.v; // B3
-  if(enabled === 1){
-	const nextMatch = document.getElementById("nextMatch");
-	nextMatch.classList.remove("hide");
-  }else{
-	return;
+// Construye un id único de pareja
+function pairId(row) {
+  return `${row.Vet}::${row.Nov}`;
+}
+
+// Mapa jugador -> id de pareja
+function buildPlayerToPairMap(rankingRows) {
+  const map = new Map();
+  for (const row of rankingRows) {
+    const id = pairId(row);
+    map.set(row.Vet, id);
+    map.set(row.Nov, id);
   }
-  
-  // 1. Leer ranking suizo
-  const rankingJson = await fetchSheet(RANKING_SUIZO);
-  const rankingRows = rankingJson.table.rows;
+  return map;
+}
 
-  const teams = rankingRows
-    .map(r => (r.c && r.c[0] ? r.c[0].v : null))
-    .filter(Boolean);
-
-  // 2. Leer resultados para saber qué partidos ya se jugaron
-  const resJson = await fetchSheet(RESULTADOS);
-  const resRows = resJson.table.rows;
-
-  // Set de partidos jugados (sin orden: "A|B" == "B|A")
+// Conjunto de emparejamientos ya jugados (por pareja)
+function buildPlayedPairsSet(rankingRows, resultadosRows) {
+  const playerToPair = buildPlayerToPairMap(rankingRows);
   const played = new Set();
 
-  resRows.forEach(r => {
-    if (!r.c) return;
-    const A = r.c[2]?.v;
-    const B = r.c[3]?.v;
-    if (A && B) {
-      const key = [A, B].sort().join("|");
-      played.add(key);
-    }
-  });
+  for (const r of resultadosRows) {
+    const pairA = playerToPair.get(r.EquipoA);
+    const pairB = playerToPair.get(r.EquipoB);
+    if (!pairA || !pairB || pairA === pairB) continue;
 
-  // 3. Emparejar evitando repetidos
-  const used = new Set();
-  const pairings = [];
+    const key = [pairA, pairB].sort().join(" vs ");
+    played.add(key);
+  }
 
-  for (let i = 0; i < teams.length; i++) {
-    const t1 = teams[i];
-    if (used.has(t1)) continue;
+  return played;
+}
 
-    let t2 = null;
+// Orden suizo usando solo RankingSuizo (ya trae los valores)
+function sortSwiss(rankingRows) {
+  return [...rankingRows].sort((a, b) =>
+    b.Puntos        - a.Puntos        ||
+    b.TDDiff        - a.TDDiff        ||
+    b.TDPlus        - a.TDPlus        ||
+    b.BajasPlus     - a.BajasPlus     ||
+    b.PorcVictorias - a.PorcVictorias ||
+    b.OMW           - a.OMW           ||
+    b.SOS           - a.SOS           ||
+    b.SOSOS         - a.SOSOS
+  );
+}
 
-    // Buscar el primer rival disponible que NO haya jugado contra t1
-    for (let j = i + 1; j < teams.length; j++) {
-      const candidate = teams[j];
-      if (used.has(candidate)) continue;
+// Generar emparejamientos suizos evitando repetidos
+function generarEmparejamientos(rankingRows, resultadosRows) {
+  const ordenadas = sortSwiss(rankingRows);
+  const played = buildPlayedPairsSet(rankingRows, resultadosRows);
 
-      const key = [t1, candidate].sort().join("|");
+  const usadas = new Set();
+  const emparejamientos = [];
+
+  const idMap = new Map(ordenadas.map(r => [pairId(r), r]));
+
+  for (let i = 0; i < ordenadas.length; i++) {
+    if (usadas.has(i)) continue;
+
+    const p1 = ordenadas[i];
+    const p1Id = pairId(p1);
+    let rivalIndex = -1;
+
+    // Buscar rival que no haya jugado contra p1
+    for (let j = i + 1; j < ordenadas.length; j++) {
+      if (usadas.has(j)) continue;
+      const p2 = ordenadas[j];
+      const p2Id = pairId(p2);
+      const key = [p1Id, p2Id].sort().join(" vs ");
       if (!played.has(key)) {
-        t2 = candidate;
+        rivalIndex = j;
         break;
       }
     }
 
-    // Si no se encuentra rival, asignar BYE
-    if (!t2) {
-      pairings.push([t1, "BYE"]);
-      used.add(t1);
-      continue;
+    // Si no hay rival "nuevo", coger el siguiente disponible
+    if (rivalIndex === -1) {
+      for (let j = i + 1; j < ordenadas.length; j++) {
+        if (!usadas.has(j)) {
+          rivalIndex = j;
+          break;
+        }
+      }
     }
 
-    pairings.push([t1, t2]);
-    used.add(t1);
-    used.add(t2);
+    if (rivalIndex !== -1) {
+      usadas.add(i);
+      usadas.add(rivalIndex);
+      emparejamientos.push({
+        parejaA: ordenadas[i],
+        parejaB: ordenadas[rivalIndex]
+      });
+    }
   }
 
-  // 4. Pintar en la tabla
-  const tbody = document.querySelector("#pairings tbody");
-  tbody.innerHTML = "";
+  return emparejamientos;
+}
 
-  let mesa = 1;
-  pairings.forEach(([a, b]) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${mesa++}</td>
-      <td>${a}</td>
-      <td>${b}</td>
+// Pintar tabla HTML
+function renderEmparejamientosTable(emparejamientos) {
+  let html = `
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Pareja A Vet</th>
+          <th>Pareja A Nov</th>
+          <th>Pareja B Vet</th>
+          <th>Pareja B Nov</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  for (const emp of emparejamientos) {
+    html += `
+      <tr>
+        <td>${emp.parejaA.Vet}</td>
+        <td>${emp.parejaA.Nov}</td>
+        <td>${emp.parejaB.Vet}</td>
+        <td>${emp.parejaB.Nov}</td>
+      </tr>
     `;
-    tbody.appendChild(tr);
-  });
+  }
+
+  html += `
+      </tbody>
+    </table>
+  `;
+
+  return html;
+}
+
+// Ejemplo de uso en tu web
+function loadPairings(resultados,rankingSuizo) {
+  const emparejamientos = generarEmparejamientos(rankingSuizo, resultados);
+  const tablaHtml = renderEmparejamientosTable(emparejamientos);
+  document.getElementById("emparejamientos").innerHTML = tablaHtml;
 }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      await loadResultados();
-      await loadPairings();
+  const jsonResultados = await fetchSheet(RESULTADOS);
+  const rowsResultados = jsonResultados.table.rows;
+  const jsonRS = await fetchSheet(RANKING_SUIZO);
+  const rowsRs = jsonRS.table.rows;
+      await loadResultados(rowsResultados);
+      await loadPairings(rowsResultados,rowsRs);
     });
   </script>
 </body>
