@@ -165,8 +165,8 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   const token = localStorage.getItem("token");
 
   const jornada=document.getElementById("jornada").value;
-  const equipoA=document.getElementById("equipoA").value;
-  const equipoB=document.getElementById("equipoB").value;
+  const equipoA=document.getElementById("equipoA").value.split('-')[0];
+  const equipoB=document.getElementById("equipoB").value.split('-')[0];
   const tdA=document.getElementById("tdA").value;
   const tdB=document.getElementById("tdB").value;
   const bajasA=document.getElementById("bajasA").value;
