@@ -108,7 +108,7 @@ async function sha256(texto) {
 	.join("");
 }
 const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-const RANKING_SUIZO = "rankingSuizo";
+const USUARIOS_ACEPTADOS = "UsuariosAceptados";
 const CONFIG = "Config";
 
 async function fetchSheet(sheetName) {
@@ -125,9 +125,9 @@ async function cargarEquipos() {
   const jornada = rowsConfig[0].c[1]?.v; // B1
   document.getElementById("jornada").value = jornada;
   
-  const json = await fetchSheet(RANKING_SUIZO);
+  const json = await fetchSheet(USUARIOS_ACEPTADOS);
   const rows = json.table.rows;
-  const equipos = rows.map(r => r.c?.[0]?.v).filter(Boolean);
+  const equipos = rows.map(r => r.c?.[1]?.v+'-'+r.c?.[2]?.v).filter(Boolean);
 
   const selA = document.getElementById("equipoA");
   const selB = document.getElementById("equipoB");
