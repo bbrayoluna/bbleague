@@ -286,20 +286,32 @@ function renderEmparejamientosTable(emparejamientos) {
     const maestroB = emp.parejaB.c[0].v;
     const padawanB = emp.parejaB.c[1].v;
 
+    let linea1 = "";
+    let linea2 = "";
+
+    // 🔥 LÓGICA SEGÚN JORNADA
+    if (JORNADA === 1 || JORNADA === 2) {
+      linea1 = `${maestroA} vs ${padawanB}`;
+      linea2 = `${maestroB} vs ${padawanA}`;
+    } else if (JORNADA === 3 || JORNADA === 4) {
+      linea1 = `${maestroA} vs ${maestroB}`;
+      linea2 = `${padawanA} vs ${padawanB}`;
+    } else {
+      // fallback por si acaso
+      linea1 = `${maestroA} vs ${padawanB}`;
+      linea2 = `${maestroB} vs ${padawanA}`;
+    }
+
     html += `
       <table class="match-table">
         <tr>
-          <td class="match-label  jornada-header" rowspan="2">
+          <td class="match-label jornada-header" rowspan="2">
             Match ${index + 1}
           </td>
-          <td class="match-line">
-            ${maestroA} vs ${padawanB}
-          </td>
+          <td class="match-line">${linea1}</td>
         </tr>
         <tr>
-          <td class="match-line">
-            ${maestroB} vs ${padawanA}
-          </td>
+          <td class="match-line">${linea2}</td>
         </tr>
       </table>
       <br>
@@ -308,6 +320,7 @@ function renderEmparejamientosTable(emparejamientos) {
 
   return html;
 }
+
 
 
 
