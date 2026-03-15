@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head><!-- Google tag (gtag.js) -->
+<link rel="stylesheet" href="style.css">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ND8WV5PLDZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ND8WV5PLDZ');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area de Jugadores - League Rayo de Luna</title>
+</head>
+	<body>
+		<header>
+			<img src="images/logo.png" class="logosize"  alt="LogoBB">
+			<h1>League Rayo de Luna</h1>
+			<img src="images/logoliga.png" class="logosize6x6" alt="logoliga">
+		</header>
+		<div class="container">
+			<nav>
+				<ul>
+					<li><a href="index.html" class="nuffle yellow menu">Principal</a></li>
+					<li><a href="reglas.html" class="nuffle yellow menu">Bases</a></li>
+					<li><a href="clasificacion.html" class="nuffle yellow menu">Clasificación</a></li>
+					<li><a href="pairings.html" class="nuffle yellow menu">Emparejamientos</a></li>
+					<li><a href="registro.html" class="nuffle yellow menu">Registro</a></li>
+					<li><a class="nuffle yellow menu">Jugadores</a></li>
+				</ul>
+				<img src="images/numuno.PNG" class="sideimg" alt="numuno">
+			</nav>
+			<main>
+				<div id="loginSection">
+				<div id="cheerme" class="hide centered">
+					<img src="images/bbPomPom.gif">
+				</div>
+				  <h2 class="nuffle red big centered">Iniciar sesión</h2>
+
+				  <form class="formulario" id="formLogin">
+					<label>Usuario</label>
+					<input type="text" id="loginUser" required>
+
+					<label>Contraseña</label>
+					<input type="password" id="loginPass" required>
+
+					<button type="submit">Entrar</button>
+				  </form>
+
+				  <div id="loginMensaje"></div>
+				</div>
+
+
+
+				<div id="form-wrapper" >
+				  <h2 class="nuffle red centered">Enviar resultado</h2>
+
+				 <form class="formulario" id="resultadoForm">
+
+
+					<label for="jornada">Jornada</label>
+					<input type="text" id="jornada" readonly>
+
+					<label for="equipoA">Equipo A</label>
+					<select id="equipoA"></select>
+
+					<label for="equipoB">Equipo B</label>
+					<select id="equipoB"></select>
+
+					<label for="tdA">Touchdowns A</label>
+					<input type="number" id="tdA" min="0">
+
+					<label for="tdB">Touchdowns B</label>
+					<input type="number" id="tdB" min="0">
+
+					<label for="bajasA">Bajas causadas por equipo A</label>
+					<input type="number" id="bajasA" min="0">
+
+					<label for="bajasB">Bajas causadas por equipo B</label>
+					<input type="number" id="bajasB" min="0">
+
+					<button type="submit">Enviar resultado</button>
+				  </form>
+
+				  <div id="mensaje" style="margin-top:1rem;"></div>
+				</div>
+			</main>
+		</div>
+		<div id="overlay" class="hide">
+		  <div class="overlay-content nuffle red big">
+			Cargando...
+		  </div>
+		</div>
+
+	</body>
+<script>
+async function sha256(texto) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(texto);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+	.map(b => b.toString(16).padStart(2, "0"))
+	.join("");
+}
+const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+const USUARIOS_ACEPTADOS = "UsuariosAceptados";
+const CONFIG = "Config";
+
+async function fetchSheet(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+}
+
+async function cargarEquipos() {
+  const jsonConfig = await fetchSheet(CONFIG);
+  const rowsConfig = jsonConfig.table.rows;
+
+  const jornada = rowsConfig[0].c[1]?.v; // B1
+  document.getElementById("jornada").value = jornada;
+  
+  const json = await fetchSheet(USUARIOS_ACEPTADOS);
+  const rows = json.table.rows;
+  const equipos = rows.map(r => r.c?.[1]?.v+'-'+r.c?.[2]?.v).filter(Boolean);
+
+  const selA = document.getElementById("equipoA");
+  const selB = document.getElementById("equipoB");
+
+  equipos.forEach(eq => {
+    const optA = document.createElement("option");
+    optA.value = eq;
+    optA.textContent = eq;
+    selA.appendChild(optA);
+
+    const optB = document.createElement("option");
+    optB.value = eq;
+    optB.textContent = eq;
+    selB.appendChild(optB);
+  });
+}
+
+
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
+
+
+function validarFormulario() {
+  const a = document.getElementById("equipoA").value;
+  const b = document.getElementById("equipoB").value;
+
+  if (a === b) {
+    alert("Equipo A y Equipo B deben ser distintos.");
+    return false;
+  }
+  return true;
+}
+
+document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const token = localStorage.getItem("token");
+
+  const jornada=document.getElementById("jornada").value;
+  const equipoA=document.getElementById("equipoA").value.split('-')[0];
+  const equipoB=document.getElementById("equipoB").value.split('-')[0];
+  const tdA=document.getElementById("tdA").value;
+  const tdB=document.getElementById("tdB").value;
+  const bajasA=document.getElementById("bajasA").value;
+  const bajasB=document.getElementById("bajasB").value;
+  const data = {
+				action: "resultado",
+				jornada,
+				equipoA,
+				equipoB,
+				tdA,
+				tdB,
+				bajasA,
+				bajasB,
+				token
+			  };
+
+			  const formData = new FormData();
+			  formData.append("data", JSON.stringify(data));
+  await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+  
+  document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
+});
+
+
+
+document.getElementById("formLogin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+ mostrarOverlay();
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value;
+    if (username === "cheerme" && password === "please") {
+		ocultarOverlay();
+        document.getElementById("cheerme").classList.remove("hide");   
+        return false;                  
+    }
+  const password_hash = await sha256(password);
+
+  const data = {
+    action: "login",
+    username,
+    password_hash,
+    user_agent: 'nodata'
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+
+  const json = await res.json();
+	ocultarOverlay();
+  if (json.ok) {
+    // Guardar sesión
+    localStorage.setItem("token", json.token);
+    localStorage.setItem("user_id", json.user_id);
+	alert("Sesión iniciada correctamente");
+    document.getElementById("loginMensaje").innerText = "Sesión iniciada";
+
+    mostrarResultados();
+  } else {
+	alert("Error: " + json.error);
+    document.getElementById("loginMensaje").innerText = json.error;
+  }
+});
+
+async function mostrarResultados() {
+  await cargarEquipos();
+  document.getElementById("loginSection").classList.add("hide");
+  document.getElementById("form-wrapper").classList.remove("hide");
+}
+
+function mostrarLogin() {
+  document.getElementById("loginSection").classList.remove("hide");
+  document.getElementById("form-wrapper").classList.add("hide");
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  const user_id = localStorage.getItem("user_id");
+	mostrarOverlay();
+  if (!token) {
+	ocultarOverlay();
+    mostrarLogin();
+    return;
+  }
+
+  const data = {
+    action: "validar",
+    token,
+    user_id
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+
+  const json = await res.json();
+
+  if (json.ok) {
+	ocultarOverlay();
+    await mostrarResultados();
+  } else {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+	ocultarOverlay();
+    mostrarLogin();
+  }
+});
+
+function mostrarOverlay() {
+  document.getElementById("overlay").classList.remove("hide");
+}
+
+function ocultarOverlay() {
+  document.getElementById("overlay").classList.add("hide");
+}
+
+</script>
+
+
+</html>
