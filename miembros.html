@@ -228,7 +228,7 @@ async function cargarEquipos() {
   const rowsConfig = jsonConfig.table.rows;
 
   const jornada = rowsConfig[0].c[1]?.v; // B1
-  const resultadosActivo = rowsConfig[2].c[1]?.v; // B1
+  const resultadosActivo = rowsConfig[1].c[1]?.v; // B1
   const actasActivo = rowsConfig[5].c[1]?.v; // B6
   const rostersActivo = rowsConfig[4].c[1]?.v; // B5
   const downloadRostersActivo = rowsConfig[6].c[1]?.v; // B7
