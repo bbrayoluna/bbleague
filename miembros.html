@@ -157,9 +157,21 @@ async function cargarEquipos() {
     optA.value = eq;
     optA.textContent = eq;
     selA.appendChild(optA);
-    selB.appendChild(optA);
-    selAacta.appendChild(optA);
-    selBacta.appendChild(optA);
+
+    const optB = document.createElement("option");
+    optB.value = eq;
+    optB.textContent = eq;
+    selB.appendChild(optB);
+
+    const optAacta = document.createElement("option");
+    optAacta.value = eq;
+    optAacta.textContent = eq;
+    selAacta.appendChild(optAacta);
+
+    const optBacta = document.createElement("option");
+    optBacta.value = eq;
+    optBacta.textContent = eq;
+    selBacta.appendChild(optBacta);
   });
 }
 
