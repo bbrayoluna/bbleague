@@ -25,7 +25,7 @@
 				<ul>
 					<li><a href="index.html" class="nuffle yellow menu">Principal</a></li>
 					<li><a href="reglas.html" class="nuffle yellow menu">Bases</a></li>
-					<li><a href="clasificacion.html" class="nuffle yellow menu">Clasificación</a></li>
+					<li><a href="clasificacion.html" class="nuffle yellow menu">Torneo</a></li>
 					<li><a href="pairings.html" class="nuffle yellow menu">Emparejamientos</a></li>
 					<li><a href="registro.html" class="nuffle yellow menu">Registro</a></li>
 					<li><a class="nuffle yellow menu">Jugadores</a></li>
@@ -87,6 +87,20 @@
 				  <div id="mensaje" style="margin-top:1rem;"></div>
 				</div>
 			</main>
+		</div>
+		<div id="subirActas">
+		<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
+
+			<form  class="formulario" id="uploadActaForm">
+			  <input type="file" id="fileInput" required />
+			  <button type="submit">Subir acta</button>
+			</form>
+
+			<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+			  <div id="progressBar" style="height: 10px; width: 0%; background: #4caf50;"></div>
+			</div>
+
+			<p id="status"></p>
 		</div>
 		<div id="overlay" class="hide">
 		  <div class="overlay-content nuffle red big">
@@ -234,17 +248,43 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
     document.getElementById("loginMensaje").innerText = json.error;
   }
 });
+async function subirArchivo(token, file, type) {
+  const reader = new FileReader();
 
+  return new Promise((resolve) => {
+    reader.onload = async () => {
+      const base64 = reader.result.split(",")[1];
+
+      const payload = {
+        action: "subirArchivo",
+        token,
+        filename: file.name,
+        mime_type: file.type,
+        file_base64: base64
+      };
+
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        body: new URLSearchParams({ data: JSON.stringify(payload) })
+      });
+
+      resolve(await res.json());
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
 async function mostrarResultados() {
   await cargarEquipos();
   document.getElementById("loginSection").classList.add("hide");
   document.getElementById("form-wrapper").classList.remove("hide");
+  document.getElementById("subirActas").classList.remove("hide");
 }
 
 function mostrarLogin() {
   document.getElementById("loginSection").classList.remove("hide");
   document.getElementById("form-wrapper").classList.add("hide");
-}
+  document.getElementById("subirActas").classList.add("hide");
 
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
@@ -282,7 +322,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarLogin();
   }
 });
+document.getElementById("uploadActaForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
+  const file = document.getElementById("fileInput").files[0];
+  const status = document.getElementById("status");
+  const type = "actas";
+  const progress = document.getElementById("progressContainer");
+  const bar = document.getElementById("progressBar");
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    status.textContent = "No hay sesión activa";
+    return;
+  }
+
+  progress.style.display = "block";
+  bar.style.width = "30%";
+  status.textContent = "Preparando archivo...";
+
+  const res = await subirArchivo(token, file);
+
+  bar.style.width = "100%";
+
+  if (res.ok) {
+    status.innerHTML = `Archivo subido correctamente<br><a href="${res.url}" target="_blank">Abrir archivo</a>`;
+  } else {
+    status.textContent = "Error: " + res.error;
+  }
+});
 function mostrarOverlay() {
   document.getElementById("overlay").classList.remove("hide");
 }
