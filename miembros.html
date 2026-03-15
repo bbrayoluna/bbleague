@@ -301,13 +301,14 @@ async function subirArchivo(token, file, type, propName) {
     reader.readAsDataURL(file);
   });
 }
-async function mostrarResultados() {
+async function mostrarLogado() {
   await cargarEquipos();
   document.getElementById("loginSection").classList.add("hide");
   document.getElementById("form-wrapper").classList.remove("hide");
   document.getElementById("subirActas").classList.remove("hide");
   document.getElementById("subirRoster").classList.remove("hide");
   document.getElementById("listaRoster").classList.remove("hide");
+  cargarRosters();
 }
 
 function mostrarLogin() {
@@ -323,6 +324,34 @@ function mostrarOverlay() {
 
 function ocultarOverlay() {
   document.getElementById("overlay").classList.add("hide");
+}
+async function cargarRosters() {
+  const tabla = document.querySelector("#tablaRoster tbody");
+  tabla.innerHTML = "";
+  document.getElementById("mensajeRoster").textContent = "Cargando...";
+
+  const res = await listarRoster();
+
+  if (!res.ok) {
+    document.getElementById("mensajeRoster").textContent = "Error: " + res.error;
+    return;
+  }
+
+  document.getElementById("mensajeRoster").textContent = "";
+
+  res.archivos.forEach(f => {
+    const tr = document.createElement("tr");
+
+    const fecha = new Date(f.date).toLocaleString("es-ES");
+
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${fecha}</td>
+      <td><button onclick="descargarRoster('${f.id}')">Descargar</button></td>
+    `;
+
+    tabla.appendChild(tr);
+  });
 }
 
 /* LISTENERS */
@@ -353,8 +382,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const json = await res.json();
 
   if (json.ok) {
+    await mostrarLogado();
 	ocultarOverlay();
-    await mostrarResultados();
   } else {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
@@ -362,36 +391,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarLogin();
   }
 });
-
-document.getElementById("btnCargarRoster").addEventListener("click", async () => {
-  const tabla = document.querySelector("#tablaRoster tbody");
-  tabla.innerHTML = "";
-  document.getElementById("mensajeRoster").textContent = "Cargando...";
-
-  const res = await listarRoster();
-
-  if (!res.ok) {
-    document.getElementById("mensajeRoster").textContent = "Error: " + res.error;
-    return;
-  }
-
-  document.getElementById("mensajeRoster").textContent = "";
-
-  res.archivos.forEach(f => {
-    const tr = document.createElement("tr");
-
-    const fecha = new Date(f.date).toLocaleString("es-ES");
-
-    tr.innerHTML = `
-      <td>${f.name}</td>
-      <td>${fecha}</td>
-      <td><button onclick="descargarRoster('${f.id}')">Descargar</button></td>
-    `;
-
-    tabla.appendChild(tr);
-  });
-});
-
 
 
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
@@ -464,7 +463,7 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
 	alert("Sesión iniciada correctamente");
     document.getElementById("loginMensaje").innerText = "Sesión iniciada";
 
-    mostrarResultados();
+    mostrarLogado();
   } else {
 	alert("Error: " + json.error);
     document.getElementById("loginMensaje").innerText = json.error;
