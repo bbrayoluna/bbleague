@@ -228,10 +228,10 @@ async function cargarEquipos() {
   const rowsConfig = jsonConfig.table.rows;
 
   const jornada = rowsConfig[0].c[1]?.v; // B1
-  const resultadosActivo = rowsConfig[0].c[2]?.v; // B1
-  const actasActivo = rowsConfig[0].c[5]?.v; // B6
-  const rostersActivo = rowsConfig[0].c[4]?.v; // B5
-  const downloadRostersActivo = rowsConfig[0].c[6]?.v; // B7
+  const resultadosActivo = rowsConfig[2].c[1]?.v; // B1
+  const actasActivo = rowsConfig[5].c[1]?.v; // B6
+  const rostersActivo = rowsConfig[4].c[1]?.v; // B5
+  const downloadRostersActivo = rowsConfig[6].c[1]?.v; // B7
   if(resultadosActivo===1){
 	document.getElementById("form-wrapper").classList.remove("hide");
   }else{
