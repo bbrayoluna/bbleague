@@ -228,6 +228,25 @@ async function cargarEquipos() {
   const rowsConfig = jsonConfig.table.rows;
 
   const jornada = rowsConfig[0].c[1]?.v; // B1
+  const resultadosActivo = rowsConfig[0].c[2]?.v; // B1
+  const actasActivo = rowsConfig[0].c[5]?.v; // B6
+  const rostersActivo = rowsConfig[0].c[4]?.v; // B5
+  if(resultadosActivo===1){
+	document.getElementById("form-wrapper").classList.remove("hide");
+  }else{
+	document.getElementById("form-wrapper").classList.add("hide");
+  }
+  if(actasActivo===1){
+	document.getElementById("subirActa").classList.remove("hide");
+  }else{
+	document.getElementById("subirActa").classList.add("hide");
+  }
+  if(rostersActivo===1){
+	document.getElementById("subirRoster").classList.remove("hide");
+  }else{
+	document.getElementById("subirActa").classList.add("hide");
+  }
+  
   document.getElementById("jornada").value = jornada;
   
   const json = await fetchSheet(USUARIOS_ACEPTADOS);
