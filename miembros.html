@@ -118,6 +118,25 @@
 					  <button type="submit">Subir acta</button>
 					</form>
 				</div>
+				<div id="listaRoster" class="hide">
+				  <h2>Rosters subidos</h2>
+
+				  <button id="btnCargarRoster">Cargar roster</button>
+
+				  <table id="tablaRoster" border="1" style="margin-top: 10px; width: 100%; border-collapse: collapse;">
+					<thead>
+					  <tr>
+						<th>Nombre</th>
+						<th>Fecha</th>
+						<th>Descargar</th>
+					  </tr>
+					</thead>
+					<tbody></tbody>
+				  </table>
+
+				  <p id="mensajeRoster"></p>
+				</div>
+
 			</main>
 		</div>
 		<div id="overlay" class="hide">
@@ -134,6 +153,56 @@ const CONFIG = "Config";
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
 
 /* FUNCTIONS */
+async function listarRoster() {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    action: "listarArchivos",
+    token,
+    type: "roster"   // ← IMPORTANTE
+  };
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: new URLSearchParams({ data: JSON.stringify(payload) })
+  });
+
+  return await res.json();
+}
+
+async function descargarRoster(fileId) {
+  const token = localStorage.getItem("token");
+
+  const payload = {
+    action: "descargarArchivo",
+    token,
+    fileId
+  };
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: new URLSearchParams({ data: JSON.stringify(payload) })
+  });
+
+  const json = await res.json();
+
+  if (!json.ok) {
+    alert("Error: " + json.error);
+    return;
+  }
+
+  const bytes = Uint8Array.from(atob(json.base64), c => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: json.mime });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = json.name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
 async function sha256(texto) {
   const encoder = new TextEncoder();
   const data = encoder.encode(texto);
@@ -238,6 +307,7 @@ async function mostrarResultados() {
   document.getElementById("form-wrapper").classList.remove("hide");
   document.getElementById("subirActas").classList.remove("hide");
   document.getElementById("subirRoster").classList.remove("hide");
+  document.getElementById("listaRoster").classList.remove("hide");
 }
 
 function mostrarLogin() {
@@ -245,6 +315,7 @@ function mostrarLogin() {
   document.getElementById("form-wrapper").classList.add("hide");
   document.getElementById("subirActas").classList.add("hide");
   document.getElementById("subirRoster").classList.add("hide");
+  document.getElementById("listaRoster").classList.add("hide");
 }
 function mostrarOverlay() {
   document.getElementById("overlay").classList.remove("hide");
@@ -291,6 +362,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarLogin();
   }
 });
+
+document.getElementById("btnCargarRoster").addEventListener("click", async () => {
+  const tabla = document.querySelector("#tablaRoster tbody");
+  tabla.innerHTML = "";
+  document.getElementById("mensajeRoster").textContent = "Cargando...";
+
+  const res = await listarRoster();
+
+  if (!res.ok) {
+    document.getElementById("mensajeRoster").textContent = "Error: " + res.error;
+    return;
+  }
+
+  document.getElementById("mensajeRoster").textContent = "";
+
+  res.archivos.forEach(f => {
+    const tr = document.createElement("tr");
+
+    const fecha = new Date(f.date).toLocaleString("es-ES");
+
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${fecha}</td>
+      <td><button onclick="descargarRoster('${f.id}')">Descargar</button></td>
+    `;
+
+    tabla.appendChild(tr);
+  });
+});
+
 
 
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
