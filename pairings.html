@@ -263,30 +263,28 @@ function renderEmparejamientosTable(emparejamientos) {
     const padawanB = emp.parejaB.c[1].v;
 
     html += `
-      <h3 class="nuffle red big">Match ${index + 1}</h3>
-
-      <table class="tabla-match">
+      <table class="match-table">
         <tr>
-          <th>${maestroA}</th>
-          <td>vs</td>
-          <th>${padawanB}</th>
+          <td class="match-label" rowspan="2">
+            Match ${index + 1}
+          </td>
+          <td class="match-line">
+            ${maestroA} vs ${padawanB}
+          </td>
+        </tr>
+        <tr>
+          <td class="match-line">
+            ${maestroB} vs ${padawanA}
+          </td>
         </tr>
       </table>
-
-      <table class="tabla-match">
-        <tr>
-          <th>${maestroB}</th>
-          <td>vs</td>
-          <th>${padawanA}</th>
-        </tr>
-      </table>
-
       <br>
     `;
   });
 
   return html;
 }
+
 
 
 // Ejemplo de uso en tu web
