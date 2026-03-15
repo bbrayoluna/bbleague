@@ -207,29 +207,26 @@ function generarEmparejamientos(rankingRows, resultadosRows) {
 
   const usadas = new Set();
   const emparejamientos = [];
-
-  const idMap = new Map(ordenadas.map(r => [pairId(r), r]));
+  let desparejado = null;
 
   for (let i = 0; i < ordenadas.length; i++) {
     if (usadas.has(i)) continue;
 
     const p1 = ordenadas[i];
-    const p1Id = pairId(p1);
     let rivalIndex = -1;
 
-    // Buscar rival que no haya jugado contra p1
     for (let j = i + 1; j < ordenadas.length; j++) {
       if (usadas.has(j)) continue;
+
       const p2 = ordenadas[j];
-      const p2Id = pairId(p2);
-      const key = [p1Id, p2Id].sort().join(" vs ");
+      const key = [pairId(p1), pairId(p2)].sort().join(" vs ");
+
       if (!played.has(key)) {
         rivalIndex = j;
         break;
       }
     }
 
-    // Si no hay rival "nuevo", coger el siguiente disponible
     if (rivalIndex === -1) {
       for (let j = i + 1; j < ordenadas.length; j++) {
         if (!usadas.has(j)) {
@@ -246,11 +243,15 @@ function generarEmparejamientos(rankingRows, resultadosRows) {
         parejaA: ordenadas[i],
         parejaB: ordenadas[rivalIndex]
       });
+    } else {
+      // ESTA PAREJA QUEDA LIBRE
+      desparejado = ordenadas[i];
     }
   }
 
-  return emparejamientos;
+  return { emparejamientos, desparejado };
 }
+
 
 // Pintar tabla HTML
 function renderEmparejamientosTable(emparejamientos) {
@@ -265,7 +266,7 @@ function renderEmparejamientosTable(emparejamientos) {
     html += `
       <table class="match-table">
         <tr>
-          <td class="match-label jornada-header" rowspan="2">
+          <td class="match-label jornada-he24" rowspan="2">
             Match ${index + 1}
           </td>
           <td class="match-line">
@@ -288,11 +289,18 @@ function renderEmparejamientosTable(emparejamientos) {
 
 
 // Ejemplo de uso en tu web
-function loadPairings(resultados,rankingSuizo) {
-  const emparejamientos = generarEmparejamientos(rankingSuizo, resultados);
-  const tablaHtml = renderEmparejamientosTable(emparejamientos);
-  document.getElementById("emparejamientos").innerHTML = tablaHtml;
+function loadPairings(resultados, rankingSuizo) {
+  const { emparejamientos, desparejado } = generarEmparejamientos(rankingSuizo, resultados);
+
+  let html = renderEmparejamientosTable(emparejamientos);
+
+  if (desparejado) {
+    html += renderDesparejado(desparejado);
+  }
+
+  document.getElementById("emparejamientos").innerHTML = html;
 }
+
 function mostrarNextMatch(config) {
 	const showNextMatch=config[3].c[1].v;
 	if(showNextMatch===1){
