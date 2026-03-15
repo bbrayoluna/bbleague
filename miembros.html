@@ -51,7 +51,20 @@
 
 				  <div id="loginMensaje"></div>
 				</div>
+				<div id="subirRoster" class="hide">
+					<h2 class="nuffle red centered">subir roster</h2>
+					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+					  <div id="progressBar" style="height: 10px; width: 0%; background: #ac342f;"></div>
+					</div>
 
+					<p id="status"></p>
+					<form  class="formulario" id="uploadRosterForm">
+					<label for="equipo">Equipo</label>
+					<select id="equipoRoster"></select>
+					  <input type="file" id="fileInput" required />
+					  <button type="submit">Subir roster</button>
+					</form>
+				</div>
 
 
 				<div id="form-wrapper" class="hide" >
@@ -92,7 +105,7 @@
 
 
 					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
-					  <div id="progressBar" style="height: 10px; width: 0%; background: #4caf50;"></div>
+					  <div id="progressBar" style="height: 10px; width: 0%; background: #ac342f;"></div>
 					</div>
 
 					<p id="status"></p>
@@ -151,6 +164,7 @@ async function cargarEquipos() {
   const selB = document.getElementById("equipoB");
   const selAacta = document.getElementById("equipoAacta");
   const selBacta = document.getElementById("equipoBacta");
+  const selBacta = document.getElementById("equipoRoster");
 
   equipos.forEach(eq => {
     const optA = document.createElement("option");
@@ -172,6 +186,11 @@ async function cargarEquipos() {
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
+
+    const optBroster = document.createElement("option");
+    optBroster.value = eq;
+    optBroster.textContent = eq;
+    selBroster.appendChild(optBroster);
   });
 }
 
@@ -195,7 +214,7 @@ async function subirArchivo(token, file, type) {
       const payload = {
         action: "subirArchivo",
         token,
-		type,
+		type: type,
         filename: file.name,
         mime_type: file.type,
         file_base64: base64
@@ -217,12 +236,14 @@ async function mostrarResultados() {
   document.getElementById("loginSection").classList.add("hide");
   document.getElementById("form-wrapper").classList.remove("hide");
   document.getElementById("subirActas").classList.remove("hide");
+  document.getElementById("subirRoster").classList.remove("hide");
 }
 
 function mostrarLogin() {
   document.getElementById("loginSection").classList.remove("hide");
   document.getElementById("form-wrapper").classList.add("hide");
   document.getElementById("subirActas").classList.add("hide");
+  document.getElementById("subirRoster").classList.add("hide");
 }
 function mostrarOverlay() {
   document.getElementById("overlay").classList.remove("hide");
@@ -231,7 +252,46 @@ function mostrarOverlay() {
 function ocultarOverlay() {
   document.getElementById("overlay").classList.add("hide");
 }
+
 /* LISTENERS */
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  const user_id = localStorage.getItem("user_id");
+	mostrarOverlay();
+  if (!token) {
+	ocultarOverlay();
+    mostrarLogin();
+    return;
+  }
+
+  const data = {
+    action: "validar",
+    token,
+    user_id
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(data));
+
+  const res = await fetch(URL_SCRIPT, {
+    method: "POST",
+    body: formData
+  });
+
+  const json = await res.json();
+
+  if (json.ok) {
+	ocultarOverlay();
+    await mostrarResultados();
+  } else {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+	ocultarOverlay();
+    mostrarLogin();
+  }
+});
+
+
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const token = localStorage.getItem("token");
@@ -264,6 +324,8 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
+
+
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
  mostrarOverlay();
@@ -307,40 +369,35 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", async () => {
+
+document.getElementById("uploadRosterForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const file = document.getElementById("fileInput").files[0];
+  const status = document.getElementById("status");
+  const type = "roster";
+  const progress = document.getElementById("progressContainer");
+  const bar = document.getElementById("progressBar");
+
   const token = localStorage.getItem("token");
-  const user_id = localStorage.getItem("user_id");
-	mostrarOverlay();
+
   if (!token) {
-	ocultarOverlay();
-    mostrarLogin();
+    status.textContent = "No hay sesión activa";
     return;
   }
 
-  const data = {
-    action: "validar",
-    token,
-    user_id
-  };
+  progress.style.display = "block";
+  bar.style.width = "30%";
+  status.textContent = "Preparando archivo...";
 
-  const formData = new FormData();
-  formData.append("data", JSON.stringify(data));
+  const res = await subirArchivo(token, file, type);
 
-  const res = await fetch(URL_SCRIPT, {
-    method: "POST",
-    body: formData
-  });
+  bar.style.width = "100%";
 
-  const json = await res.json();
-
-  if (json.ok) {
-	ocultarOverlay();
-    await mostrarResultados();
+  if (res.ok) {
+    status.innerHTML = `Archivo subido correctamente<br>`;
   } else {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user_id");
-	ocultarOverlay();
-    mostrarLogin();
+    status.textContent = "Error: " + res.error;
   }
 });
 
@@ -369,7 +426,7 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
   bar.style.width = "100%";
 
   if (res.ok) {
-    status.innerHTML = `Archivo subido correctamente<br><a href="${res.url}" target="_blank">Abrir archivo</a>`;
+    status.innerHTML = `Archivo subido correctamente<br>`;
   } else {
     status.textContent = "Error: " + res.error;
   }
