@@ -52,7 +52,7 @@
     const RANKING_SUIZO = "rankingSuizo";
     const RESULTADOS = "Resultados";
     const CONFIG = "Config";
-
+	let JORNADA = 0;
     async function fetchSheet(sheetName) {
       const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
       const res = await fetch(url);
@@ -265,7 +265,7 @@ function renderEmparejamientosTable(emparejamientos) {
     html += `
       <table class="match-table">
         <tr>
-          <td class="match-label" rowspan="2">
+          <td class="match-label jornada-header" rowspan="2">
             Match ${index + 1}
           </td>
           <td class="match-line">
@@ -308,6 +308,7 @@ function mostrarNextMatch(config) {
   const jsonConf = await fetchSheet(CONFIG);
   const rowsConf = jsonConf.table.rows;
       await loadResultados(rowsResultados);
+	  JORNADA=rowsConf[0].c[1].v
 	  if(mostrarNextMatch(rowsConf)){	  
 		await loadPairings(rowsResultados,rowsRs);
 		document.getElementById("nextMatch").classList.remove("hide");
