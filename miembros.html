@@ -104,8 +104,8 @@
 				<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
 
 
-					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
-					  <div id="progressBar" style="height: 10px; width: 0%; background: #ac342f;"></div>
+					<div id="progressContainerActa" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+					  <div id="progressBarActa" style="height: 10px; width: 0%; background: #ac342f;"></div>
 					</div>
 
 					<p id="status"></p>
@@ -114,7 +114,7 @@
 					<select id="equipoAacta"></select>
 					<label for="equipoB">Equipo B</label>
 					<select id="equipoBacta"></select>
-					  <input type="file" id="fileInput" required />
+					  <input type="file" id="fileInputActa" required />
 					  <button type="submit">Subir acta</button>
 					</form>
 				</div>
@@ -404,11 +404,11 @@ document.getElementById("uploadRosterForm").addEventListener("submit", async (e)
 document.getElementById("uploadActaForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const file = document.getElementById("fileInput").files[0];
-  const status = document.getElementById("status");
+  const file = document.getElementById("fileInputActa").files[0];
+  const status = document.getElementById("statusActa");
   const type = "actas";
-  const progress = document.getElementById("progressContainer");
-  const bar = document.getElementById("progressBar");
+  const progress = document.getElementById("progressContainerActa");
+  const bar = document.getElementById("progressBarActa");
 
   const token = localStorage.getItem("token");
 
