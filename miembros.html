@@ -169,6 +169,7 @@ async function listarRoster() {
 }
 
 async function descargarRoster(fileId) {
+	mostrarOverlay();
   const token = localStorage.getItem("token");
 
   const payload = {
@@ -198,6 +199,7 @@ async function descargarRoster(fileId) {
   a.download = json.name;
   a.click();
   URL.revokeObjectURL(url);
+  ocultarOverlay();
 }
 
 
