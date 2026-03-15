@@ -110,10 +110,13 @@
 		</div>
 	</body>
 <script>
+/* CONSTANTS */
 const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
 const USUARIOS_ACEPTADOS = "UsuariosAceptados";
 const CONFIG = "Config";
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
+
+/* FUNCTIONS */
 async function sha256(texto) {
   const encoder = new TextEncoder();
   const data = encoder.encode(texto);
@@ -156,9 +159,6 @@ async function cargarEquipos() {
   });
 }
 
-
-
-
 function validarFormulario() {
   const a = document.getElementById("equipoA").value;
   const b = document.getElementById("equipoB").value;
@@ -169,7 +169,52 @@ function validarFormulario() {
   }
   return true;
 }
+async function subirArchivo(token, file, type) {
+  const reader = new FileReader();
 
+  return new Promise((resolve) => {
+    reader.onload = async () => {
+      const base64 = reader.result.split(",")[1];
+
+      const payload = {
+        action: "subirArchivo",
+        token,
+        filename: file.name,
+        mime_type: file.type,
+        file_base64: base64
+      };
+
+      const res = await fetch(URL_SCRIPT, {
+        method: "POST",
+        body: new URLSearchParams({ data: JSON.stringify(payload) })
+      });
+
+      resolve(await res.json());
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+async function mostrarResultados() {
+  await cargarEquipos();
+  document.getElementById("loginSection").classList.add("hide");
+  document.getElementById("form-wrapper").classList.remove("hide");
+  document.getElementById("subirActas").classList.remove("hide");
+}
+
+function mostrarLogin() {
+  document.getElementById("loginSection").classList.remove("hide");
+  document.getElementById("form-wrapper").classList.add("hide");
+  document.getElementById("subirActas").classList.add("hide");
+}
+function mostrarOverlay() {
+  document.getElementById("overlay").classList.remove("hide");
+}
+
+function ocultarOverlay() {
+  document.getElementById("overlay").classList.add("hide");
+}
+/* LISTENERS */
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const token = localStorage.getItem("token");
@@ -202,9 +247,6 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
 });
-
-
-
 document.getElementById("formLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
  mostrarOverlay();
@@ -247,44 +289,7 @@ document.getElementById("formLogin").addEventListener("submit", async (e) => {
     document.getElementById("loginMensaje").innerText = json.error;
   }
 });
-async function subirArchivo(token, file, type) {
-  const reader = new FileReader();
 
-  return new Promise((resolve) => {
-    reader.onload = async () => {
-      const base64 = reader.result.split(",")[1];
-
-      const payload = {
-        action: "subirArchivo",
-        token,
-        filename: file.name,
-        mime_type: file.type,
-        file_base64: base64
-      };
-
-      const res = await fetch(URL_SCRIPT, {
-        method: "POST",
-        body: new URLSearchParams({ data: JSON.stringify(payload) })
-      });
-
-      resolve(await res.json());
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-async function mostrarResultados() {
-  await cargarEquipos();
-  document.getElementById("loginSection").classList.add("hide");
-  document.getElementById("form-wrapper").classList.remove("hide");
-  document.getElementById("subirActas").classList.remove("hide");
-}
-
-function mostrarLogin() {
-  document.getElementById("loginSection").classList.remove("hide");
-  document.getElementById("form-wrapper").classList.add("hide");
-  document.getElementById("subirActas").classList.add("hide");
-}
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   const user_id = localStorage.getItem("user_id");
@@ -321,6 +326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarLogin();
   }
 });
+
 document.getElementById("uploadActaForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -351,13 +357,6 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
     status.textContent = "Error: " + res.error;
   }
 });
-function mostrarOverlay() {
-  document.getElementById("overlay").classList.remove("hide");
-}
-
-function ocultarOverlay() {
-  document.getElementById("overlay").classList.add("hide");
-}
 
 </script>
 
