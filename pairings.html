@@ -33,11 +33,6 @@
 				</ul>
 				<img src="images/pairings.png" class="sideimg" alt="pairings">
 			</nav>
-				<br>
-				<br>
-				<br>
-				<br>
-				<br>
 			<main>
     <h2 class="nuffle red big">Resultados previos</h2>
     <div id="resultados">
@@ -46,6 +41,11 @@
 		<h2 class="nuffle red big">Próximos emparejamientos</h2>
 		<div id="emparejamientos"></div>
 	</div>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
   </div>
 
   <script>
@@ -339,7 +339,7 @@ function loadPairings(resultados, rankingSuizo) {
 }
 
 function mostrarNextMatch(config) {
-	const showNextMatch=config[3].c[1].v;
+	const showNextMatch=config[2].c[1].v;
 	if(showNextMatch===1){
 		return true;
 	}
