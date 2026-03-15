@@ -204,7 +204,7 @@ function validarFormulario() {
   }
   return true;
 }
-async function subirArchivo(token, file, type) {
+async function subirArchivo(token, file, type, propName) {
   const reader = new FileReader();
 
   return new Promise((resolve) => {
@@ -214,6 +214,7 @@ async function subirArchivo(token, file, type) {
       const payload = {
         action: "subirArchivo",
         token,
+        propName: propName,
 		type: type,
         filename: file.name,
         mime_type: file.type,
@@ -375,6 +376,7 @@ document.getElementById("uploadRosterForm").addEventListener("submit", async (e)
 
   const file = document.getElementById("fileInput").files[0];
   const status = document.getElementById("status");
+  const team = document.getElementById("equipoRoster");
   const type = "roster";
   const progress = document.getElementById("progressContainer");
   const bar = document.getElementById("progressBar");
@@ -390,7 +392,7 @@ document.getElementById("uploadRosterForm").addEventListener("submit", async (e)
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file, type);
+  const res = await subirArchivo(token, file, type, team);
 
   bar.style.width = "100%";
 
@@ -406,6 +408,8 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
 
   const file = document.getElementById("fileInputActa").files[0];
   const status = document.getElementById("statusActa");
+  const teamA = document.getElementById("equipoAacta");
+  const teamB = document.getElementById("equipoBacta");
   const type = "actas";
   const progress = document.getElementById("progressContainerActa");
   const bar = document.getElementById("progressBarActa");
@@ -421,7 +425,7 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file, type);
+  const res = await subirArchivo(token, file, type, teamA+'VS'+teamB);
 
   bar.style.width = "100%";
 
