@@ -86,21 +86,22 @@
 
 				  <div id="mensaje" style="margin-top:1rem;"></div>
 				</div>
+				
+				<div id="subirActas">
+				<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
+
+					<form  class="formulario" id="uploadActaForm">
+					  <input type="file" id="fileInput" required />
+					  <button type="submit">Subir acta</button>
+					</form>
+
+					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+					  <div id="progressBar" style="height: 10px; width: 0%; background: #4caf50;"></div>
+					</div>
+
+					<p id="status"></p>
+				</div>
 			</main>
-		</div>
-		<div id="subirActas">
-		<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
-
-			<form  class="formulario" id="uploadActaForm">
-			  <input type="file" id="fileInput" required />
-			  <button type="submit">Subir acta</button>
-			</form>
-
-			<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
-			  <div id="progressBar" style="height: 10px; width: 0%; background: #4caf50;"></div>
-			</div>
-
-			<p id="status"></p>
 		</div>
 		<div id="overlay" class="hide">
 		  <div class="overlay-content nuffle red big">
