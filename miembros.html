@@ -90,16 +90,20 @@
 				<div id="subirActas" class="hide">
 				<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
 
-					<form  class="formulario" id="uploadActaForm">
-					  <input type="file" id="fileInput" required />
-					  <button type="submit">Subir acta</button>
-					</form>
 
 					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
 					  <div id="progressBar" style="height: 10px; width: 0%; background: #4caf50;"></div>
 					</div>
 
 					<p id="status"></p>
+					<form  class="formulario" id="uploadActaForm">
+					<label for="equipoA">Equipo A</label>
+					<select id="equipoAacta"></select>
+					<label for="equipoB">Equipo B</label>
+					<select id="equipoBacta"></select>
+					  <input type="file" id="fileInput" required />
+					  <button type="submit">Subir acta</button>
+					</form>
 				</div>
 			</main>
 		</div>
@@ -145,17 +149,17 @@ async function cargarEquipos() {
 
   const selA = document.getElementById("equipoA");
   const selB = document.getElementById("equipoB");
+  const selAacta = document.getElementById("equipoAacta");
+  const selBacta = document.getElementById("equipoBacta");
 
   equipos.forEach(eq => {
     const optA = document.createElement("option");
     optA.value = eq;
     optA.textContent = eq;
     selA.appendChild(optA);
-
-    const optB = document.createElement("option");
-    optB.value = eq;
-    optB.textContent = eq;
-    selB.appendChild(optB);
+    selB.appendChild(optA);
+    selAacta.appendChild(optA);
+    selBacta.appendChild(optA);
   });
 }
 
@@ -179,6 +183,7 @@ async function subirArchivo(token, file, type) {
       const payload = {
         action: "subirArchivo",
         token,
+		type,
         filename: file.name,
         mime_type: file.type,
         file_base64: base64
@@ -347,7 +352,7 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file);
+  const res = await subirArchivo(token, file, type);
 
   bar.style.width = "100%";
 
