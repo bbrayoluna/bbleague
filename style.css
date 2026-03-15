@@ -301,3 +301,34 @@ font-weight: bold;
 background: #fac546;
 color: #25396c;
 }
+
+/* tablas de pairings*/
+.match-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+  border: 2px solid #333;
+  table-layout: fixed; /* importante */
+}
+
+.match-label {
+  width: 50%;        /* mitad exacta */
+  min-width: 50%;
+  max-width: 50%;
+  text-align: center;
+  font-weight: bold;
+  background: #222;
+  color: #fff;
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+
+.match-line {
+  width: 50%;        /* la otra mitad */
+  min-width: 50%;
+  max-width: 50%;
+  font-size: 1.2em;
+  text-align: center;
+  padding: 10px;
+  vertical-align: middle;
+}
