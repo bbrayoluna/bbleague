@@ -254,37 +254,40 @@ function generarEmparejamientos(rankingRows, resultadosRows) {
 
 // Pintar tabla HTML
 function renderEmparejamientosTable(emparejamientos) {
-  let html = `
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Pareja A Maestro</th>
-          <th>Pareja A Padawan</th>
-          <th>Pareja B Maestro</th>
-          <th>Pareja B Padawan</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  let html = "";
 
-  for (const emp of emparejamientos) {
+  emparejamientos.forEach((emp, index) => {
+    const maestroA = emp.parejaA.c[0].v;
+    const padawanA = emp.parejaA.c[1].v;
+    const maestroB = emp.parejaB.c[0].v;
+    const padawanB = emp.parejaB.c[1].v;
+
     html += `
-      <tr>
-        <td>${emp.parejaA.c[0].v}</td>
-        <td>${emp.parejaA.c[1].v}</td>
-        <td>${emp.parejaB.c[0].v}</td>
-        <td>${emp.parejaB.c[1].v}</td>
-      </tr>
-    `;
-  }
+      <h3 class="nuffle red big">Match ${index + 1}</h3>
 
-  html += `
-      </tbody>
-    </table>
-  `;
+      <table class="tabla-match">
+        <tr>
+          <th>${maestroA}</th>
+          <td>vs</td>
+          <th>${padawanB}</th>
+        </tr>
+      </table>
+
+      <table class="tabla-match">
+        <tr>
+          <th>${maestroB}</th>
+          <td>vs</td>
+          <th>${padawanA}</th>
+        </tr>
+      </table>
+
+      <br>
+    `;
+  });
 
   return html;
 }
+
 
 // Ejemplo de uso en tu web
 function loadPairings(resultados,rankingSuizo) {
