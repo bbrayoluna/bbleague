@@ -231,6 +231,7 @@ async function cargarEquipos() {
   const resultadosActivo = rowsConfig[0].c[2]?.v; // B1
   const actasActivo = rowsConfig[0].c[5]?.v; // B6
   const rostersActivo = rowsConfig[0].c[4]?.v; // B5
+  const downloadRostersActivo = rowsConfig[0].c[6]?.v; // B7
   if(resultadosActivo===1){
 	document.getElementById("form-wrapper").classList.remove("hide");
   }else{
@@ -245,6 +246,11 @@ async function cargarEquipos() {
 	document.getElementById("subirRoster").classList.remove("hide");
   }else{
 	document.getElementById("subirRoster").classList.add("hide");
+  }
+  if(downloadRostersActivo===1){
+	document.getElementById("listaRoster").classList.remove("hide");
+  }else{
+	document.getElementById("listaRoster").classList.add("hide");
   }
   
   document.getElementById("jornada").value = jornada;
