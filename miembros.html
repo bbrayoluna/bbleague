@@ -108,9 +108,12 @@
 			Cargando...
 		  </div>
 		</div>
-
 	</body>
 <script>
+const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+const USUARIOS_ACEPTADOS = "UsuariosAceptados";
+const CONFIG = "Config";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
 async function sha256(texto) {
   const encoder = new TextEncoder();
   const data = encoder.encode(texto);
@@ -119,10 +122,6 @@ async function sha256(texto) {
 	.map(b => b.toString(16).padStart(2, "0"))
 	.join("");
 }
-const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-const USUARIOS_ACEPTADOS = "UsuariosAceptados";
-const CONFIG = "Config";
-
 async function fetchSheet(sheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
   const res = await fetch(url);
@@ -158,7 +157,6 @@ async function cargarEquipos() {
 }
 
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzYL6nJM9l0-Jptg5D0J73ZSBnY2xKG_OlUXE09mraH3BvWU7qCaBfFBjPg1k4i0LL0Ww/exec";
 
 
 function validarFormulario() {
@@ -264,7 +262,7 @@ async function subirArchivo(token, file, type) {
         file_base64: base64
       };
 
-      const res = await fetch(ENDPOINT, {
+      const res = await fetch(URL_SCRIPT, {
         method: "POST",
         body: new URLSearchParams({ data: JSON.stringify(payload) })
       });
@@ -286,7 +284,7 @@ function mostrarLogin() {
   document.getElementById("loginSection").classList.remove("hide");
   document.getElementById("form-wrapper").classList.add("hide");
   document.getElementById("subirActas").classList.add("hide");
-
+}
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   const user_id = localStorage.getItem("user_id");
