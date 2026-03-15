@@ -42,8 +42,8 @@
 				  <label>Nombre del equipo</label>
 				  <input type="text" id="equipo" required>
 
-				  <label>Raza</label>
-				  <input type="text" id="raza" required>
+				  <label for="raza">Raza</label>
+				  <select id="raza" required></select>
 
 				  <label>Contraseña</label>
 				  <input type="password" id="password" required>
@@ -62,7 +62,20 @@
 		</div>
 		<script>
 			const CONFIG = "Config";
+			const SELECT_EQUIPOS = "SelectEquipos";
 			const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
+			async function cargarEquipos(rowsConfig) {
+			  const equipos = rowsConfig.map(r => r.c?.[0]?.v).filter(Boolean);
+
+			  const raza = document.getElementById("raza");
+
+			  equipos.forEach(eq => {
+				const optA = document.createElement("option");
+				optA.value = eq;
+				optA.textContent = eq;
+				raza.appendChild(optA);
+			  });
+			}
 			async function fetchSheet(sheetName) {
 			  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
 			  const res = await fetch(url);
@@ -87,7 +100,6 @@
 			mostrarOverlay();
 			  const username = document.getElementById("username").value.trim();
 			  const equipo   = document.getElementById("equipo").value.trim();
-			  const raza     = document.getElementById("raza").value.trim();
 			  const password = document.getElementById("password").value;
 
 			  const password_hash = await sha256(password);
@@ -148,7 +160,9 @@
 				mostrarOverlay();
 			  const jsonConfig = await fetchSheet(CONFIG);
 			  const rowsConfig = jsonConfig.table.rows;
-
+			  const jsonTeams = await fetchSheet(SELECT_EQUIPOS);
+			  const rowsTeams = jsonTeams.table.rows;
+				cargarEquipos(rowsTeams);
 			  const registroActivo = rowsConfig[3].c[1]?.v; // B1
 			  if(registroActivo===1){
 				mostrarFormulario();
