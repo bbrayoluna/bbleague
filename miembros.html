@@ -108,7 +108,7 @@
 					  <div id="progressBarActa" style="height: 10px; width: 0%; background: #ac342f;"></div>
 					</div>
 
-					<p id="status"></p>
+					<p id="statusActa"></p>
 					<form  class="formulario" id="uploadActaForm">
 					<label for="equipoA">Equipo A</label>
 					<select id="equipoAacta"></select>
@@ -392,7 +392,7 @@ document.getElementById("uploadRosterForm").addEventListener("submit", async (e)
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file, type, team);
+  const res = await subirArchivo(token, file, type, team.value);
 
   bar.style.width = "100%";
 
@@ -425,7 +425,7 @@ document.getElementById("uploadActaForm").addEventListener("submit", async (e) =
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file, type, teamA+'VS'+teamB);
+  const res = await subirArchivo(token, file, type, teamA.value+'VS'+teamB.value);
 
   bar.style.width = "100%";
 
