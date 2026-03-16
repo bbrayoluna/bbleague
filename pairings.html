@@ -51,6 +51,11 @@
 				<br>
 				<br>
   </div>
+		<div id="overlay" class="hide">
+		  <div class="overlay-content nuffle red big">
+			Cargando...
+		  </div>
+		</div>
 
   <script>
     const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
@@ -401,8 +406,15 @@ function mostrarCurrentMatch(config) {
 	}
 	return false;
 }
+function mostrarOverlay() {
+  document.getElementById("overlay").classList.remove("hide");
+}
 
+function ocultarOverlay() {
+  document.getElementById("overlay").classList.add("hide");
+}
 document.addEventListener("DOMContentLoaded", async () => {
+mostrarOverlay();
   const jsonResultados = await fetchSheet(RESULTADOS);
   const rowsResultados = jsonResultados.table.rows;
   const jsonRS = await fetchSheet(RANKING_SUIZO);
@@ -421,7 +433,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		await loadCurrent(rowsEquipos);
 		document.getElementById("currentMatch").classList.remove("hide");
 	  }
-    });
+	  ocultarOverlay();
+});
   </script>
 </body>
 </html>
