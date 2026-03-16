@@ -335,6 +335,7 @@ async function destaparSeccionesPorConfig(){
 async function mostrarLogado() {
   await cargarEquipos();
   await destaparSeccionesPorConfig();
+  document.getElementById("loginSection").classList.add("hide");
   cargarRosters();
 }
 
