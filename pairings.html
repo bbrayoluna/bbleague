@@ -349,7 +349,7 @@ function loadPairings(resultados, rankingSuizo) {
 function loadCurrent(equiposRows) {
   let html = "";
 
-  equiposRows.forEach(r => {
+  equiposRows.forEach((r, index) => {
     const maestroA = r.c[0].v;
     const padawanA = r.c[1].v;
     const maestroB = r.c[2].v;
