@@ -186,6 +186,12 @@ th {
     border-radius: 10px;
 }
 
+.sideimg {
+    max-width: 50%;
+    height: auto;
+    border-radius: 10px;
+}
+
 /* Otros */
 .date {
     color: #999999;
