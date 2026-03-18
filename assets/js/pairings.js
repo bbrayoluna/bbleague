@@ -1,7 +1,7 @@
 // pairings.js
 // Importa constantes y utilidades globales
 import * as constants from './constants.js';
-import { fetchSheet } from './main.js';
+import { fetchSheet, mostrarOverlay, ocultarOverlay } from './main.js';
 let JORNADA = 0;
 
 async function loadResultados(rows) {
@@ -337,6 +337,11 @@ function mostrarCurrentMatch(config) {
 	}
 	return false;
 }
+
+// Hacer mostrarOverlay y ocultarOverlay accesibles globalmente
+window.mostrarOverlay = mostrarOverlay;
+window.ocultarOverlay = ocultarOverlay;
+
 document.addEventListener("DOMContentLoaded", async () => {
   mostrarOverlay();
   const jsonResultados = await fetchSheet(constants.RESULTADOS);
