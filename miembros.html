@@ -264,7 +264,7 @@ async function cargarEquipos() {
 	}
   });
 }
-function checkPlayer(eq){
+async function checkPlayer(eq){
   const jsonResul = await fetchSheet(RESULTADOS);
   const rowsResul = jsonResul.table.rows;
   const valor = rowsResul?.[0]?.c?.[0]?.v ?? "";
