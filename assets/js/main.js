@@ -1,6 +1,4 @@
 
-
-export { fetchSheet, sha256, mostrarOverlay, ocultarOverlay };
 // main.js
 // Archivo principal para lógica global
 
