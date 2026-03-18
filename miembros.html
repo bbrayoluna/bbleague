@@ -154,6 +154,7 @@ const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
 const USUARIOS_ACEPTADOS = "UsuariosAceptados";
 const CONFIG = "Config";
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
+let SHOW_ROSTER = false;
 
 /* FUNCTIONS */
 async function listarRoster() {
@@ -254,14 +255,35 @@ async function cargarEquipos() {
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
-
-    const optBroster = document.createElement("option");
-    optBroster.value = eq;
-    optBroster.textContent = eq;
-    selBroster.appendChild(optBroster);
+	if(checkPlayer(eq)){	
+		const optBroster = document.createElement("option");
+		optBroster.value = eq;
+		optBroster.textContent = eq;
+		selBroster.appendChild(optBroster);
+		SHOW_ROSTER=true;
+	}
   });
 }
+function checkPlayer(eq){
+  const jsonResul = await fetchSheet(RESULTADOS);
+  const rowsResul = jsonResul.table.rows;
+  const valor = rowsResul?.[0]?.c?.[0]?.v ?? "";
 
+	if (valor === "ignorar") {
+		return true;
+	} 
+	rowsResul.forEach(r => {
+		if (!r.c) return;
+		const equipoA = r.c[2]?.v;   // Columna C
+		const equipoB = r.c[3]?.v;   // Columna D
+		const [entrenador, equipo] = eq.split("-").map(p => p.trim());
+		if(entrenador===equipoA || entrenador===equipoB){
+			return false;
+		}
+
+  });
+}
+  
 function validarFormulario() {
   const a = document.getElementById("equipoA").value;
   const b = document.getElementById("equipoB").value;
@@ -343,8 +365,13 @@ function mostrarLogin() {
   document.getElementById("loginSection").classList.remove("hide");
   document.getElementById("form-wrapper").classList.add("hide");
   document.getElementById("subirActas").classList.add("hide");
-  document.getElementById("subirRoster").classList.add("hide");
+  mostrarRoster();
   document.getElementById("listaRoster").classList.add("hide");
+}
+function mostrarRoster(){
+	if(SHOW_ROSTER){
+		document.getElementById("subirRoster").classList.add("hide");
+	}  
 }
 function mostrarOverlay() {
   document.getElementById("overlay").classList.remove("hide");
