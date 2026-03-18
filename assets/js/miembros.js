@@ -20,7 +20,9 @@ async function listarRoster() {
   return await res.json();
 }
 
-async function descargarRoster(fileId) {
+
+// Hacer descargarRoster global para uso en HTML inline
+export async function descargarRoster(fileId) {
   mostrarOverlay();
   const token = localStorage.getItem("token");
   const payload = {
@@ -47,6 +49,9 @@ async function descargarRoster(fileId) {
   URL.revokeObjectURL(url);
   ocultarOverlay();
 }
+
+// Hacer la función accesible globalmente para el HTML inline
+window.descargarRoster = descargarRoster;
 
 async function cargarEquipos() {
   const json = await fetchSheet(constants.USUARIOS_ACEPTADOS);
