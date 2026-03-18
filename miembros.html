@@ -278,7 +278,10 @@ async function checkPlayer(eq,rowsResul){
 		const equipoA = r.c[2]?.v;   // Columna C
 		const equipoB = r.c[3]?.v;   // Columna D
 		const [entrenador, equipo] = eq.split("-").map(p => p.trim());
-		return entrenador === equipoA || entrenador === equipoB;
+		if(entrenador===equipoA || entrenador===equipoB){
+			return false;
+		}
+
   });
   return encontrado;
 }
