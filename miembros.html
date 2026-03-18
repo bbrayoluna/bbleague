@@ -258,7 +258,7 @@ async function cargarEquipos() {
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
-	if(checkPlayer(eq,rowsResul)){	
+	if(await checkPlayer(eq,rowsResul)){	
 		const optBroster = document.createElement("option");
 		optBroster.value = eq;
 		optBroster.textContent = eq;
