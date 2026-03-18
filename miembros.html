@@ -273,16 +273,14 @@ async function checkPlayer(eq,rowsResul){
 	if (valor === "ignorar") {
 		return true;
 	} 
-	rowsResul.forEach(r => {
+	const encontrado = rowsResul.forEach(r => {
 		if (!r.c) return;
 		const equipoA = r.c[2]?.v;   // Columna C
 		const equipoB = r.c[3]?.v;   // Columna D
 		const [entrenador, equipo] = eq.split("-").map(p => p.trim());
-		if(entrenador===equipoA || entrenador===equipoB){
-			return false;
-		}
-
+		return entrenador === equipoA || entrenador === equipoB;
   });
+  return encontrado;
 }
   
 function validarFormulario() {
