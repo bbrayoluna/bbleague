@@ -1,11 +1,4 @@
-// Overlay reutilizable
-function mostrarOverlay() {
-  document.getElementById("overlay").classList.remove("hide");
-}
 
-function ocultarOverlay() {
-  document.getElementById("overlay").classList.add("hide");
-}
 
 export { fetchSheet, sha256, mostrarOverlay, ocultarOverlay };
 // main.js
