@@ -1,52 +1,44 @@
-// pairings.js
+
+// miembros.js
 // Importa constantes y utilidades globales
 import * as constants from './constants.js';
 import { fetchSheet, sha256, mostrarOverlay, ocultarOverlay } from './main.js';
 let SHOW_ROSTER = false;
 
-/* FUNCTIONS */
+// FUNCTIONS
 async function listarRoster() {
   const token = localStorage.getItem("token");
-
   const payload = {
     action: "listarArchivos",
     token,
-    type: "roster"   // ← IMPORTANTE
+    type: "roster" // ← IMPORTANTE
   };
-
   const res = await fetch(constants.URL_SCRIPT, {
     method: "POST",
     body: new URLSearchParams({ data: JSON.stringify(payload) })
   });
-
   return await res.json();
 }
 
 async function descargarRoster(fileId) {
-	mostrarOverlay();
+  mostrarOverlay();
   const token = localStorage.getItem("token");
-
   const payload = {
     action: "descargarArchivo",
     token,
     fileId
   };
-
   const res = await fetch(constants.URL_SCRIPT, {
     method: "POST",
     body: new URLSearchParams({ data: JSON.stringify(payload) })
   });
-
   const json = await res.json();
-
   if (!json.ok) {
     alert("Error: " + json.error);
     return;
   }
-
   const bytes = Uint8Array.from(atob(json.base64), c => c.charCodeAt(0));
   const blob = new Blob([bytes], { type: json.mime });
-
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -56,42 +48,34 @@ async function descargarRoster(fileId) {
   ocultarOverlay();
 }
 
-
 async function cargarEquipos() {
   const json = await fetchSheet(constants.USUARIOS_ACEPTADOS);
   const rows = json.table.rows;
   const jsonResul = await fetchSheet(constants.RESULTADOS);
   const rowsResul = jsonResul.table.rows;
-  const equipos = rows.map(r => r.c?.[1]?.v+'-'+r.c?.[2]?.v).filter(Boolean);
-
+  const equipos = rows.map(r => r.c?.[1]?.v + '-' + r.c?.[2]?.v).filter(Boolean);
   const selA = document.getElementById("equipoA");
   const selB = document.getElementById("equipoB");
   const selAacta = document.getElementById("equipoAacta");
   const selBacta = document.getElementById("equipoBacta");
   const selBroster = document.getElementById("equipoRoster");
-
   for (const eq of equipos) {
-
     const optA = document.createElement("option");
     optA.value = eq;
     optA.textContent = eq;
     selA.appendChild(optA);
-
     const optB = document.createElement("option");
     optB.value = eq;
     optB.textContent = eq;
     selB.appendChild(optB);
-
     const optAacta = document.createElement("option");
     optAacta.value = eq;
     optAacta.textContent = eq;
     selAacta.appendChild(optAacta);
-
     const optBacta = document.createElement("option");
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
-
     if (await checkPlayer(eq, rowsResul)) {
       const optBroster = document.createElement("option");
       optBroster.value = eq;

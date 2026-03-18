@@ -1,3 +1,4 @@
+
 // constants.js
 // Archivo para constantes globales del proyecto
 

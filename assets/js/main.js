@@ -1,4 +1,5 @@
 
+
 // main.js
 // Archivo principal para lógica global
 
@@ -27,6 +28,7 @@ function mostrarOverlay() {
   const el = document.getElementById('overlay');
   if (el) el.classList.remove('hide');
 }
+
 function ocultarOverlay() {
   const el = document.getElementById('overlay');
   if (el) el.classList.add('hide');
