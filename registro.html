@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/registro.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registro - League Rayo de Luna</title>
@@ -56,119 +57,5 @@
 			Cargando...
 		  </div>
 		</div>
-		<script>
-			const CONFIG = "Config";
-			const SELECT_EQUIPOS = "SelectEquipos";
-			const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-			async function cargarEquipos(rowsConfig) {
-			  const equipos = rowsConfig.map(r => r.c?.[0]?.v).filter(Boolean);
-
-			  const raza = document.getElementById("raza");
-
-			  equipos.forEach(eq => {
-				const optA = document.createElement("option");
-				optA.value = eq;
-				optA.textContent = eq;
-				raza.appendChild(optA);
-			  });
-			}
-			async function fetchSheet(sheetName) {
-			  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
-			  const res = await fetch(url);
-			  const text = await res.text();
-			  return JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-			}
-
-			async function sha256(texto) {
-			  const encoder = new TextEncoder();
-			  const data = encoder.encode(texto);
-			  const hash = await crypto.subtle.digest("SHA-256", data);
-			  return Array.from(new Uint8Array(hash))
-				.map(b => b.toString(16).padStart(2, "0"))
-				.join("");
-			}
-			const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
-
-
-
-			document.getElementById("formRegistro").addEventListener("submit", async (e) => {
-			  e.preventDefault();
-			mostrarOverlay();
-			  const username = document.getElementById("username").value.trim();
-			  const equipo   = document.getElementById("equipo").value.trim();
-			  const password = document.getElementById("password").value;
-
-			  const password_hash = await sha256(password);
-
-			  const data = {
-				action: "registrar",
-				username,
-				equipo,
-				raza: raza.value,
-				password_hash
-			  };
-
-			  const formData = new FormData();
-			  formData.append("data", JSON.stringify(data));
-
-			  const res  = await fetch(URL_SCRIPT, {
-				method: "POST",
-				body: formData
-			  });
-
-			  const text = await res.text();
-			  let json;
-			  try {
-				json = JSON.parse(text);
-			  } catch (e) {
-				json = { ok: false, error: "Respuesta no válida: " + text };
-			  }
-			ocultarOverlay();
-			alert("Resultado: " + json.mensaje || json.error);
-			  document.getElementById("mensaje").innerText = json.mensaje || json.error;
-			});
-
-			function mostrarOverlay() {
-			  document.getElementById("overlay").classList.remove("hide");
-			}
-
-			function ocultarOverlay() {
-			  document.getElementById("overlay").classList.add("hide");
-			}
-
-			function mostrarNoRegistro() {
-			  document.getElementById("noregistros").classList.remove("hide");
-			}
-
-			function ocultarNoRegistro() {
-			  document.getElementById("noregistros").classList.add("hide");
-			}
-
-			function mostrarFormulario() {
-			  document.getElementById("formRegistro").classList.remove("hide");
-			}
-
-			function ocultarFormulario() {
-			  document.getElementById("formRegistro").classList.add("hide");
-			}
-			
-			document.addEventListener("DOMContentLoaded", async () => {
-				mostrarOverlay();
-			  const jsonConfig = await fetchSheet(CONFIG);
-			  const rowsConfig = jsonConfig.table.rows;
-			  const jsonTeams = await fetchSheet(SELECT_EQUIPOS);
-			  const rowsTeams = jsonTeams.table.rows;
-				cargarEquipos(rowsTeams);
-			  const registroActivo = rowsConfig[3].c[1]?.v; // B1
-			  if(registroActivo===1){
-				mostrarFormulario();
-				ocultarNoRegistro();
-			  }else{
-				ocultarFormulario();
-				mostrarNoRegistro();
-			  }
-				ocultarOverlay();
-			});
-		</script>
 	</body>
 </html>

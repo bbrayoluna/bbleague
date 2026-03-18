@@ -337,13 +337,6 @@ function mostrarCurrentMatch(config) {
 	}
 	return false;
 }
-function mostrarOverlay() {
-  document.getElementById("overlay").classList.remove("hide");
-}
-
-function ocultarOverlay() {
-  document.getElementById("overlay").classList.add("hide");
-}
 document.addEventListener("DOMContentLoaded", async () => {
   mostrarOverlay();
   const jsonResultados = await fetchSheet(constants.RESULTADOS);
