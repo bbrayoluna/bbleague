@@ -228,6 +228,8 @@ async function fetchSheet(sheetName) {
 async function cargarEquipos() {
   const json = await fetchSheet(USUARIOS_ACEPTADOS);
   const rows = json.table.rows;
+  const jsonResul = await fetchSheet(RESULTADOS);
+  const rowsResul = jsonResul.table.rows;
   const equipos = rows.map(r => r.c?.[1]?.v+'-'+r.c?.[2]?.v).filter(Boolean);
 
   const selA = document.getElementById("equipoA");
@@ -256,7 +258,7 @@ async function cargarEquipos() {
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
-	if(checkPlayer(eq)){	
+	if(checkPlayer(eq,rowsResul)){	
 		const optBroster = document.createElement("option");
 		optBroster.value = eq;
 		optBroster.textContent = eq;
@@ -265,9 +267,7 @@ async function cargarEquipos() {
 	}
   });
 }
-async function checkPlayer(eq){
-  const jsonResul = await fetchSheet(RESULTADOS);
-  const rowsResul = jsonResul.table.rows;
+async function checkPlayer(eq,rowsResul){
   const valor = rowsResul?.[0]?.c?.[0]?.v ?? "";
 
 	if (valor === "ignorar") {
