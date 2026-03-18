@@ -238,7 +238,8 @@ async function cargarEquipos() {
   const selBacta = document.getElementById("equipoBacta");
   const selBroster = document.getElementById("equipoRoster");
 
-  equipos.forEach(eq => {
+  for (const eq of equipos) {
+
     const optA = document.createElement("option");
     optA.value = eq;
     optA.textContent = eq;
@@ -258,15 +259,17 @@ async function cargarEquipos() {
     optBacta.value = eq;
     optBacta.textContent = eq;
     selBacta.appendChild(optBacta);
-	if(await checkPlayer(eq,rowsResul)){	
-		const optBroster = document.createElement("option");
-		optBroster.value = eq;
-		optBroster.textContent = eq;
-		selBroster.appendChild(optBroster);
-		SHOW_ROSTER=true;
-	}
-  });
+
+    if (await checkPlayer(eq, rowsResul)) {
+      const optBroster = document.createElement("option");
+      optBroster.value = eq;
+      optBroster.textContent = eq;
+      selBroster.appendChild(optBroster);
+      SHOW_ROSTER = true;
+    }
+  }
 }
+
 async function checkPlayer(eq, rowsResul) {
   const valor = rowsResul?.[0]?.c?.[0]?.v ?? "";
 
