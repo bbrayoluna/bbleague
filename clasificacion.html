@@ -1,16 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-<link rel="stylesheet" href="style.css">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ND8WV5PLDZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-ND8WV5PLDZ');
-</script>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="assets/js/main.js"></script>
+<script src="assets/js/clasificacion.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datos del torneo - League Rayo de Luna</title>
@@ -75,110 +68,6 @@
 					</tr>
 				  </thead>
 				  <tbody>
-					<script>
-					const SHEET_ID = "1O7yVvVJcC2afswIFlYi87J6JCgKaw-Sa18yuRBCoSdI";
-					const TABLA_ORDENADA_EQUIPOS = "TablaOrdenadaEquipos";
-					const TABLA_ORDENADA = "TablaOrdenada";
-
-					async function loadClasificacionParejas() {
-					loadClasificacionNormal();
-					  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${TABLA_ORDENADA_EQUIPOS}`;
-					  const res = await fetch(url);
-					  const text = await res.text();
-
-					  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-					  const rows = json.table.rows;
-
-					  const tbody = document.querySelector("#clasificacionParejas tbody");
-					  tbody.innerHTML = "";
-
-					  rows.forEach((row, index) => {
-						if (!row.c) return;
-
-						const tr = document.createElement("tr");
-
-						// Posición
-						const pos = document.createElement("td");
-						pos.textContent = index + 1;
-						tr.appendChild(pos);
-
-						// Columnas de TablaOrdenada (A=Equipo, B=PJ, C=PG, D=PE, E=PP, F=TD+, G=TD-, H=TD±, I=Puntos)
-						const get = (i) => row.c[i] ? row.c[i].v : "";
-
-						const cols = [
-						  get(0)+'-'+get(1), // Equipo
-						  get(2), // PJ
-						  get(3), // PG
-						  get(4), // PE
-						  get(5), // PP
-						  get(6), // TD+
-						  get(7), // TD-
-						  get(8), // TD±
-						  get(9), // Bajas causadas
-						  get(10), // Bajas sufridas
-						  get(9)-get(10), // Bajas sufridas
-						  get(11)  // Puntos
-						];
-
-						cols.forEach(v => {
-						  const td = document.createElement("td");
-						  td.textContent = v;
-						  tr.appendChild(td);
-						});
-
-						tbody.appendChild(tr);
-					  });
-					}
-				async function loadClasificacionNormal() {
-					  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${TABLA_ORDENADA}`;
-					  const res = await fetch(url);
-					  const text = await res.text();
-
-					  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-					  const rows = json.table.rows;
-
-					  const tbody = document.querySelector("#clasificacion tbody");
-					  tbody.innerHTML = "";
-
-					  rows.forEach((row, index) => {
-						if (!row.c) return;
-
-						const tr = document.createElement("tr");
-
-						// Posición
-						const pos = document.createElement("td");
-						pos.textContent = index + 1;
-						tr.appendChild(pos);
-
-						// Columnas de TablaOrdenada (A=Equipo, B=PJ, C=PG, D=PE, E=PP, F=TD+, G=TD-, H=TD±, I=Puntos)
-						const get = (i) => row.c[i] ? row.c[i].v : "";
-
-						const cols = [
-						  get(0), // Equipo
-						  get(1), // PJ
-						  get(2), // PG
-						  get(3), // PE
-						  get(4), // PP
-						  get(5), // TD+
-						  get(6), // TD-
-						  get(7), // TD±
-						  get(8), // Bajas causadas
-						  get(9), // Bajas sufridas
-						  get(8)-get(9), // Bajas sufridas
-						  get(10)  // Puntos
-						];
-
-						cols.forEach(v => {
-						  const td = document.createElement("td");
-						  td.textContent = v;
-						  tr.appendChild(td);
-						});
-
-						tbody.appendChild(tr);
-					  });
-					}
-					document.addEventListener("DOMContentLoaded", loadClasificacionParejas);
-					</script>
 				  </tbody>
 				</table>
 

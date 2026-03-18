@@ -1,0 +1,100 @@
+/* Tipografías */
+@font-face {
+    font-family: 'nuffle';
+    src: url('../../fonts/nuffle.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Utilidades */
+.hide {
+    display: none !important;
+}
+
+.nuffle {
+    font-family: 'nuffle', sans-serif;
+    font-weight: bold;
+}
+
+.yellow {
+    color: #fac546;
+}
+
+.red {
+    color: #ac342f;
+}
+.blue {
+    color: #25396c;
+}
+.grey {
+    color: #999999;
+}
+
+.big {
+    font-size: 35px;
+}
+
+.size2em {
+    font-size: 2em;
+}
+
+.backgrey {
+    background-color: #999;
+}
+
+/* Encabezados */
+h1 {
+    font-family: 'nuffle', sans-serif;
+    font-weight: bold;
+    color: #fac546;
+    font-size: 65px;
+    text-align: center;
+}
+
+@media (max-width: 1000px) {
+    h1 {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 500px) {
+    h1 {
+        font-size: 25px;
+    }
+}
+
+/* Menú */
+.menu {
+    font-size: 30px;
+}
+
+@media (max-width: 1300px) {
+    .menu {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 570px) {
+    .menu {
+        font-size: 0.65rem;
+    }
+}
+
+/* Layout general */
+body {
+    background-image: url('../../images/fondo.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../../images/headerback.jpg');
+    color: white;
+    text-align: center;
+    padding: 1em 0;
