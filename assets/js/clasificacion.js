@@ -6,54 +6,44 @@ import * as constants from './constants.js';
 import { fetchSheet } from './main.js';
 
 async function loadClasificacion() {
-  await procesarClasificacionParejas();
-  await loadClasificacionNormal();
-  /*const json = await fetchSheet(constants.TABLA_ORDENADA_EQUIPOS);
-  const rows = json.table.rows;
-  const tbody = document.querySelector("#clasificacionParejas tbody");
-  tbody.innerHTML = "";
-  rows.forEach((row, index) => {
-    if (!row.c) return;
-    const tr = document.createElement("tr");
-    const pos = document.createElement("td");
-    pos.textContent = index + 1;
-    tr.appendChild(pos);
-    const get = (i) => row.c[i] ? row.c[i].v : "";
-    const cols = [
-      get(0) + '-' + get(1), get(2), get(3), get(4), get(5), get(6), get(7), get(8), get(9), get(10), get(9) - get(10), get(11)
-    ];
-    cols.forEach(v => {
-      const td = document.createElement("td");
-      td.textContent = v;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });*/
+  const jsonCEquipos = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
+  const rowsCEquipos = jsonCEquipos.table.rows;
+  const jsonEquipos = await fetchSheet(constants.CLASIFICACION);
+  const rowsEquipos = jsonEquipos.table.rows;
+  const jsonResul = await fetchSheet(constants.RESULTADOS);
+  const rowsResul = jsonResul.table.rows;
+
+  await procesarClasificacionParejas(rowsCEquipos,jsonResul);
+  await procesarClasificacionNormal(rowsEquipos,jsonResul);
 }
 
-async function loadClasificacionNormal() {
-  const json = await fetchSheet(constants.TABLA_ORDENADA);
-  const rows = json.table.rows;
-  const tbody = document.querySelector("#clasificacion tbody");
-  tbody.innerHTML = "";
-  rows.forEach((row, index) => {
-    if (!row.c) return;
-    const tr = document.createElement("tr");
-    const pos = document.createElement("td");
-    pos.textContent = index + 1;
-    tr.appendChild(pos);
-    const get = (i) => row.c[i] ? row.c[i].v : "";
-    const cols = [
-      get(0), get(1), get(2), get(3), get(4), get(5), get(6), get(7), get(8), get(9), get(8) - get(9), get(10)
-    ];
-    cols.forEach(v => {
-      const td = document.createElement("td");
-      td.textContent = v;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
+async function procesarClasificacionNormal(rowsInd,rowsResul) {
+  const clasificacionInd = rowsInd.map(r => {
+    const c = r.c || [];
+
+    return {
+      jugador: c[0]?.v || "",
+      pj: Number(c[1]?.v || 0),
+      pg: Number(c[2]?.v || 0),
+      pe: Number(c[3]?.v || 0),
+      pp: Number(c[4]?.v || 0),
+      tdPlus: Number(c[5]?.v || 0),
+      tdMinus: Number(c[6]?.v || 0),
+      bajasPlus: Number(c[8]?.v || 0),
+      bajasMinus: Number(c[9]?.v || 0),
+      puntos: Number(c[10]?.v || 0)
+    };
   });
+
+  const resultadosRaw = parseResultados(rowsResul);
+
+  // Ordenación individual
+  const clasificacionOrdenada = ordenarClasificacion(clasificacionInd, resultadosRaw, false);
+
+  console.table(clasificacionOrdenada);
+  return clasificacionOrdenada;
 }
+
 // ===============================
 // 1. Obtener equipo (pareja) de un jugador
 // ===============================
@@ -114,11 +104,25 @@ function enfrentamientoDirecto(equipo1, equipo2, resultados) {
 
   return diff;
 }
+function enfrentamientoDirectoJugadores(j1, j2, resultados) {
+  let diff = 0;
+
+  resultados.forEach(r => {
+    if (r.equipoA === j1 && r.equipoB === j2) {
+      diff += r.tda - r.tdb;
+    }
+    if (r.equipoA === j2 && r.equipoB === j1) {
+      diff -= r.tda - r.tdb;
+    }
+  });
+
+  return diff;
+}
 
 // ===============================
 // 5. Ordenar clasificación con tus criterios
 // ===============================
-function ordenarClasificacion(clasificacion, resultados) {
+function ordenarClasificacion(clasificacion, resultados, isCouples) {
   return [...clasificacion].sort((a, b) => {
 
     // 1. Puntos
@@ -127,9 +131,15 @@ function ordenarClasificacion(clasificacion, resultados) {
     }
 
     // 2. Enfrentamiento directo
-    const ed = enfrentamientoDirecto(a.equipo, b.equipo, resultados);
+    const idA = isCouples ? a.equipo : a.jugador;
+    const idB = isCouples ? b.equipo : b.jugador;
+
+    const ed = isCouples
+      ? enfrentamientoDirecto(idA, idB, resultados)
+      : enfrentamientoDirectoJugadores(idA, idB, resultados);
+
     if (ed !== 0) {
-      return -ed; // positivo → gana A
+      return -ed;
     }
 
     // 3. TD netos
@@ -153,8 +163,8 @@ function ordenarClasificacion(clasificacion, resultados) {
 // ===============================
 // 6. Pintar resultados en html
 // ===============================
-function pintarClasificacion(clasificacionOrdenada) {
-  const tbody = document.querySelector("#clasificacionParejas tbody");
+function pintarClasificacion(clasificacionOrdenada,body) {
+  const tbody = document.querySelector(body);
   tbody.innerHTML = ""; // limpiar tabla
 
   clasificacionOrdenada.forEach((team, index) => {
@@ -186,17 +196,10 @@ function pintarClasificacion(clasificacionOrdenada) {
 // ===============================
 // 6. Obtener ry procesar toda la info para mostrar clasificación ordenada
 // ===============================
-async function procesarClasificacionParejas() {
-  // Leer equipos (tal como ya lo haces)
-  const json = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
-  const rows = json.table.rows;
+async function procesarClasificacionParejas(rows,rowsResul) {
   const equipos = rows
     .map(r => r.c?.[0]?.v + '-' + r.c?.[1]?.v)
     .filter(Boolean);
-
-  // Leer resultados
-  const jsonResul = await fetchSheet(constants.RESULTADOS);
-  const rowsResul = jsonResul.table.rows;
 
   const resultadosRaw = parseResultados(rowsResul);
   const resultadosParejas = mapResultadosAParejas(resultadosRaw, equipos);
@@ -216,9 +219,9 @@ async function procesarClasificacionParejas() {
   }));
 
   // Orden final
-  const clasificacionOrdenada = ordenarClasificacion(clasificacion, resultadosParejas);
+  const clasificacionOrdenada = ordenarClasificacion(clasificacion, resultadosParejas, true);
 
-  pintarClasificacion(clasificacionOrdenada);
+  pintarClasificacion(clasificacionOrdenada,"#clasificacionParejas tbody");
 }
 
 document.addEventListener("DOMContentLoaded", loadClasificacion);
