@@ -155,7 +155,7 @@ function ordenarClasificacion(clasificacion, resultados) {
 // ===============================
 async function procesarClasificacion() {
   // Leer equipos (tal como ya lo haces)
-  const json = await fetchSheet(constants.USUARIOS_ACEPTADOS);
+  const json = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
   const rows = json.table.rows;
   const equipos = rows
     .map(r => r.c?.[1]?.v + '-' + r.c?.[2]?.v)
