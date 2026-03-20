@@ -40,8 +40,7 @@ async function procesarClasificacionNormal(rowsInd,rowsResul) {
   // Ordenación individual
   const clasificacionOrdenada = ordenarClasificacion(clasificacionInd, resultadosRaw, false);
 
-  console.table(clasificacionOrdenada);
-  return clasificacionOrdenada;
+  pintarClasificacion(clasificacionOrdenada,"#clasificacion tbody");
 }
 
 // ===============================
