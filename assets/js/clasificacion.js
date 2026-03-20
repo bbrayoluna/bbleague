@@ -5,10 +5,10 @@
 import * as constants from './constants.js';
 import { fetchSheet } from './main.js';
 
-async function loadClasificacionParejas() {
-  await procesarClasificacion();
+async function loadClasificacion() {
+  await procesarClasificacionParejas();
   await loadClasificacionNormal();
-  const json = await fetchSheet(constants.TABLA_ORDENADA_EQUIPOS);
+  /*const json = await fetchSheet(constants.TABLA_ORDENADA_EQUIPOS);
   const rows = json.table.rows;
   const tbody = document.querySelector("#clasificacionParejas tbody");
   tbody.innerHTML = "";
@@ -28,7 +28,7 @@ async function loadClasificacionParejas() {
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
-  });
+  });*/
 }
 
 async function loadClasificacionNormal() {
@@ -151,9 +151,42 @@ function ordenarClasificacion(clasificacion, resultados) {
 }
 
 // ===============================
-// 6. Ejemplo de uso con tus lecturas del Sheet
+// 6. Pintar resultados en html
 // ===============================
-async function procesarClasificacion() {
+function pintarClasificacion(clasificacionOrdenada) {
+  const tbody = document.querySelector("#clasificacionParejas tbody");
+  tbody.innerHTML = ""; // limpiar tabla
+
+  clasificacionOrdenada.forEach((team, index) => {
+    const tdDiff = team.tdPlus - team.tdMinus;
+    const bajasDiff = team.bajasPlus - team.bajasMinus;
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${team.equipo}</td>
+      <td>${team.pj}</td>
+      <td>${team.pg}</td>
+      <td>${team.pe}</td>
+      <td>${team.pp}</td>
+      <td>${team.tdPlus}</td>
+      <td>${team.tdMinus}</td>
+      <td>${tdDiff}</td>
+      <td>${team.bajasPlus}</td>
+      <td>${team.bajasMinus}</td>
+      <td>${bajasDiff}</td>
+      <td>${team.puntos}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ===============================
+// 6. Obtener ry procesar toda la info para mostrar clasificación ordenada
+// ===============================
+async function procesarClasificacionParejas() {
   // Leer equipos (tal como ya lo haces)
   const json = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
   const rows = json.table.rows;
@@ -185,8 +218,7 @@ async function procesarClasificacion() {
   // Orden final
   const clasificacionOrdenada = ordenarClasificacion(clasificacion, resultadosParejas);
 
-  console.table(clasificacionOrdenada);
-  return clasificacionOrdenada;
+  pintarClasificacion(clasificacionOrdenada);
 }
 
-document.addEventListener("DOMContentLoaded", loadClasificacionParejas);
+document.addEventListener("DOMContentLoaded", loadClasificacion);
