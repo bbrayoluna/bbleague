@@ -22,7 +22,7 @@ async function procesarClasificacionNormal(rowsInd,rowsResul) {
     const c = r.c || [];
 
     return {
-      jugador: c[0]?.v || "",
+      equipo: c[0]?.v || "",
       pj: Number(c[1]?.v || 0),
       pg: Number(c[2]?.v || 0),
       pe: Number(c[3]?.v || 0),
