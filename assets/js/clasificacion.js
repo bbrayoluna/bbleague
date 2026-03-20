@@ -158,7 +158,7 @@ async function procesarClasificacion() {
   const json = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
   const rows = json.table.rows;
   const equipos = rows
-    .map(r => r.c?.[1]?.v + '-' + r.c?.[2]?.v)
+    .map(r => r.c?.[0]?.v + '-' + r.c?.[1]?.v)
     .filter(Boolean);
 
   // Leer resultados
