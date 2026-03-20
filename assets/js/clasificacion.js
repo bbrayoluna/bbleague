@@ -13,8 +13,8 @@ async function loadClasificacion() {
   const jsonResul = await fetchSheet(constants.RESULTADOS);
   const rowsResul = jsonResul.table.rows;
 
-  await procesarClasificacionParejas(rowsCEquipos,jsonResul);
-  await procesarClasificacionNormal(rowsEquipos,jsonResul);
+  await procesarClasificacionParejas(rowsCEquipos,rowsResul);
+  await procesarClasificacionNormal(rowsEquipos,rowsResul);
 }
 
 async function procesarClasificacionNormal(rowsInd,rowsResul) {
