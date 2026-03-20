@@ -171,11 +171,11 @@ async function procesarClasificacion() {
   // Leer clasificación
   const clasificacion = rows.map(r => ({
     equipo: r.c?.[0]?.v + "-" + r.c?.[1]?.v,
-    puntos: Number(r.c?.[10]?.v),
+    puntos: Number(r.c?.[11]?.v),
     tdPlus: Number(r.c?.[6]?.v),
     tdMinus: Number(r.c?.[7]?.v),
-    bajasPlus: Number(r.c?.[8]?.v),
-    bajasMinus: Number(r.c?.[9]?.v)
+    bajasPlus: Number(r.c?.[9]?.v),
+    bajasMinus: Number(r.c?.[10]?.v)
   }));
 
   // Orden final
