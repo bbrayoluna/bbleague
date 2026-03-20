@@ -172,6 +172,10 @@ async function procesarClasificacion() {
   const clasificacion = rows.map(r => ({
     equipo: r.c?.[0]?.v + "-" + r.c?.[1]?.v,
     puntos: Number(r.c?.[11]?.v),
+    pj: Number(r.c?.[2]?.v),
+    pg: Number(r.c?.[3]?.v),
+    pe: Number(r.c?.[4]?.v),
+    pp: Number(r.c?.[5]?.v),
     tdPlus: Number(r.c?.[6]?.v),
     tdMinus: Number(r.c?.[7]?.v),
     bajasPlus: Number(r.c?.[9]?.v),
