@@ -170,7 +170,7 @@ async function procesarClasificacion() {
 
   // Leer clasificación
   const clasificacion = rows.map(r => ({
-    equipo: r.c?.[1]?.v + "-" + r.c?.[2]?.v,
+    equipo: r.c?.[0]?.v + "-" + r.c?.[1]?.v,
     puntos: Number(r.c?.[10]?.v),
     tdPlus: Number(r.c?.[6]?.v),
     tdMinus: Number(r.c?.[7]?.v),
