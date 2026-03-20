@@ -39,8 +39,9 @@ async function procesarClasificacionNormal(rowsInd,rowsResul) {
 
   // Ordenación individual
   const clasificacionOrdenada = ordenarClasificacion(clasificacionInd, resultadosRaw, false);
+  const clasificacionOrdenadaEmpates = asignarPosiciones(clasificacionOrdenada, resultadosRaw, true);
 
-  pintarClasificacion(clasificacionOrdenada,"#clasificacion tbody");
+  pintarClasificacion(clasificacionOrdenadaEmpates,"#clasificacion tbody");
 }
 
 // ===============================
@@ -124,40 +125,62 @@ function enfrentamientoDirectoJugadores(j1, j2, resultados) {
 function ordenarClasificacion(clasificacion, resultados, isCouples) {
   return [...clasificacion].sort((a, b) => {
 
-    // 1. Puntos
-    if (b.puntos !== a.puntos) {
-      return b.puntos - a.puntos;
-    }
-
-    // 2. Enfrentamiento directo
     const idA = isCouples ? a.equipo : a.jugador;
     const idB = isCouples ? b.equipo : b.jugador;
 
-    const ed = isCouples
+    const enfrentamiento = isCouples
       ? enfrentamientoDirecto(idA, idB, resultados)
       : enfrentamientoDirectoJugadores(idA, idB, resultados);
 
-    if (ed !== 0) {
-      return -ed;
-    }
-
-    // 3. TD netos
     const tdA = a.tdPlus - a.tdMinus;
     const tdB = b.tdPlus - b.tdMinus;
-    if (tdA !== tdB) {
-      return tdB - tdA;
-    }
 
-    // 4. Bajas netas
     const bajasA = a.bajasPlus - a.bajasMinus;
     const bajasB = b.bajasPlus - b.bajasMinus;
-    if (bajasA !== bajasB) {
-      return bajasB - bajasA;
-    }
 
-    return 0;
+    const scoreA =
+      a.puntos * 1_000_000 +
+      enfrentamiento * 10_000 +
+      tdA * 100 +
+      bajasA;
+
+    const scoreB =
+      b.puntos * 1_000_000 +
+      (-enfrentamiento) * 10_000 + // invertido para el otro
+      tdB * 100 +
+      bajasB;
+
+    return scoreB - scoreA;
   });
 }
+function asignarPosiciones(clasificacionOrdenada, resultados, isCouples) {
+  let lastRank = 1;
+  let lastScore = null;
+
+  return clasificacionOrdenada.map((item, index) => {
+
+    const id = isCouples ? item.equipo : item.jugador;
+
+    const tdNeto = item.tdPlus - item.tdMinus;
+    const bajasNetas = item.bajasPlus - item.bajasMinus;
+
+    const score =
+      item.puntos * 1_000_000 +
+      tdNeto * 100 +
+      bajasNetas;
+
+    if (lastScore !== null && score === lastScore) {
+      item.rank = lastRank;
+    } else {
+      lastRank = index + 1;
+      item.rank = lastRank;
+    }
+
+    lastScore = score;
+    return item;
+  });
+}
+
 
 // ===============================
 // 6. Pintar resultados en html
@@ -219,8 +242,8 @@ async function procesarClasificacionParejas(rows,rowsResul) {
 
   // Orden final
   const clasificacionOrdenada = ordenarClasificacion(clasificacion, resultadosParejas, true);
-
-  pintarClasificacion(clasificacionOrdenada,"#clasificacionParejas tbody");
+  const clasificacionOrdenadaEmpates = asignarPosiciones(clasificacionOrdenada, resultadosParejas, true);
+  pintarClasificacion(clasificacionOrdenadaEmpates,"#clasificacionParejas tbody");
 }
 
 document.addEventListener("DOMContentLoaded", loadClasificacion);
