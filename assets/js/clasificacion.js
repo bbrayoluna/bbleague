@@ -196,7 +196,7 @@ function pintarClasificacion(clasificacionOrdenada,body) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${index + 1}</td>
+      <td>${team.rank}</td>
       <td>${team.equipo}</td>
       <td>${team.pj}</td>
       <td>${team.pg}</td>
