@@ -284,6 +284,7 @@ async function loadRonda() {
 
   if (rondaActual) {
     div.textContent = `Ronda actual: ${rondaActual.numero} (${rondaActual.inicio} - ${rondaActual.fin})`;
+    div.classList.remove('hide');
   } else {
     div.textContent = "Fuera de rango de rondas";
   }
