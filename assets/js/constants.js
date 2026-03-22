@@ -16,5 +16,6 @@ export const TABLA_ORDENADA = "TablaOrdenada";
 export const CONFIG_MENU = "ConfigMenu";
 export const CLASIFICACION_EQUIPOS = "ClasificaciónEquipos";
 export const CLASIFICACION = "Clasificacion";
+export const RONDAS = "Rondas";
 //APPS SCRIPT (Backend)
 export const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
