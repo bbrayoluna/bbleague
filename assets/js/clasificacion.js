@@ -245,6 +245,11 @@ async function procesarClasificacionParejas(rows,rowsResul) {
   const clasificacionOrdenadaEmpates = asignarPosiciones(clasificacionOrdenada, resultadosParejas, true);
   pintarClasificacion(clasificacionOrdenadaEmpates,"#clasificacionParejas tbody");
 }
+function parseFechaEuropea(fechaStr) {
+  // fechaStr viene como "06/04/2026"
+  const [dia, mes, año] = fechaStr.split("/").map(Number);
+  return new Date(año, mes - 1, dia);
+}
 async function loadRonda() {
   const data = await fetchSheet(constants.RONDAS);
 
@@ -262,8 +267,8 @@ async function loadRonda() {
     const fechaInicio = row.c[1]?.f || row.c[1]?.v;
     const fechaFin = row.c[2]?.f || row.c[2]?.v;
 
-    const inicio = new Date(fechaInicio);
-    const fin = new Date(fechaFin);
+    const inicio = parseFechaEuropea(fechaInicio);
+    const fin = parseFechaEuropea(fechaFin);
 
     if (hoy >= inicio && hoy <= fin) {
       rondaActual = {
