@@ -2,7 +2,7 @@
 // miembros.js
 // Importa constantes y utilidades globales
 import * as constants from './constants.js';
-import { fetchSheet, sha256, mostrarOverlay, ocultarOverlay } from './main.js';
+import { fetchSheet, sha256, mostrarOverlay, ocultarOverlay, loadRonda } from './main.js';
 let SHOW_ROSTER = false;
 
 // FUNCTIONS
