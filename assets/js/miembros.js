@@ -180,6 +180,7 @@ async function destaparSeccionesPorConfig(){
   document.getElementById("jornada").value = jornada;
 }
 async function mostrarLogado() {
+  await loadRonda();
   await cargarEquipos();
   await destaparSeccionesPorConfig();
   document.getElementById("loginSection").classList.add("hide");
