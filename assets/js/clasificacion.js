@@ -246,7 +246,7 @@ async function procesarClasificacionParejas(rows,rowsResul) {
   pintarClasificacion(clasificacionOrdenadaEmpates,"#clasificacionParejas tbody");
 }
 async function loadRonda() {
-  const data = await fetchSheet(RONDAS);
+  const data = await fetchSheet(constants.RONDAS);
 
   // La estructura de Google Sheets en modo gviz devuelve los datos en data.table.rows
   const rows = data.table.rows;
