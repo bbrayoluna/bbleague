@@ -156,6 +156,10 @@ th {
 }
 
 /* Imágenes */
+.cartel {
+    max-width: 30%;
+    height: auto;
+}
 .logosize {
     padding-right: 50px;
     width: 15rem;
