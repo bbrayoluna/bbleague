@@ -270,6 +270,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 document.getElementById("resultadoForm").addEventListener("submit", async function(e) {
   e.preventDefault();
+  mostrarOverlay();
   const token = localStorage.getItem("token");
 
   const jornada=document.getElementById("jornada").value;
@@ -299,6 +300,7 @@ document.getElementById("resultadoForm").addEventListener("submit", async functi
   });
   
   document.getElementById("mensaje").textContent = "Resultado enviado correctamente ✔";
+  ocultarOverlay();
 });
 
 
