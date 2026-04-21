@@ -39,26 +39,27 @@ function parseFechaEuropea(fechaStr) {
   return new Date(año, mes - 1, dia);
 }
 async function loadRonda() {
-  const data = await fetchSheet(constants.RONDAS);
+  // Obtener el número de ronda del sheet CONFIG (celda B1)
+  const configData = await fetchSheet(constants.CONFIG);
+  const numRondaActual = configData.table.rows[0]?.c[1]?.v;
 
-  // La estructura de Google Sheets en modo gviz devuelve los datos en data.table.rows
-  const rows = data.table.rows;
+  if (!numRondaActual) {
+    const div = document.getElementById("ronda-actual");
+    div.textContent = "No se pudo obtener la ronda actual.";
+    return;
+  }
 
-  // Fecha actual (sin horas)
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  // Obtener información de la ronda del sheet RONDAS
+  const rondasData = await fetchSheet(constants.RONDAS);
+  const rows = rondasData.table.rows;
 
   let rondaActual = null;
 
   for (const row of rows) {
     const numRonda = row.c[0]?.v;
-    const fechaInicio = row.c[1]?.f || row.c[1]?.v;
-    const fechaFin = row.c[2]?.f || row.c[2]?.v;
-
-    const inicio = parseFechaEuropea(fechaInicio);
-    const fin = parseFechaEuropea(fechaFin);
-
-    if (hoy >= inicio && hoy <= fin) {
+    if (numRonda === numRondaActual) {
+      const fechaInicio = row.c[1]?.f || row.c[1]?.v;
+      const fechaFin = row.c[2]?.f || row.c[2]?.v;
       rondaActual = {
         numero: numRonda,
         inicio: fechaInicio,
