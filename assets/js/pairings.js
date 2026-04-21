@@ -1,7 +1,7 @@
 // pairings.js
 // Importa constantes y utilidades globales
 import * as constants from './constants.js';
-import { fetchSheet, mostrarOverlay, ocultarOverlay } from './main.js';
+import { fetchSheet, mostrarOverlay, ocultarOverlay, loadRonda  } from './main.js';
 let JORNADA = 0;
 
 async function loadResultados(rows) {
@@ -362,5 +362,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCurrent(rowsEquipos);
     document.getElementById("currentMatch").classList.remove("hide");
   }
+  await loadRonda();
   ocultarOverlay();
 });
