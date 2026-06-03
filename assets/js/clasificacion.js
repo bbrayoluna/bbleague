@@ -198,6 +198,7 @@ function pintarClasificacion(clasificacionOrdenada,body) {
     tr.innerHTML = `
       <td>${team.rank}</td>
       <td>${team.equipo}</td>
+      <td>${team.puntos}</td>
       <td>${team.pj}</td>
       <td>${team.pg}</td>
       <td>${team.pe}</td>
@@ -208,7 +209,6 @@ function pintarClasificacion(clasificacionOrdenada,body) {
       <td>${team.bajasPlus}</td>
       <td>${team.bajasMinus}</td>
       <td>${bajasDiff}</td>
-      <td>${team.puntos}</td>
     `;
 
     tbody.appendChild(tr);
