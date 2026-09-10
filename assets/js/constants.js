@@ -20,7 +20,7 @@ export const RONDAS = "Rondas";
 //APPS SCRIPT (Backend)
 export const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
 
-// Torneos previos - ejemplo Primavera 2026
+// Torneos previos
 export const USUARIOS_ACEPTADOS_PRIMAVERA2026 = "usuariosAceptadosPrimavera2026";
 export const RESULTADOS_PRIMAVERA2026 = "resultadosPrimavera2026";
 export const CLASIFICACION_PRIMAVERA2026 = "clasificacionPrimavera2026";

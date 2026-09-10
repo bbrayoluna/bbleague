@@ -8,16 +8,46 @@ function renderTable(container, rows) {
   }
   const table = document.createElement('table');
   table.className = 'simple-table';
-  rows.forEach((r, ri) => {
+
+  // Usar la primera fila como cabecera
+  const thead = document.createElement('thead');
+  const tbody = document.createElement('tbody');
+
+  const headerRow = rows[0];
+  const headerCols = headerRow?.c || [];
+  const trHead = document.createElement('tr');
+  headerCols.forEach((c) => {
+    const th = document.createElement('th');
+    th.textContent = c ? (c.v ?? c.f ?? '') : '';
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+
+  // Filas restantes como cuerpo
+  rows.slice(1).forEach((r) => {
     const tr = document.createElement('tr');
     const cols = r.c || [];
-    cols.forEach((c) => {
-      const cell = document.createElement(ri === 0 ? 'th' : 'td');
-      cell.textContent = c ? (c.v ?? c.f ?? '') : '';
-      tr.appendChild(cell);
-    });
-    table.appendChild(tr);
+    // Rellenar según número de columnas de la cabecera
+    for (let i = 0; i < headerCols.length; i++) {
+      const c = cols[i];
+      const td = document.createElement('td');
+      td.textContent = c ? (c.v ?? c.f ?? '') : '';
+      tr.appendChild(td);
+    }
+    // Si hay columnas extra, añadirlas también
+    if (cols.length > headerCols.length) {
+      for (let i = headerCols.length; i < cols.length; i++) {
+        const c = cols[i];
+        const td = document.createElement('td');
+        td.textContent = c ? (c.v ?? c.f ?? '') : '';
+        tr.appendChild(td);
+      }
+    }
+    tbody.appendChild(tr);
   });
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
   container.innerHTML = '';
   container.appendChild(table);
 }
