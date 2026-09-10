@@ -1,7 +1,7 @@
 import { fetchSheet } from './main.js';
 import * as constants from './constants.js';
 
-function renderTable(container, rows) {
+function renderTable(container, rows, maxCols) {
   if (!rows || rows.length === 0) {
     container.textContent = 'No hay datos.';
     return;
@@ -15,8 +15,9 @@ function renderTable(container, rows) {
 
   const headerRow = rows[0];
   const headerCols = headerRow?.c || [];
+  const visibleHeaderCols = (typeof maxCols === 'number') ? headerCols.slice(0, maxCols) : headerCols;
   const trHead = document.createElement('tr');
-  headerCols.forEach((c) => {
+  visibleHeaderCols.forEach((c) => {
     const th = document.createElement('th');
     th.textContent = c ? (c.v ?? c.f ?? '') : '';
     trHead.appendChild(th);
@@ -27,15 +28,16 @@ function renderTable(container, rows) {
   rows.slice(1).forEach((r) => {
     const tr = document.createElement('tr');
     const cols = r.c || [];
-    // Rellenar según número de columnas de la cabecera
-    for (let i = 0; i < headerCols.length; i++) {
+    const colCount = visibleHeaderCols.length;
+    // Rellenar según número de columnas visibles de la cabecera
+    for (let i = 0; i < colCount; i++) {
       const c = cols[i];
       const td = document.createElement('td');
       td.textContent = c ? (c.v ?? c.f ?? '') : '';
       tr.appendChild(td);
     }
-    // Si hay columnas extra, añadirlas también
-    if (cols.length > headerCols.length) {
+    // Si hay columnas extra y no hemos limitado, añadirlas también
+    if (typeof maxCols !== 'number' && cols.length > headerCols.length) {
       for (let i = headerCols.length; i < cols.length; i++) {
         const c = cols[i];
         const td = document.createElement('td');
@@ -60,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cle = document.getElementById('clasificacion-equipos');
 
     const usuariosData = await fetchSheet(constants.USUARIOS_ACEPTADOS_PRIMAVERA2026);
-    renderTable(ua, usuariosData.table.rows);
+    renderTable(ua, usuariosData.table.rows, 4); // mostrar hasta columna D
 
     const resultadosData = await fetchSheet(constants.RESULTADOS_PRIMAVERA2026);
     renderTable(res, resultadosData.table.rows);
