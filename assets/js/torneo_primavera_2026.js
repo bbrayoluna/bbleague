@@ -1,6 +1,19 @@
 import { fetchSheet } from './main.js';
 import * as constants from './constants.js';
 
+function debugRows(name, data) {
+  try {
+    const rows = data?.table?.rows || [];
+    const header = rows[0]?.c?.map(c => c ? (c.v ?? c.f ?? '') : '') || [];
+    console.log(`FETCH SHEET: ${name} — rows: ${rows.length} — header:`, header);
+    // log up to first 3 data rows
+    const sample = rows.slice(1, 4).map(r => (r.c || []).map(c => c ? (c.v ?? c.f ?? '') : ''));
+    console.log(`SAMPLE ${name}:`, sample);
+  } catch (e) {
+    console.warn('debugRows error for', name, e);
+  }
+}
+
 function renderTable(container, rows, maxCols) {
   if (!rows || rows.length === 0) {
     container.textContent = 'No hay datos.';
@@ -62,15 +75,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cle = document.getElementById('clasificacion-equipos');
 
     const usuariosData = await fetchSheet(constants.USUARIOS_ACEPTADOS_PRIMAVERA2026);
+    debugRows(constants.USUARIOS_ACEPTADOS_PRIMAVERA2026, usuariosData);
     renderTable(ua, usuariosData.table.rows, 4); // mostrar hasta columna D
 
     const resultadosData = await fetchSheet(constants.RESULTADOS_PRIMAVERA2026);
+    debugRows(constants.RESULTADOS_PRIMAVERA2026, resultadosData);
     renderTable(res, resultadosData.table.rows);
 
     const clasificacionData = await fetchSheet(constants.CLASIFICACION_PRIMAVERA2026);
+    debugRows(constants.CLASIFICACION_PRIMAVERA2026, clasificacionData);
     renderTable(cls, clasificacionData.table.rows);
 
     const clasEquiposData = await fetchSheet(constants.CLASIFICACION_EQUIPOS_PRIMAVERA2026);
+    debugRows(constants.CLASIFICACION_EQUIPOS_PRIMAVERA2026, clasEquiposData);
     renderTable(cle, clasEquiposData.table.rows);
   } catch (err) {
     console.error('Error cargando datos del torneo:', err);
