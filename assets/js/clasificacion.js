@@ -6,14 +6,14 @@ import * as constants from './constants.js';
 import { fetchSheet,loadRonda } from './main.js';
 
 async function loadClasificacion() {
-  const jsonCEquipos = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
-  const rowsCEquipos = jsonCEquipos.table.rows;
+  //const jsonCEquipos = await fetchSheet(constants.CLASIFICACION_EQUIPOS);
+  //const rowsCEquipos = jsonCEquipos.table.rows;
   const jsonEquipos = await fetchSheet(constants.CLASIFICACION);
   const rowsEquipos = jsonEquipos.table.rows;
   const jsonResul = await fetchSheet(constants.RESULTADOS);
   const rowsResul = jsonResul.table.rows;
   await loadRonda();
-  await procesarClasificacionParejas(rowsCEquipos,rowsResul);
+  //await procesarClasificacionParejas(rowsCEquipos,rowsResul);
   await procesarClasificacionNormal(rowsEquipos,rowsResul);
 }
 
