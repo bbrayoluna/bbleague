@@ -67,6 +67,76 @@ function renderTable(container, rows, maxCols) {
   container.appendChild(table);
 }
 
+// Render results like in pairings: grouped by jornada, collapsible sections
+function loadResultadosBlock(rows, container) {
+  const valor = rows?.[0]?.c?.[0]?.v ?? "";
+  if (valor === "ignorar") return;
+
+  const jornadas = {};
+  rows.forEach(r => {
+    if (!r.c) return;
+    const jornada = r.c[1]?.v;   // Columna B
+    const equipoA = r.c[2]?.v;   // Columna C
+    const equipoB = r.c[3]?.v;   // Columna D
+    const tdA = r.c[4]?.v;       // Columna E
+    const tdB = r.c[5]?.v;       // Columna F
+
+    if (!jornada) return;
+    if (!jornadas[jornada]) jornadas[jornada] = [];
+    jornadas[jornada].push({ equipoA, equipoB, tdA, tdB });
+  });
+
+  container.innerHTML = "";
+
+  Object.keys(jornadas)
+    .sort((a, b) => Number(a) - Number(b))
+    .forEach(j => {
+      const header = document.createElement('div');
+      header.className = 'jornada-header';
+
+      const contenido = document.createElement('div');
+      contenido.className = 'jornada-contenido';
+      // Mostrar desplegado por defecto
+      contenido.style.display = 'block';
+      header.textContent = `Jornada ${j} ▲`;
+
+      const table = document.createElement('table');
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Equipo A</th>
+            <th>TD</th>
+            <th>TD</th>
+            <th>Equipo B</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+      const tbody = table.querySelector('tbody');
+
+      jornadas[j].forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.equipoA ?? ''}</td>
+          <td>${p.tdA ?? ''}</td>
+          <td>${p.tdB ?? ''}</td>
+          <td>${p.equipoB ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      contenido.appendChild(table);
+      header.addEventListener('click', () => {
+        const visible = contenido.style.display === 'block';
+        contenido.style.display = visible ? 'none' : 'block';
+        header.textContent = visible ? `Jornada ${j} ▼` : `Jornada ${j} ▲`;
+      });
+
+      container.appendChild(header);
+      container.appendChild(contenido);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const ua = document.getElementById('usuarios-aceptados');
@@ -80,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resultadosData = await fetchSheet(constants.RESULTADOS_PRIMAVERA2026);
     debugRows(constants.RESULTADOS_PRIMAVERA2026, resultadosData);
-    renderTable(res, resultadosData.table.rows);
+    loadResultadosBlock(resultadosData.table.rows, res);
 
     const clasificacionData = await fetchSheet(constants.CLASIFICACION_PRIMAVERA2026);
     debugRows(constants.CLASIFICACION_PRIMAVERA2026, clasificacionData);
