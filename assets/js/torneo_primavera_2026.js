@@ -133,9 +133,8 @@ function loadResultadosBlock(rows, container) {
 
       const contenido = document.createElement('div');
       contenido.className = 'jornada-contenido';
-      // Mostrar desplegado por defecto
-      contenido.style.display = 'block';
-      header.textContent = `Jornada ${j} ▲`;
+      contenido.style.display = 'none';
+      header.textContent = `Jornada ${j} ▼`;
 
       const table = document.createElement('table');
       table.innerHTML = `
