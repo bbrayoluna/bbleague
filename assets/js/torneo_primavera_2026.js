@@ -14,6 +14,45 @@ function debugRows(name, data) {
   }
 }
 
+function normalizeHeader(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9+]/g, '');
+}
+
+function findColumnIndex(headerCols, names, fallback) {
+  const normalizedNames = names.map(normalizeHeader);
+  const index = headerCols.findIndex((column) => normalizedNames.includes(normalizeHeader(column?.label ?? column?.id)));
+  return index >= 0 ? index : fallback;
+}
+
+function sortClassificationRows(tableData) {
+  const rows = tableData?.rows || [];
+  const headerCols = tableData?.cols || [];
+  const pointsIndex = findColumnIndex(headerCols, ['Puntos'], Math.max(0, headerCols.length - 1));
+  const diffTdIndex = findColumnIndex(headerCols, ['DiffTd', 'DiferenciaTd'], Math.max(0, pointsIndex - 3));
+  const bajasPlusIndex = findColumnIndex(headerCols, ['Bajas+', 'BajasPlus'], Math.max(0, pointsIndex - 2));
+  const bajasMinusIndex = findColumnIndex(headerCols, ['Bajas-', 'BajasMinus'], Math.max(0, pointsIndex - 1));
+  const valueAt = (row, index) => Number(row.c?.[index]?.v || 0);
+
+  return {
+    ...tableData,
+    rows: [...rows].sort((a, b) => {
+      const pointsDifference = valueAt(b, pointsIndex) - valueAt(a, pointsIndex);
+      if (pointsDifference !== 0) return pointsDifference;
+
+      const diffTdDifference = valueAt(b, diffTdIndex) - valueAt(a, diffTdIndex);
+      if (diffTdDifference !== 0) return diffTdDifference;
+
+      const bajasDifference = (valueAt(b, bajasPlusIndex) - valueAt(b, bajasMinusIndex))
+        - (valueAt(a, bajasPlusIndex) - valueAt(a, bajasMinusIndex));
+      return bajasDifference;
+    })
+  };
+}
+
 function renderTable(container, tableData, maxCols) {
   const rows = tableData?.rows || [];
   const headerCols = tableData?.cols || [];
@@ -152,11 +191,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const clasificacionData = await fetchSheet(constants.CLASIFICACION_PRIMAVERA2026);
     debugRows(constants.CLASIFICACION_PRIMAVERA2026, clasificacionData);
-    renderTable(cls, clasificacionData.table);
+    renderTable(cls, sortClassificationRows(clasificacionData.table));
 
     const clasEquiposData = await fetchSheet(constants.CLASIFICACION_EQUIPOS_PRIMAVERA2026);
     debugRows(constants.CLASIFICACION_EQUIPOS_PRIMAVERA2026, clasEquiposData);
-    renderTable(cle, clasEquiposData.table);
+    renderTable(cle, sortClassificationRows(clasEquiposData.table));
   } catch (err) {
     console.error('Error cargando datos del torneo:', err);
     const main = document.querySelector('main');
