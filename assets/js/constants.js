@@ -18,7 +18,7 @@ export const CLASIFICACION_EQUIPOS = "ClasificaciónEquipos";
 export const CLASIFICACION = "Clasificacion";
 export const RONDAS = "Rondas";
 //APPS SCRIPT (Backend)
-export const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6XHHZKjrZlgxIJh7znjCwn0W2riM1z-P80Mg1bH6apq5OLsw9TUV9gIm0CKlKSJtyfw/exec";
+export const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx6NEg3Jg3QBK-7EJceXSgpbpjsQQKn1JRWGVz69yhg__wuGoJrab_bd6HrKxnDC_l1yw/exec";
 
 // Torneos previos
 export const USUARIOS_ACEPTADOS_PRIMAVERA2026 = "usuariosAceptadosPrimavera2026";
