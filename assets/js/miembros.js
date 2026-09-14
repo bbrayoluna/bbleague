@@ -5,6 +5,26 @@ import * as constants from './constants.js';
 import { fetchSheet, sha256, mostrarOverlay, ocultarOverlay, loadRonda } from './main.js';
 let SHOW_ROSTER = false;
 
+async function leerRespuestaScript(res) {
+  const text = await res.text();
+  let json;
+
+  try {
+    json = JSON.parse(text);
+  } catch {
+    return {
+      ok: false,
+      error: `El servidor devolvió ${res.status} en lugar de JSON`
+    };
+  }
+
+  if (!res.ok && json.ok !== false) {
+    return { ok: false, error: `Error HTTP ${res.status}` };
+  }
+
+  return json;
+}
+
 // FUNCTIONS
 async function listarRoster() {
   const token = localStorage.getItem("token");
@@ -17,7 +37,7 @@ async function listarRoster() {
     method: "POST",
     body: new URLSearchParams({ data: JSON.stringify(payload) })
   });
-  return await res.json();
+  return leerRespuestaScript(res);
 }
 
 
@@ -34,9 +54,10 @@ export async function descargarRoster(fileId) {
     method: "POST",
     body: new URLSearchParams({ data: JSON.stringify(payload) })
   });
-  const json = await res.json();
+  const json = await leerRespuestaScript(res);
   if (!json.ok) {
     alert("Error: " + json.error);
+    ocultarOverlay();
     return;
   }
   const bytes = Uint8Array.from(atob(json.base64), c => c.charCodeAt(0));
@@ -141,7 +162,7 @@ async function subirArchivo(token, file, type, propName) {
         body: new URLSearchParams({ data: JSON.stringify(payload) })
       });
 
-      resolve(await res.json());
+      resolve(await leerRespuestaScript(res));
     };
 
     reader.readAsDataURL(file);
@@ -205,7 +226,14 @@ async function cargarRosters() {
   tabla.innerHTML = "";
   document.getElementById("mensajeRoster").textContent = "Cargando...";
 
-  const res = await listarRoster();
+  let res;
+  try {
+    res = await listarRoster();
+  } catch (error) {
+    document.getElementById("mensajeRoster").textContent =
+      "Error al cargar los rosters: " + error.message;
+    return;
+  }
 
   if (!res.ok) {
     document.getElementById("mensajeRoster").textContent = "Error: " + res.error;
@@ -369,7 +397,14 @@ document.getElementById("uploadRosterForm").addEventListener("submit", async (e)
   bar.style.width = "30%";
   status.textContent = "Preparando archivo...";
 
-  const res = await subirArchivo(token, file, type, team.value);
+  let res;
+  try {
+    res = await subirArchivo(token, file, type, team.value);
+  } catch (error) {
+    status.textContent = "Error al subir el archivo: " + error.message;
+    progress.style.display = "none";
+    return;
+  }
 
   bar.style.width = "100%";
 
