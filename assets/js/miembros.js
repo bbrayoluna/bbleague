@@ -79,13 +79,15 @@ async function cargarEquipos() {
   const rows = json.table.rows;
   const jsonResul = await fetchSheet(constants.RESULTADOS);
   const rowsResul = jsonResul.table.rows;
-  const equipos = rows.map(r => r.c?.[1]?.v + '-' + r.c?.[2]?.v).filter(Boolean);
+  const userId = Number(localStorage.getItem("user_id"));
   const selA = document.getElementById("equipoA");
   const selB = document.getElementById("equipoB");
   const selAacta = document.getElementById("equipoAacta");
   const selBacta = document.getElementById("equipoBacta");
   const selBroster = document.getElementById("equipoRoster");
-  for (const eq of equipos) {
+  for (const row of rows) {
+    const eq = row.c?.[1]?.v + '-' + row.c?.[2]?.v;
+    if (!eq || eq === "undefined-undefined") continue;
     const optA = document.createElement("option");
     optA.value = eq;
     optA.textContent = eq;
@@ -106,6 +108,7 @@ async function cargarEquipos() {
       const optBroster = document.createElement("option");
       optBroster.value = eq;
       optBroster.textContent = eq;
+      optBroster.selected = Number(row.c?.[0]?.v) === userId;
       selBroster.appendChild(optBroster);
       SHOW_ROSTER = true;
     }
