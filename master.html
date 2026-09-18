@@ -69,6 +69,21 @@
         </form>
 
         <div id="mensaje" class="centered" aria-live="polite"></div>
+
+        <h2 class="nuffle red centered">Inscribirse en un torneo</h2>
+        <form class="formulario" id="formInscripcion">
+          <label for="torneoInscripcion">Torneo</label>
+          <select id="torneoInscripcion" required></select>
+
+          <label for="razaInscripcion">Raza</label>
+          <select id="razaInscripcion" required></select>
+
+          <label for="nombreEquipo">Nombre del equipo</label>
+          <input type="text" id="nombreEquipo" maxlength="100" required>
+
+          <button type="submit">Inscribirse</button>
+        </form>
+        <div id="inscripcionMensaje" class="centered" aria-live="polite"></div>
       </section>
     </main>
   </div>
