@@ -59,7 +59,7 @@ async function crearTorneo(name, year) {
 loginForm.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   const loginButton = loginForm.querySelector('button[type="submit"]');
 
@@ -67,7 +67,7 @@ loginForm.addEventListener('submit', async event => {
   mostrarLoginMensaje('Iniciando sesión...', 'blue');
 
   try {
-    session = await iniciarSesion(email, password);
+    session = await iniciarSesion(username, password);
     mostrarAreaMaster(true);
     mostrarLoginMensaje('', 'blue');
   } catch (error) {

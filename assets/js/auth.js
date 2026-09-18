@@ -8,8 +8,26 @@ function validarConfiguracion() {
   }
 }
 
-async function iniciarSesion(email, password) {
+async function iniciarSesion(username, password) {
   validarConfiguracion();
+
+  const emailResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_auth_email`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ login_username: username })
+  });
+
+  if (!emailResponse.ok) {
+    throw new Error('No se pudo validar el usuario.');
+  }
+
+  const email = await emailResponse.json();
+  if (!email) {
+    throw new Error('Usuario o contraseña incorrectos.');
+  }
 
   const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: 'POST',
