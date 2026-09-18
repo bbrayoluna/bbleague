@@ -1,10 +1,12 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
-import { iniciarSesion, obtenerSesion, cerrarSesion } from './auth.js';
+import { iniciarSesion, registrarUsuario, obtenerSesion, cerrarSesion } from './auth.js';
 
 const loginSection = document.getElementById('loginSection');
 const masterSection = document.getElementById('masterSection');
 const loginForm = document.getElementById('formLogin');
 const loginMensaje = document.getElementById('loginMensaje');
+const registroForm = document.getElementById('formRegistroUsuario');
+const registroMensaje = document.getElementById('registroMensaje');
 const logoutButton = document.getElementById('logoutButton');
 const form = document.getElementById('formTorneo');
 const mensaje = document.getElementById('mensaje');
@@ -19,6 +21,11 @@ function mostrarMensaje(texto, clase) {
 function mostrarLoginMensaje(texto, clase) {
   loginMensaje.textContent = texto;
   loginMensaje.className = `${clase} centered`;
+}
+
+function mostrarRegistroMensaje(texto, clase) {
+  registroMensaje.textContent = texto;
+  registroMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
@@ -74,6 +81,38 @@ loginForm.addEventListener('submit', async event => {
     mostrarLoginMensaje(error.message, 'red');
   } finally {
     loginButton.disabled = false;
+  }
+});
+
+registroForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const username = document.getElementById('registroUsername').value.trim();
+  const email = document.getElementById('registroEmail').value.trim();
+  const password = document.getElementById('registroPassword').value;
+  const confirmacion = document.getElementById('registroPasswordConfirmacion').value;
+  const registroButton = registroForm.querySelector('button[type="submit"]');
+
+  if (password !== confirmacion) {
+    mostrarRegistroMensaje('Las contraseñas no coinciden.', 'red');
+    return;
+  }
+
+  registroButton.disabled = true;
+  mostrarRegistroMensaje('Registrando usuario...', 'blue');
+
+  try {
+    await registrarUsuario(username, email, password);
+    registroForm.reset();
+    mostrarRegistroMensaje(
+      'Usuario registrado. Revisa el email de confirmación si Supabase lo solicita y después inicia sesión.',
+      'blue'
+    );
+  } catch (error) {
+    console.error('Error al registrar el usuario:', error);
+    mostrarRegistroMensaje(`No se pudo registrar el usuario: ${error.message}`, 'red');
+  } finally {
+    registroButton.disabled = false;
   }
 });
 

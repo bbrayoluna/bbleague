@@ -47,6 +47,30 @@ async function iniciarSesion(username, password) {
   return data;
 }
 
+async function registrarUsuario(username, email, password) {
+  validarConfiguracion();
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      data: { username }
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.msg || data.message || data.error_description || 'No se pudo registrar el usuario.');
+  }
+
+  return data;
+}
+
 async function obtenerSesion() {
   const stored = localStorage.getItem(SESSION_KEY);
   if (!stored) return null;
@@ -88,4 +112,4 @@ function cerrarSesion() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-export { iniciarSesion, obtenerSesion, cerrarSesion };
+export { iniciarSesion, registrarUsuario, obtenerSesion, cerrarSesion };

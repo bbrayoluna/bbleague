@@ -32,6 +32,24 @@
           <button type="submit">Entrar</button>
         </form>
         <div id="loginMensaje" class="centered" aria-live="polite"></div>
+
+        <h2 class="nuffle red centered">Registrar usuario</h2>
+        <form class="formulario" id="formRegistroUsuario">
+          <label for="registroUsername">Alias</label>
+          <input type="text" id="registroUsername" maxlength="50" required>
+
+          <label for="registroEmail">Email</label>
+          <input type="email" id="registroEmail" autocomplete="email" required>
+
+          <label for="registroPassword">Contraseña</label>
+          <input type="password" id="registroPassword" minlength="6" autocomplete="new-password" required>
+
+          <label for="registroPasswordConfirmacion">Repetir contraseña</label>
+          <input type="password" id="registroPasswordConfirmacion" minlength="6" autocomplete="new-password" required>
+
+          <button type="submit">Registrar usuario</button>
+        </form>
+        <div id="registroMensaje" class="centered" aria-live="polite"></div>
       </section>
 
       <section id="masterSection" class="hide">
