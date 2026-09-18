@@ -107,23 +107,45 @@ async function obtenerSesion() {
     return null;
   }
 
+  validarConfiguracion();
+
+  let response;
   try {
-    validarConfiguracion();
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${session.access_token}`
       }
     });
-
-    if (!response.ok) {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    }
   } catch {
+    return session;
+  }
+
+  if (response.ok) {
+    return session;
+  }
+
+  if (session.refresh_token && (response.status === 401 || response.status === 403)) {
+    const refreshResponse = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
+
+    if (refreshResponse.ok) {
+      const refreshedSession = await refreshResponse.json();
+      localStorage.setItem(SESSION_KEY, JSON.stringify(refreshedSession));
+      return refreshedSession;
+    }
+
+    localStorage.removeItem(SESSION_KEY);
     return null;
   }
 
+  // Mantener la sesión ante errores transitorios del servidor o de red.
   return session;
 }
 
