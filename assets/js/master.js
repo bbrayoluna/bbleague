@@ -27,6 +27,10 @@ const torneoClasificacionSelect = document.getElementById('torneoClasificacion')
 const clasificacionContenedor = document.getElementById('clasificacionContenedor');
 const clasificacionMensaje = document.getElementById('clasificacionMensaje');
 const clasificacionBody = document.querySelector('#tablaClasificacion tbody');
+const torneoResultadosSelect = document.getElementById('torneoResultados');
+const resultadosTorneoContenedor = document.getElementById('resultadosTorneoContenedor');
+const resultadosTorneoMensaje = document.getElementById('resultadosTorneoMensaje');
+const resultadosTorneoBody = document.querySelector('#tablaResultadosTorneo tbody');
 const rosterForm = document.getElementById('formRoster');
 const rosterMensaje = document.getElementById('rosterMensaje');
 const inscripcionRosterSelect = document.getElementById('inscripcionRoster');
@@ -77,6 +81,11 @@ function mostrarPartidoMensaje(texto, clase) {
 function mostrarClasificacionMensaje(texto, clase) {
   clasificacionMensaje.textContent = texto;
   clasificacionMensaje.className = `${clase} centered`;
+}
+
+function mostrarResultadosTorneoMensaje(texto, clase) {
+  resultadosTorneoMensaje.textContent = texto;
+  resultadosTorneoMensaje.className = `${clase} centered`;
 }
 
 function mostrarRosterMensaje(texto, clase) {
@@ -473,6 +482,82 @@ async function cargarClasificacion(tournamentId) {
   }
 }
 
+async function cargarResultadosTorneo(tournamentId) {
+  resultadosTorneoContenedor.classList.add('hide');
+  resultadosTorneoBody.innerHTML = '';
+
+  if (!tournamentId) {
+    mostrarResultadosTorneoMensaje('', 'blue');
+    return;
+  }
+
+  mostrarResultadosTorneoMensaje('Cargando resultados...', 'blue');
+
+  try {
+    const [matches, results, rounds, registrations, users] = await Promise.all([
+      obtenerDatos(`matches?select=id,round_id,tournament_user_a_id,tournament_user_b_id&tournament_id=eq.${tournamentId}`),
+      obtenerDatos('results?select=match_id,touchdowns_a,touchdowns_b,casualties_a,casualties_b,status'),
+      obtenerDatos(`rounds?select=id,number&tournament_id=eq.${tournamentId}`),
+      obtenerDatos(`tournament_users?select=id,user_id,team_name&tournament_id=eq.${tournamentId}`),
+      obtenerDatos('users?select=id,username')
+    ]);
+
+    const matchById = new Map(matches.map(match => [String(match.id), match]));
+    const roundById = new Map(rounds.map(round => [String(round.id), round.number]));
+    const registrationById = new Map(
+      registrations.map(registration => [String(registration.id), registration])
+    );
+    const usernameById = new Map(users.map(user => [user.id, user.username]));
+    const resultRows = results
+      .filter(result => result.status === 'confirmed')
+      .map(result => ({ result, match: matchById.get(String(result.match_id)) }))
+      .filter(row => row.match);
+
+    if (resultRows.length === 0) {
+      mostrarResultadosTorneoMensaje('Este torneo todavía no tiene resultados.', 'red');
+      return;
+    }
+
+    resultRows.sort((a, b) => {
+      const roundA = roundById.get(String(a.match.round_id)) || 0;
+      const roundB = roundById.get(String(b.match.round_id)) || 0;
+      return roundA - roundB || Number(a.match.id) - Number(b.match.id);
+    });
+
+    resultRows.forEach(({ result, match }) => {
+      const playerA = registrationById.get(String(match.tournament_user_a_id));
+      const playerB = registrationById.get(String(match.tournament_user_b_id));
+      const nameA = usernameById.get(playerA?.user_id) || 'Jugador A';
+      const nameB = usernameById.get(playerB?.user_id) || 'Jugador B';
+      const labelA = playerA?.team_name ? `${nameA} - ${playerA.team_name}` : nameA;
+      const labelB = playerB?.team_name ? `${nameB} - ${playerB.team_name}` : nameB;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${roundById.get(String(match.round_id)) || ''}</td>
+        <td>${labelA}</td>
+        <td>${result.touchdowns_a}</td>
+        <td>${result.casualties_a}</td>
+        <td>${result.touchdowns_b}</td>
+        <td>${result.casualties_b}</td>
+        <td>${labelB}</td>
+      `;
+      resultadosTorneoBody.appendChild(row);
+    });
+
+    resultadosTorneoContenedor.classList.remove('hide');
+    mostrarResultadosTorneoMensaje('', 'blue');
+  } catch (error) {
+    mostrarResultadosTorneoMensaje(`No se pudieron cargar los resultados: ${error.message}`, 'red');
+  }
+}
+
+function cargarSelectorResultados() {
+  torneoResultadosSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  [...torneoClasificacionSelect.options]
+    .filter(option => option.value)
+    .forEach(option => torneoResultadosSelect.appendChild(option.cloneNode(true)));
+}
+
 async function cargarOpcionesRosters() {
   const [registrations, users, tournaments] = await Promise.all([
     obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
@@ -657,6 +742,7 @@ async function prepararInscripcion() {
   try {
     await cargarOpcionesInscripcion();
     await cargarSelectorClasificacion();
+    cargarSelectorResultados();
     await cargarPartidosPendientes();
     await cargarOpcionesPartido();
     await cargarOpcionesRosters();
@@ -741,6 +827,10 @@ loginForm.addEventListener('submit', async event => {
 
 torneoClasificacionSelect.addEventListener('change', () => {
   cargarClasificacion(torneoClasificacionSelect.value);
+});
+
+torneoResultadosSelect.addEventListener('change', () => {
+  cargarResultadosTorneo(torneoResultadosSelect.value);
 });
 
 torneoGestionSelect.addEventListener('change', () => {
