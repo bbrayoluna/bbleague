@@ -18,8 +18,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                     menuHtml += `<li><a href="${path}" class="nuffle yellow menu">${texto}</a></li>`;
                 }
             });
-            // Añadir enlace estático a Torneos Previos si no está en el sheet
-            menuHtml += '<li><a href="torneos_previos.html" class="nuffle yellow menu">Torneos Previos</a></li>';
             menuHtml += '</ul>';
             menuContainer.innerHTML = menuHtml;
         } catch (error) {
