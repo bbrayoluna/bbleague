@@ -10,7 +10,11 @@ const registroMensaje = document.getElementById('registroMensaje');
 const logoutButton = document.getElementById('logoutButton');
 const form = document.getElementById('formTorneo');
 const mensaje = document.getElementById('mensaje');
-const boton = form?.querySelector('button[type="submit"]');
+function botonFormulario(formElement) {
+  return formElement?.querySelector('button[type="submit"], button:not([type])');
+}
+
+const boton = botonFormulario(form);
 const inscripcionForm = document.getElementById('formInscripcion');
 const inscripcionMensaje = document.getElementById('inscripcionMensaje');
 const torneoSelect = document.getElementById('torneoInscripcion');
@@ -873,9 +877,9 @@ loginForm?.addEventListener('submit', async event => {
 
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
-  const loginButton = loginForm.querySelector('button[type="submit"]');
+  const loginButton = botonFormulario(loginForm);
 
-  loginButton.disabled = true;
+  if (loginButton) loginButton.disabled = true;
   mostrarLoginMensaje('Iniciando sesión...', 'blue');
 
   try {
@@ -886,7 +890,7 @@ loginForm?.addEventListener('submit', async event => {
   } catch (error) {
     mostrarLoginMensaje(error.message, 'red');
   } finally {
-    loginButton.disabled = false;
+    if (loginButton) loginButton.disabled = false;
   }
 });
 
@@ -952,7 +956,7 @@ rosterForm?.addEventListener('submit', async event => {
 
   const registrationId = inscripcionRosterSelect.value;
   const file = archivoRoster.files[0];
-  const uploadButton = rosterForm.querySelector('button[type="submit"]');
+  const uploadButton = botonFormulario(rosterForm);
 
   if (!registrationId || !file) {
     mostrarRosterMensaje('Selecciona un torneo y un archivo PDF.', 'red');
@@ -964,7 +968,7 @@ rosterForm?.addEventListener('submit', async event => {
     return;
   }
 
-  uploadButton.disabled = true;
+  if (uploadButton) uploadButton.disabled = true;
   mostrarRosterMensaje('Subiendo roster...', 'blue');
 
   try {
@@ -976,14 +980,14 @@ rosterForm?.addEventListener('submit', async event => {
     console.error('Error al subir el roster:', error);
     mostrarRosterMensaje(error.message, 'red');
   } finally {
-    uploadButton.disabled = false;
+    if (uploadButton) uploadButton.disabled = false;
   }
 });
 
 partidoForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const partidoButton = partidoForm.querySelector('button[type="submit"]');
+  const partidoButton = botonFormulario(partidoForm);
   const roundId = rondaPartidoSelect.value;
   const playerAId = jugadorAPartidoSelect.value;
   const playerBId = jugadorBPartidoSelect.value;
@@ -998,7 +1002,7 @@ partidoForm?.addEventListener('submit', async event => {
     return;
   }
 
-  partidoButton.disabled = true;
+  if (partidoButton) partidoButton.disabled = true;
   mostrarPartidoMensaje('Añadiendo partido...', 'blue');
 
   try {
@@ -1012,14 +1016,14 @@ partidoForm?.addEventListener('submit', async event => {
     console.error('Error al crear el partido:', error);
     mostrarPartidoMensaje(error.message, 'red');
   } finally {
-    partidoButton.disabled = false;
+    if (partidoButton) partidoButton.disabled = false;
   }
 });
 
 inscripcionForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const inscripcionButton = inscripcionForm.querySelector('button[type="submit"]');
+  const inscripcionButton = botonFormulario(inscripcionForm);
   const torneoId = torneoSelect.value;
   const razaId = razaSelect.value;
   const teamName = document.getElementById('nombreEquipo').value.trim();
@@ -1029,7 +1033,7 @@ inscripcionForm?.addEventListener('submit', async event => {
     return;
   }
 
-  inscripcionButton.disabled = true;
+  if (inscripcionButton) inscripcionButton.disabled = true;
   mostrarInscripcionMensaje('Formalizando inscripción...', 'blue');
 
   try {
@@ -1040,14 +1044,14 @@ inscripcionForm?.addEventListener('submit', async event => {
     console.error('Error al inscribirse:', error);
     mostrarInscripcionMensaje(error.message, 'red');
   } finally {
-    inscripcionButton.disabled = false;
+    if (inscripcionButton) inscripcionButton.disabled = false;
   }
 });
 
 resultadoForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const resultadoButton = resultadoForm.querySelector('button[type="submit"]');
+  const resultadoButton = botonFormulario(resultadoForm);
   const partidoId = partidoSelect.value;
   const touchdownsA = document.getElementById('touchdownsA').value;
   const touchdownsB = document.getElementById('touchdownsB').value;
@@ -1059,7 +1063,7 @@ resultadoForm?.addEventListener('submit', async event => {
     return;
   }
 
-  resultadoButton.disabled = true;
+  if (resultadoButton) resultadoButton.disabled = true;
   mostrarResultadoMensaje('Enviando resultado...', 'blue');
 
   try {
@@ -1071,7 +1075,7 @@ resultadoForm?.addEventListener('submit', async event => {
     console.error('Error al enviar el resultado:', error);
     mostrarResultadoMensaje(error.message, 'red');
   } finally {
-    resultadoButton.disabled = false;
+    if (resultadoButton) resultadoButton.disabled = false;
   }
 });
 
@@ -1082,14 +1086,14 @@ registroForm?.addEventListener('submit', async event => {
   const email = document.getElementById('registroEmail').value.trim();
   const password = document.getElementById('registroPassword').value;
   const confirmacion = document.getElementById('registroPasswordConfirmacion').value;
-  const registroButton = registroForm.querySelector('button[type="submit"]');
+  const registroButton = botonFormulario(registroForm);
 
   if (password !== confirmacion) {
     mostrarRegistroMensaje('Las contraseñas no coinciden.', 'red');
     return;
   }
 
-  registroButton.disabled = true;
+  if (registroButton) registroButton.disabled = true;
   mostrarRegistroMensaje('Registrando usuario...', 'blue');
 
   try {
@@ -1103,7 +1107,7 @@ registroForm?.addEventListener('submit', async event => {
     console.error('Error al registrar el usuario:', error);
     mostrarRegistroMensaje(`No se pudo registrar el usuario: ${error.message}`, 'red');
   } finally {
-    registroButton.disabled = false;
+    if (registroButton) registroButton.disabled = false;
   }
 });
 
