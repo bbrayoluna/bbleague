@@ -1,0 +1,73 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
+
+const SESSION_KEY = 'bbleague_supabase_session';
+
+function validarConfiguracion() {
+  if (SUPABASE_URL.includes('TU-PROYECTO') || SUPABASE_ANON_KEY.includes('TU-CLAVE')) {
+    throw new Error('Configura la URL y la anon key de Supabase en supabase-config.js.');
+  }
+}
+
+async function iniciarSesion(email, password) {
+  validarConfiguracion();
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error_description || data.msg || data.message || 'No se pudo iniciar sesión.');
+  }
+
+  localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+  return data;
+}
+
+async function obtenerSesion() {
+  const stored = localStorage.getItem(SESSION_KEY);
+  if (!stored) return null;
+
+  let session;
+  try {
+    session = JSON.parse(stored);
+  } catch {
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+
+  if (!session.access_token) {
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+
+  try {
+    validarConfiguracion();
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`
+      }
+    });
+
+    if (!response.ok) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return session;
+}
+
+function cerrarSesion() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+export { iniciarSesion, obtenerSesion, cerrarSesion };

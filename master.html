@@ -20,19 +20,38 @@
       <img src="images/members.jpeg" class="sideimg" alt="Master">
     </nav>
     <main>
-      <h2 class="nuffle red centered">Crear torneo</h2>
+      <section id="loginSection">
+        <h2 class="nuffle red centered">Iniciar sesión</h2>
+        <form class="formulario" id="formLogin">
+          <label for="email">Email</label>
+          <input type="email" id="email" autocomplete="username" required>
 
-      <form class="formulario" id="formTorneo">
-        <label for="nombreTorneo">Nombre del torneo</label>
-        <input type="text" id="nombreTorneo" name="name" maxlength="120" required>
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" autocomplete="current-password" required>
 
-        <label for="anoTorneo">Año</label>
-        <input type="number" id="anoTorneo" name="year" min="2000" max="2100" required>
+          <button type="submit">Entrar</button>
+        </form>
+        <div id="loginMensaje" class="centered" aria-live="polite"></div>
+      </section>
 
-        <button type="submit">Crear torneo</button>
-      </form>
+      <section id="masterSection" class="hide">
+        <div class="centered">
+          <button type="button" class="master-action" id="logoutButton">Cerrar sesión</button>
+        </div>
+        <h2 class="nuffle red centered">Crear torneo</h2>
 
-      <div id="mensaje" class="centered" aria-live="polite"></div>
+        <form class="formulario" id="formTorneo">
+          <label for="nombreTorneo">Nombre del torneo</label>
+          <input type="text" id="nombreTorneo" name="name" maxlength="120" required>
+
+          <label for="anoTorneo">Año</label>
+          <input type="number" id="anoTorneo" name="year" min="2000" max="2100" required>
+
+          <button type="submit">Crear torneo</button>
+        </form>
+
+        <div id="mensaje" class="centered" aria-live="polite"></div>
+      </section>
     </main>
   </div>
 </body>

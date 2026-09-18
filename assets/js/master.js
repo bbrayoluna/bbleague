@@ -1,18 +1,121 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
+import { iniciarSesion, obtenerSesion, cerrarSesion } from './auth.js';
+
+const loginSection = document.getElementById('loginSection');
+const masterSection = document.getElementById('masterSection');
+const loginForm = document.getElementById('formLogin');
+const loginMensaje = document.getElementById('loginMensaje');
+const logoutButton = document.getElementById('logoutButton');
 const form = document.getElementById('formTorneo');
 const mensaje = document.getElementById('mensaje');
+const boton = form.querySelector('button[type="submit"]');
+let session = null;
 
-form.addEventListener('submit', event => {
+function mostrarMensaje(texto, clase) {
+  mensaje.textContent = texto;
+  mensaje.className = `${clase} centered`;
+}
+
+function mostrarLoginMensaje(texto, clase) {
+  loginMensaje.textContent = texto;
+  loginMensaje.className = `${clase} centered`;
+}
+
+function mostrarAreaMaster(visible) {
+  loginSection.classList.toggle('hide', visible);
+  masterSection.classList.toggle('hide', !visible);
+}
+
+async function crearTorneo(name, year) {
+  if (SUPABASE_URL.includes('TU-PROYECTO') || SUPABASE_ANON_KEY.includes('TU-CLAVE')) {
+    throw new Error('Configura la URL y la anon key de Supabase en supabase-config.js.');
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/tournaments`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify({ name, year })
+  });
+
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const error = await response.json();
+      detail = error.message || error.details || error.hint || '';
+    } catch {
+      detail = await response.text();
+    }
+    throw new Error(detail || `Supabase respondió con HTTP ${response.status}.`);
+  }
+
+  return response.json();
+}
+
+loginForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const loginButton = loginForm.querySelector('button[type="submit"]');
+
+  loginButton.disabled = true;
+  mostrarLoginMensaje('Iniciando sesión...', 'blue');
+
+  try {
+    session = await iniciarSesion(email, password);
+    mostrarAreaMaster(true);
+    mostrarLoginMensaje('', 'blue');
+  } catch (error) {
+    mostrarLoginMensaje(error.message, 'red');
+  } finally {
+    loginButton.disabled = false;
+  }
+});
+
+logoutButton.addEventListener('click', () => {
+  cerrarSesion();
+  session = null;
+  form.reset();
+  mostrarAreaMaster(false);
+});
+
+form.addEventListener('submit', async event => {
   event.preventDefault();
 
   const nombre = document.getElementById('nombreTorneo').value.trim();
   const ano = Number(document.getElementById('anoTorneo').value);
 
   if (!nombre || !Number.isInteger(ano) || ano < 2000 || ano > 2100) {
-    mensaje.textContent = 'Revisa el nombre y el año del torneo.';
-    mensaje.className = 'red centered';
+    mostrarMensaje('Revisa el nombre y el año del torneo.', 'red');
     return;
   }
 
-  mensaje.textContent = 'Formulario correcto. La creación persistente se conectará a Supabase en el siguiente paso.';
-  mensaje.className = 'blue centered';
+  boton.disabled = true;
+  mostrarMensaje('Creando torneo...', 'blue');
+
+  try {
+    await crearTorneo(nombre, ano);
+    mostrarMensaje('Torneo creado correctamente.', 'blue');
+    form.reset();
+  } catch (error) {
+    console.error('Error al crear el torneo:', error);
+    mostrarMensaje(`No se pudo crear el torneo: ${error.message}`, 'red');
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    session = await obtenerSesion();
+    mostrarAreaMaster(Boolean(session));
+  } catch (error) {
+    mostrarAreaMaster(false);
+    mostrarLoginMensaje(error.message, 'red');
+  }
 });

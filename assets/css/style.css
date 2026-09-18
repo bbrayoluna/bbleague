@@ -336,6 +336,23 @@ background: #fac546;
 color: #25396c;
 }
 
+.master-action {
+    font-family: 'nuffle', sans-serif;
+    color: #fac546;
+    padding: 0.5rem 1rem;
+    background: #ac342f;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.master-action:hover {
+    font-weight: bold;
+    background: #fac546;
+    color: #25396c;
+}
+
 /* tablas de pairings*/
 .match-table {
   width: 100%;
