@@ -11,17 +11,29 @@ function validarConfiguracion() {
 async function iniciarSesion(username, password) {
   validarConfiguracion();
 
+  const normalizedUsername = username.trim().toLowerCase();
+  if (!normalizedUsername || !password) {
+    throw new Error('Introduce el usuario y la contraseña.');
+  }
+
   const emailResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_auth_email`, {
     method: 'POST',
     headers: {
       apikey: SUPABASE_ANON_KEY,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ login_username: username })
+    body: JSON.stringify({ login_username: normalizedUsername })
   });
 
   if (!emailResponse.ok) {
-    throw new Error('No se pudo validar el usuario.');
+    let detail = '';
+    try {
+      const error = await emailResponse.json();
+      detail = error.message || error.details || error.hint || '';
+    } catch {
+      detail = await emailResponse.text();
+    }
+    throw new Error(detail || `No se pudo validar el usuario (HTTP ${emailResponse.status}).`);
   }
 
   const email = await emailResponse.json();
@@ -40,7 +52,14 @@ async function iniciarSesion(username, password) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error_description || data.msg || data.message || 'No se pudo iniciar sesión.');
+    if (response.status === 429) {
+      throw new Error('Demasiados intentos. Espera unos minutos antes de volver a intentarlo.');
+    }
+    throw new Error(data.error_description || data.msg || data.message || 'Usuario o contraseña incorrectos.');
+  }
+
+  if (!data.access_token) {
+    throw new Error('El login no devolvió una sesión válida. Comprueba la confirmación del email en Supabase.');
   }
 
   localStorage.setItem(SESSION_KEY, JSON.stringify(data));

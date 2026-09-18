@@ -132,7 +132,7 @@ set search_path = public
 as $$
   select email
   from public.users
-  where username = login_username;
+  where lower(username) = lower(login_username);
 $$;
 
 grant execute on function public.get_auth_email(text) to anon, authenticated;

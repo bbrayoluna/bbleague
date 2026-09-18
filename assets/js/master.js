@@ -38,6 +38,10 @@ async function crearTorneo(name, year) {
     throw new Error('Configura la URL y la anon key de Supabase en supabase-config.js.');
   }
 
+  if (!session?.access_token) {
+    throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+  }
+
   const response = await fetch(`${SUPABASE_URL}/rest/v1/tournaments`, {
     method: 'POST',
     headers: {
