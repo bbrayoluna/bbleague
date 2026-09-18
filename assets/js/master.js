@@ -593,10 +593,10 @@ function conectarBases() {
       button.disabled = true;
       try {
         const path = `${select.value}/bases.pdf`;
-        const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/tournament-documents/${path}`, { method: 'PUT', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/pdf', 'x-upsert': 'true' }, body: file });
-        if (!upload.ok) throw new Error('No se pudieron subir las bases.');
+        const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/tournament-documents/${path}`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/pdf', 'x-upsert': 'true' }, body: file });
+        if (!upload.ok) { const error = await upload.json().catch(() => ({})); throw new Error(error.message || error.error || `No se pudieron subir las bases (HTTP ${upload.status}).`); }
         const metadata = await fetch(`${SUPABASE_URL}/rest/v1/tournament_bases?on_conflict=tournament_id`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ tournament_id: Number(select.value), file_name: file.name, storage_path: path, mime_type: 'application/pdf' }) });
-        if (!metadata.ok) throw new Error('No se guardaron los datos de las bases.');
+        if (!metadata.ok) { const error = await metadata.json().catch(() => ({})); throw new Error(error.message || error.details || error.hint || `No se guardaron los datos de las bases (HTTP ${metadata.status}).`); }
         event.currentTarget.reset(); message.textContent = 'Bases subidas correctamente.';
       } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
     });
