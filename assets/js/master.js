@@ -80,12 +80,13 @@ async function obtenerDatos(endpoint) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${session.access_token}`
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
     }
   });
 
   if (!response.ok) {
-    throw new Error(`No se pudieron cargar los datos (${response.status}).`);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.details || `No se pudieron cargar los datos (${response.status}).`);
   }
 
   return response.json();
@@ -98,6 +99,9 @@ async function cargarOpcionesInscripcion() {
   ]);
 
   torneoSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  if (torneos.length === 0) {
+    torneoSelect.innerHTML = '<option value="">No hay torneos disponibles</option>';
+  }
   torneos.forEach(torneo => {
     const option = document.createElement('option');
     option.value = torneo.id;
@@ -106,12 +110,23 @@ async function cargarOpcionesInscripcion() {
   });
 
   razaSelect.innerHTML = '<option value="">Selecciona una raza</option>';
+  if (razas.length === 0) {
+    razaSelect.innerHTML = '<option value="">No hay razas disponibles</option>';
+  }
   razas.forEach(raza => {
     const option = document.createElement('option');
     option.value = raza.id;
     option.textContent = raza.name;
     razaSelect.appendChild(option);
   });
+}
+
+async function prepararInscripcion() {
+  try {
+    await cargarOpcionesInscripcion();
+  } catch (error) {
+    mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
+  }
 }
 
 async function inscribirUsuario(tournamentId, raceId, teamName) {
@@ -150,7 +165,7 @@ loginForm.addEventListener('submit', async event => {
   try {
     session = await iniciarSesion(username, password);
     mostrarAreaMaster(true);
-    await cargarOpcionesInscripcion();
+    await prepararInscripcion();
     mostrarLoginMensaje('', 'blue');
   } catch (error) {
     mostrarLoginMensaje(error.message, 'red');
@@ -257,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     session = await obtenerSesion();
     mostrarAreaMaster(Boolean(session));
     if (session) {
-      await cargarOpcionesInscripcion();
+      await prepararInscripcion();
     }
   } catch (error) {
     mostrarAreaMaster(false);
