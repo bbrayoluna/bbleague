@@ -10,7 +10,7 @@ const registroMensaje = document.getElementById('registroMensaje');
 const logoutButton = document.getElementById('logoutButton');
 const form = document.getElementById('formTorneo');
 const mensaje = document.getElementById('mensaje');
-const boton = form.querySelector('button[type="submit"]');
+const boton = form?.querySelector('button[type="submit"]');
 const inscripcionForm = document.getElementById('formInscripcion');
 const inscripcionMensaje = document.getElementById('inscripcionMensaje');
 const torneoSelect = document.getElementById('torneoInscripcion');
@@ -49,63 +49,74 @@ const finalizarTorneoButton = document.getElementById('finalizarTorneo');
 let session = null;
 
 function mostrarMensaje(texto, clase) {
+  if (!mensaje) return;
   mensaje.textContent = texto;
   mensaje.className = `${clase} centered`;
 }
 
 function mostrarLoginMensaje(texto, clase) {
+  if (!loginMensaje) return;
   loginMensaje.textContent = texto;
   loginMensaje.className = `${clase} centered`;
 }
 
 function mostrarRegistroMensaje(texto, clase) {
+  if (!registroMensaje) return;
   registroMensaje.textContent = texto;
   registroMensaje.className = `${clase} centered`;
 }
 
 function mostrarInscripcionMensaje(texto, clase) {
+  if (!inscripcionMensaje) return;
   inscripcionMensaje.textContent = texto;
   inscripcionMensaje.className = `${clase} centered`;
 }
 
 function mostrarResultadoMensaje(texto, clase) {
+  if (!resultadoMensaje) return;
   resultadoMensaje.textContent = texto;
   resultadoMensaje.className = `${clase} centered`;
 }
 
 function mostrarPartidoMensaje(texto, clase) {
+  if (!partidoMensaje) return;
   partidoMensaje.textContent = texto;
   partidoMensaje.className = `${clase} centered`;
 }
 
 function mostrarClasificacionMensaje(texto, clase) {
+  if (!clasificacionMensaje) return;
   clasificacionMensaje.textContent = texto;
   clasificacionMensaje.className = `${clase} centered`;
 }
 
 function mostrarResultadosTorneoMensaje(texto, clase) {
+  if (!resultadosTorneoMensaje) return;
   resultadosTorneoMensaje.textContent = texto;
   resultadosTorneoMensaje.className = `${clase} centered`;
 }
 
 function mostrarRosterMensaje(texto, clase) {
+  if (!rosterMensaje) return;
   rosterMensaje.textContent = texto;
   rosterMensaje.className = `${clase} centered`;
 }
 
 function mostrarRostersMensaje(texto, clase) {
+  if (!rostersMensaje) return;
   rostersMensaje.textContent = texto;
   rostersMensaje.className = `${clase} centered`;
 }
 
 function mostrarGestionMensaje(texto, clase) {
+  if (!gestionMensaje) return;
   gestionMensaje.textContent = texto;
   gestionMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
-  loginSection.classList.toggle('hide', visible);
-  masterSection.classList.toggle('hide', !visible);
+  loginSection?.classList.toggle('hide', visible);
+  masterSection?.classList.toggle('hide', !visible);
 }
 
 async function crearTorneo(name, year) {
@@ -278,7 +289,7 @@ function reiniciarRondas() {
   `;
 }
 
-anadirRondaButton.addEventListener('click', () => {
+anadirRondaButton?.addEventListener('click', () => {
   const number = rondasTorneo.querySelectorAll('.ronda-form').length + 1;
   rondasTorneo.appendChild(nuevaRondaForm(number));
 });
@@ -740,14 +751,18 @@ async function cargarSelectorClasificacion() {
 
 async function prepararInscripcion() {
   try {
-    await cargarOpcionesInscripcion();
-    await cargarSelectorClasificacion();
-    cargarSelectorResultados();
-    await cargarPartidosPendientes();
-    await cargarOpcionesPartido();
-    await cargarOpcionesRosters();
-    await cargarRosters();
-    await cargarGestionTorneos();
+    if (torneoSelect) await cargarOpcionesInscripcion();
+    if (torneoClasificacionSelect) {
+      await cargarSelectorClasificacion();
+      cargarSelectorResultados();
+    }
+    if (partidoSelect) await cargarPartidosPendientes();
+    if (partidoForm) await cargarOpcionesPartido();
+    if (rosterForm) {
+      await cargarOpcionesRosters();
+      await cargarRosters();
+    }
+    if (torneoGestionSelect) await cargarGestionTorneos();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
@@ -803,7 +818,7 @@ async function enviarResultado(matchId, touchdownsA, touchdownsB, bajasA, bajasB
   }
 }
 
-loginForm.addEventListener('submit', async event => {
+loginForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const username = document.getElementById('username').value.trim();
@@ -825,36 +840,36 @@ loginForm.addEventListener('submit', async event => {
   }
 });
 
-torneoClasificacionSelect.addEventListener('change', () => {
+torneoClasificacionSelect?.addEventListener('change', () => {
   cargarClasificacion(torneoClasificacionSelect.value);
 });
 
-torneoResultadosSelect.addEventListener('change', () => {
+torneoResultadosSelect?.addEventListener('change', () => {
   cargarResultadosTorneo(torneoResultadosSelect.value);
 });
 
-torneoGestionSelect.addEventListener('change', () => {
+torneoGestionSelect?.addEventListener('change', () => {
   const tournament = JSON.parse(
     torneoGestionSelect.selectedOptions[0]?.dataset.tournament || 'null'
   );
   actualizarEstadoGestion(tournament);
 });
 
-abrirInscripcionesButton.addEventListener('click', () => {
+abrirInscripcionesButton?.addEventListener('click', () => {
   cambiarEstadoTorneo(
     { registration_open: true },
     'Inscripciones abiertas correctamente.'
   );
 });
 
-cerrarInscripcionesButton.addEventListener('click', () => {
+cerrarInscripcionesButton?.addEventListener('click', () => {
   cambiarEstadoTorneo(
     { registration_open: false },
     'Inscripciones cerradas correctamente.'
   );
 });
 
-finalizarTorneoButton.addEventListener('click', () => {
+finalizarTorneoButton?.addEventListener('click', () => {
   if (!window.confirm('¿Quieres dar por finalizado este torneo?')) return;
   cambiarEstadoTorneo(
     { status: 'finished', registration_open: false, finished_at: new Date().toISOString() },
@@ -862,13 +877,13 @@ finalizarTorneoButton.addEventListener('click', () => {
   );
 });
 
-torneoRostersSelect.addEventListener('change', () => {
+torneoRostersSelect?.addEventListener('change', () => {
   cargarRosters(torneoRostersSelect.value).catch(error => {
     mostrarRostersMensaje(`No se pudieron cargar los rosters: ${error.message}`, 'red');
   });
 });
 
-rostersBody.addEventListener('click', async event => {
+rostersBody?.addEventListener('click', async event => {
   const button = event.target.closest('.descargar-roster');
   if (!button) return;
 
@@ -882,7 +897,7 @@ rostersBody.addEventListener('click', async event => {
   }
 });
 
-rosterForm.addEventListener('submit', async event => {
+rosterForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const registrationId = inscripcionRosterSelect.value;
@@ -915,7 +930,7 @@ rosterForm.addEventListener('submit', async event => {
   }
 });
 
-partidoForm.addEventListener('submit', async event => {
+partidoForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const partidoButton = partidoForm.querySelector('button[type="submit"]');
@@ -951,7 +966,7 @@ partidoForm.addEventListener('submit', async event => {
   }
 });
 
-inscripcionForm.addEventListener('submit', async event => {
+inscripcionForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const inscripcionButton = inscripcionForm.querySelector('button[type="submit"]');
@@ -979,7 +994,7 @@ inscripcionForm.addEventListener('submit', async event => {
   }
 });
 
-resultadoForm.addEventListener('submit', async event => {
+resultadoForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const resultadoButton = resultadoForm.querySelector('button[type="submit"]');
@@ -1010,7 +1025,7 @@ resultadoForm.addEventListener('submit', async event => {
   }
 });
 
-registroForm.addEventListener('submit', async event => {
+registroForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const username = document.getElementById('registroUsername').value.trim();
@@ -1042,14 +1057,14 @@ registroForm.addEventListener('submit', async event => {
   }
 });
 
-logoutButton.addEventListener('click', () => {
+logoutButton?.addEventListener('click', () => {
   cerrarSesion();
   session = null;
-  form.reset();
+  form?.reset();
   mostrarAreaMaster(false);
 });
 
-form.addEventListener('submit', async event => {
+form?.addEventListener('submit', async event => {
   event.preventDefault();
 
   if (!form.checkValidity()) {

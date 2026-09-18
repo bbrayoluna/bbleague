@@ -353,6 +353,14 @@ color: #25396c;
     color: #25396c;
 }
 
+.page-link {
+    display: block;
+    box-sizing: border-box;
+    margin-top: 0.75rem;
+    text-align: center;
+    text-decoration: none;
+}
+
 #rondasTorneo {
     margin-top: 1.5rem;
     padding: 0.75rem;
