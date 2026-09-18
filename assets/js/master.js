@@ -15,6 +15,11 @@ const inscripcionForm = document.getElementById('formInscripcion');
 const inscripcionMensaje = document.getElementById('inscripcionMensaje');
 const torneoSelect = document.getElementById('torneoInscripcion');
 const razaSelect = document.getElementById('razaInscripcion');
+const resultadoForm = document.getElementById('formResultado');
+const resultadoMensaje = document.getElementById('resultadoMensaje');
+const partidoSelect = document.getElementById('partidoResultado');
+const rondasTorneo = document.getElementById('rondasTorneo');
+const anadirRondaButton = document.getElementById('anadirRonda');
 let session = null;
 
 function mostrarMensaje(texto, clase) {
@@ -35,6 +40,11 @@ function mostrarRegistroMensaje(texto, clase) {
 function mostrarInscripcionMensaje(texto, clase) {
   inscripcionMensaje.textContent = texto;
   inscripcionMensaje.className = `${clase} centered`;
+}
+
+function mostrarResultadoMensaje(texto, clase) {
+  resultadoMensaje.textContent = texto;
+  resultadoMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
@@ -73,8 +83,73 @@ async function crearTorneo(name, year) {
     throw new Error(detail || `Supabase respondió con HTTP ${response.status}.`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return data[0];
 }
+
+function obtenerRondasFormulario() {
+  return [...rondasTorneo.querySelectorAll('.ronda-form')].map((ronda, index) => ({
+    number: index + 1,
+    start_date: ronda.querySelector('[data-field="start-date"]').value,
+    end_date: ronda.querySelector('[data-field="end-date"]').value,
+    status: index === 0 ? 'active' : 'pending'
+  }));
+}
+
+async function crearRondas(tournamentId, rounds) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rounds`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify(rounds.map(round => ({
+      tournament_id: tournamentId,
+      ...round
+    })))
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.details || 'No se pudieron crear las rondas.');
+  }
+}
+
+function nuevaRondaForm(number) {
+  const ronda = document.createElement('div');
+  ronda.className = 'ronda-form';
+  ronda.dataset.ronda = number;
+  ronda.innerHTML = `
+    <h3>Ronda ${number}</h3>
+    <label for="inicioRonda${number}">Fecha de inicio</label>
+    <input type="date" id="inicioRonda${number}" data-field="start-date" required>
+
+    <label for="finRonda${number}">Fecha de fin</label>
+    <input type="date" id="finRonda${number}" data-field="end-date" required>
+  `;
+  return ronda;
+}
+
+function reiniciarRondas() {
+  rondasTorneo.innerHTML = `
+    <legend>Rondas</legend>
+    <div class="ronda-form" data-ronda="1">
+      <h3>Ronda 1</h3>
+      <label for="inicioRonda1">Fecha de inicio</label>
+      <input type="date" id="inicioRonda1" data-field="start-date" required>
+
+      <label for="finRonda1">Fecha de fin</label>
+      <input type="date" id="finRonda1" data-field="end-date" required>
+    </div>
+  `;
+}
+
+anadirRondaButton.addEventListener('click', () => {
+  const number = rondasTorneo.querySelectorAll('.ronda-form').length + 1;
+  rondasTorneo.appendChild(nuevaRondaForm(number));
+});
 
 async function obtenerDatos(endpoint) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
@@ -121,11 +196,52 @@ async function cargarOpcionesInscripcion() {
   });
 }
 
+async function cargarPartidosPendientes() {
+  const [matches, registrations, users, results] = await Promise.all([
+    obtenerDatos('matches?select=id,round_id,tournament_user_a_id,tournament_user_b_id&order=round_id.asc,id.asc'),
+    obtenerDatos('tournament_users?select=id,user_id,team_name'),
+    obtenerDatos('users?select=id,username'),
+    obtenerDatos('results?select=match_id')
+  ]);
+
+  const userRegistrations = registrations.filter(registration =>
+    registration.user_id === session.user.id
+  );
+  const registrationIds = new Set(userRegistrations.map(registration => registration.id));
+  const registrationById = new Map(registrations.map(registration => [registration.id, registration]));
+  const usernameById = new Map(users.map(user => [user.id, user.username]));
+  const completedMatchIds = new Set(results.map(result => result.match_id));
+
+  const pendingMatches = matches.filter(match =>
+    !completedMatchIds.has(match.id)
+    && (registrationIds.has(match.tournament_user_a_id)
+      || registrationIds.has(match.tournament_user_b_id))
+  );
+
+  partidoSelect.innerHTML = '<option value="">Selecciona un partido</option>';
+  if (pendingMatches.length === 0) {
+    partidoSelect.innerHTML = '<option value="">No hay partidos pendientes</option>';
+  }
+
+  pendingMatches.forEach(match => {
+    const playerA = registrationById.get(match.tournament_user_a_id);
+    const playerB = registrationById.get(match.tournament_user_b_id);
+    const nameA = usernameById.get(playerA?.user_id) || 'Jugador A';
+    const nameB = usernameById.get(playerB?.user_id) || 'Jugador B';
+    const option = document.createElement('option');
+    option.value = match.id;
+    option.textContent = `Ronda ${match.round_id}: ${nameA} vs ${nameB}`;
+    partidoSelect.appendChild(option);
+  });
+}
+
 async function prepararInscripcion() {
   try {
     await cargarOpcionesInscripcion();
+    await cargarPartidosPendientes();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
+    mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
   }
 }
 
@@ -149,6 +265,32 @@ async function inscribirUsuario(tournamentId, raceId, teamName) {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || error.details || 'No se pudo completar la inscripción.');
+  }
+}
+
+async function enviarResultado(matchId, touchdownsA, touchdownsB, bajasA, bajasB) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/results`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify({
+      match_id: Number(matchId),
+      submitted_by: session.user.id,
+      touchdowns_a: Number(touchdownsA),
+      touchdowns_b: Number(touchdownsB),
+      casualties_a: Number(bajasA),
+      casualties_b: Number(bajasB),
+      status: 'pending'
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.details || 'No se pudo enviar el resultado.');
   }
 }
 
@@ -202,6 +344,37 @@ inscripcionForm.addEventListener('submit', async event => {
   }
 });
 
+resultadoForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const resultadoButton = resultadoForm.querySelector('button[type="submit"]');
+  const partidoId = partidoSelect.value;
+  const touchdownsA = document.getElementById('touchdownsA').value;
+  const touchdownsB = document.getElementById('touchdownsB').value;
+  const bajasA = document.getElementById('bajasA').value;
+  const bajasB = document.getElementById('bajasB').value;
+
+  if (!partidoId || [touchdownsA, touchdownsB, bajasA, bajasB].some(value => value === '')) {
+    mostrarResultadoMensaje('Completa todos los campos.', 'red');
+    return;
+  }
+
+  resultadoButton.disabled = true;
+  mostrarResultadoMensaje('Enviando resultado...', 'blue');
+
+  try {
+    await enviarResultado(partidoId, touchdownsA, touchdownsB, bajasA, bajasB);
+    resultadoForm.reset();
+    await cargarPartidosPendientes();
+    mostrarResultadoMensaje('Resultado enviado y pendiente de validación.', 'blue');
+  } catch (error) {
+    console.error('Error al enviar el resultado:', error);
+    mostrarResultadoMensaje(error.message, 'red');
+  } finally {
+    resultadoButton.disabled = false;
+  }
+});
+
 registroForm.addEventListener('submit', async event => {
   event.preventDefault();
 
@@ -244,11 +417,18 @@ logoutButton.addEventListener('click', () => {
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
   const nombre = document.getElementById('nombreTorneo').value.trim();
   const ano = Number(document.getElementById('anoTorneo').value);
+  const rondas = obtenerRondasFormulario();
 
-  if (!nombre || !Number.isInteger(ano) || ano < 2000 || ano > 2100) {
-    mostrarMensaje('Revisa el nombre y el año del torneo.', 'red');
+  if (!nombre || !Number.isInteger(ano) || ano < 2000 || ano > 2100
+    || rondas.some(ronda => ronda.end_date < ronda.start_date)) {
+    mostrarMensaje('Revisa el nombre, el año y las fechas de las rondas.', 'red');
     return;
   }
 
@@ -256,9 +436,14 @@ form.addEventListener('submit', async event => {
   mostrarMensaje('Creando torneo...', 'blue');
 
   try {
-    await crearTorneo(nombre, ano);
+    const torneo = await crearTorneo(nombre, ano);
+    if (!torneo?.id) {
+      throw new Error('Supabase no devolvió el identificador del torneo.');
+    }
+    await crearRondas(torneo.id, rondas);
     mostrarMensaje('Torneo creado correctamente.', 'blue');
     form.reset();
+    reiniciarRondas();
   } catch (error) {
     console.error('Error al crear el torneo:', error);
     mostrarMensaje(`No se pudo crear el torneo: ${error.message}`, 'red');

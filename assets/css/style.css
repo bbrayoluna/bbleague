@@ -353,6 +353,35 @@ color: #25396c;
     color: #25396c;
 }
 
+#rondasTorneo {
+    margin-top: 1.5rem;
+    padding: 0.75rem;
+    border: 1px solid #fac546;
+    border-radius: 4px;
+}
+
+#rondasTorneo legend {
+    padding: 0 0.4rem;
+    color: #fac546;
+    font-family: 'nuffle', sans-serif;
+    font-weight: bold;
+}
+
+.ronda-form {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(250, 197, 70, 0.45);
+}
+
+.ronda-form:last-child {
+    border-bottom: 0;
+}
+
+.ronda-form h3 {
+    margin: 0;
+    color: #fac546;
+    font-family: 'nuffle', sans-serif;
+}
+
 /* tablas de pairings*/
 .match-table {
   width: 100%;
