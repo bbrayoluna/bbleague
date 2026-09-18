@@ -509,7 +509,15 @@ async function subirRoster(registrationId, file) {
 }
 
 async function descargarRoster(path) {
-  const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+  const normalizedPath = String(path)
+    .replace(/^\/+/, '')
+    .replace(/^rosters\//, '');
+
+  if (!/^\d+\/[^/]+$/.test(normalizedPath)) {
+    throw new Error(`La ruta del roster no es válida: ${path}`);
+  }
+
+  const encodedPath = normalizedPath.split('/').map(encodeURIComponent).join('/');
   const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/rosters/${encodedPath}`, {
     method: 'POST',
     headers: {
@@ -522,13 +530,15 @@ async function descargarRoster(path) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || 'No se pudo preparar la descarga.');
+    throw new Error(error.message || error.error || `No se pudo preparar la descarga (HTTP ${response.status}).`);
   }
 
   const data = await response.json();
   const signedUrl = data.signedURL.startsWith('http')
     ? data.signedURL
-    : `${SUPABASE_URL}${data.signedURL}`;
+    : data.signedURL.startsWith('/storage/v1/')
+      ? `${SUPABASE_URL}${data.signedURL}`
+      : `${SUPABASE_URL}/storage/v1${data.signedURL}`;
   window.open(signedUrl, '_blank', 'noopener');
 }
 
