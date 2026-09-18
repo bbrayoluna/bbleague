@@ -216,6 +216,10 @@ th {
     border-radius: 10px;
 }
 
+.cartel-xmas {
+    max-width: 10%;
+}
+
 /* Otros */
 .date {
     color: #999999;
