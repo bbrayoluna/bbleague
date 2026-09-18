@@ -23,6 +23,10 @@ const partidoMensaje = document.getElementById('partidoMensaje');
 const rondaPartidoSelect = document.getElementById('rondaPartido');
 const jugadorAPartidoSelect = document.getElementById('jugadorAPartido');
 const jugadorBPartidoSelect = document.getElementById('jugadorBPartido');
+const torneoClasificacionSelect = document.getElementById('torneoClasificacion');
+const clasificacionContenedor = document.getElementById('clasificacionContenedor');
+const clasificacionMensaje = document.getElementById('clasificacionMensaje');
+const clasificacionBody = document.querySelector('#tablaClasificacion tbody');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
 let session = null;
@@ -55,6 +59,11 @@ function mostrarResultadoMensaje(texto, clase) {
 function mostrarPartidoMensaje(texto, clase) {
   partidoMensaje.textContent = texto;
   partidoMensaje.className = `${clase} centered`;
+}
+
+function mostrarClasificacionMensaje(texto, clase) {
+  clasificacionMensaje.textContent = texto;
+  clasificacionMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
@@ -315,9 +324,62 @@ async function crearPartido(roundId, playerAId, playerBId) {
   }
 }
 
+async function cargarClasificacion(tournamentId) {
+  clasificacionContenedor.classList.add('hide');
+  clasificacionBody.innerHTML = '';
+
+  if (!tournamentId) {
+    mostrarClasificacionMensaje('', 'blue');
+    return;
+  }
+
+  mostrarClasificacionMensaje('Cargando clasificación...', 'blue');
+
+  try {
+    const rows = await obtenerDatos(
+      `classification?select=rank,username,race_name,played,wins,draws,losses,points,touchdown_difference,casualty_difference&tournament_id=eq.${tournamentId}&order=rank.asc`
+    );
+
+    if (rows.length === 0) {
+      mostrarClasificacionMensaje('Este torneo todavía no tiene clasificación.', 'red');
+      return;
+    }
+
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.rank}</td>
+        <td>${row.username}</td>
+        <td>${row.race_name}</td>
+        <td>${row.played}</td>
+        <td>${row.wins}</td>
+        <td>${row.draws}</td>
+        <td>${row.losses}</td>
+        <td>${row.points}</td>
+        <td>${row.touchdown_difference}</td>
+        <td>${row.casualty_difference}</td>
+      `;
+      clasificacionBody.appendChild(tr);
+    });
+
+    clasificacionContenedor.classList.remove('hide');
+    mostrarClasificacionMensaje('', 'blue');
+  } catch (error) {
+    mostrarClasificacionMensaje(`No se pudo cargar la clasificación: ${error.message}`, 'red');
+  }
+}
+
+function cargarSelectorClasificacion() {
+  torneoClasificacionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  [...torneoSelect.options]
+    .filter(option => option.value)
+    .forEach(option => torneoClasificacionSelect.appendChild(option.cloneNode(true)));
+}
+
 async function prepararInscripcion() {
   try {
     await cargarOpcionesInscripcion();
+    cargarSelectorClasificacion();
     await cargarPartidosPendientes();
     await cargarOpcionesPartido();
   } catch (error) {
@@ -395,6 +457,10 @@ loginForm.addEventListener('submit', async event => {
   } finally {
     loginButton.disabled = false;
   }
+});
+
+torneoClasificacionSelect.addEventListener('change', () => {
+  cargarClasificacion(torneoClasificacionSelect.value);
 });
 
 partidoForm.addEventListener('submit', async event => {

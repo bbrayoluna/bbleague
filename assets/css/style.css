@@ -382,6 +382,14 @@ color: #25396c;
     font-family: 'nuffle', sans-serif;
 }
 
+.classification-scroll {
+    overflow-x: auto;
+}
+
+.classification-scroll table {
+    min-width: 760px;
+}
+
 /* tablas de pairings*/
 .match-table {
   width: 100%;
