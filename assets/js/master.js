@@ -365,7 +365,7 @@ async function enviarResultado(matchId, touchdownsA, touchdownsB, bajasA, bajasB
       touchdowns_b: Number(touchdownsB),
       casualties_a: Number(bajasA),
       casualties_b: Number(bajasB),
-      status: 'pending'
+      status: 'confirmed'
     })
   });
 
@@ -483,7 +483,7 @@ resultadoForm.addEventListener('submit', async event => {
     await enviarResultado(partidoId, touchdownsA, touchdownsB, bajasA, bajasB);
     resultadoForm.reset();
     await cargarPartidosPendientes();
-    mostrarResultadoMensaje('Resultado enviado y pendiente de validación.', 'blue');
+    mostrarResultadoMensaje('Resultado enviado correctamente.', 'blue');
   } catch (error) {
     console.error('Error al enviar el resultado:', error);
     mostrarResultadoMensaje(error.message, 'red');
