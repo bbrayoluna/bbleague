@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/master.js"></script>
+<script type="module" src="assets/js/menu.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master - League Rayo de Luna</title>
+</head>
+<body>
+  <header>
+    <img src="images/logo.png" class="logosize" alt="LogoBB">
+    <h1>Master</h1>
+    <img src="images/logoliga.png" class="logosize6x6" alt="logoliga">
+  </header>
+  <div class="container">
+    <nav>
+      <div id="menu-container"></div>
+      <img src="images/members.jpeg" class="sideimg" alt="Master">
+    </nav>
+    <main>
+      <h2 class="nuffle red centered">Crear torneo</h2>
+
+      <form class="formulario" id="formTorneo">
+        <label for="nombreTorneo">Nombre del torneo</label>
+        <input type="text" id="nombreTorneo" name="name" maxlength="120" required>
+
+        <label for="anoTorneo">Año</label>
+        <input type="number" id="anoTorneo" name="year" min="2000" max="2100" required>
+
+        <button type="submit">Crear torneo</button>
+      </form>
+
+      <div id="mensaje" class="centered" aria-live="polite"></div>
+    </main>
+  </div>
+</body>
+</html>
