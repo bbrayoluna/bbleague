@@ -36,6 +36,12 @@ const rostersMensaje = document.getElementById('rostersMensaje');
 const rostersBody = document.querySelector('#tablaRosters tbody');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
+const torneoGestionSelect = document.getElementById('torneoGestion');
+const estadoTorneo = document.getElementById('estadoTorneo');
+const gestionMensaje = document.getElementById('gestionMensaje');
+const abrirInscripcionesButton = document.getElementById('abrirInscripciones');
+const cerrarInscripcionesButton = document.getElementById('cerrarInscripciones');
+const finalizarTorneoButton = document.getElementById('finalizarTorneo');
 let session = null;
 
 function mostrarMensaje(texto, clase) {
@@ -83,6 +89,11 @@ function mostrarRostersMensaje(texto, clase) {
   rostersMensaje.className = `${clase} centered`;
 }
 
+function mostrarGestionMensaje(texto, clase) {
+  gestionMensaje.textContent = texto;
+  gestionMensaje.className = `${clase} centered`;
+}
+
 function mostrarAreaMaster(visible) {
   loginSection.classList.toggle('hide', visible);
   masterSection.classList.toggle('hide', !visible);
@@ -105,7 +116,13 @@ async function crearTorneo(name, year) {
       'Content-Type': 'application/json',
       Prefer: 'return=representation'
     },
-    body: JSON.stringify({ name, year })
+    body: JSON.stringify({
+      name,
+      year,
+      creator_id: session.user.id,
+      registration_open: true,
+      status: 'active'
+    })
   });
 
   if (!response.ok) {
@@ -121,6 +138,76 @@ async function crearTorneo(name, year) {
 
   const data = await response.json();
   return data[0];
+}
+
+function actualizarEstadoGestion(tournament) {
+  if (!tournament) {
+    estadoTorneo.textContent = '';
+    abrirInscripcionesButton.disabled = true;
+    cerrarInscripcionesButton.disabled = true;
+    finalizarTorneoButton.disabled = true;
+    return;
+  }
+
+  estadoTorneo.textContent = tournament.status === 'finished'
+    ? 'Estado: finalizado'
+    : `Estado: activo. Inscripciones: ${tournament.registration_open ? 'abiertas' : 'cerradas'}`;
+  abrirInscripcionesButton.disabled = tournament.status === 'finished' || tournament.registration_open;
+  cerrarInscripcionesButton.disabled = tournament.status === 'finished' || !tournament.registration_open;
+  finalizarTorneoButton.disabled = tournament.status === 'finished';
+}
+
+async function cargarGestionTorneos() {
+  const tournaments = await obtenerDatos(
+    `tournaments?select=id,name,year,creator_id,registration_open,status,finished_at&creator_id=eq.${session.user.id}&order=year.desc,name.asc`
+  );
+
+  torneoGestionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  tournaments.forEach(tournament => {
+    const option = document.createElement('option');
+    option.value = tournament.id;
+    option.textContent = `${tournament.name} (${tournament.year})`;
+    option.dataset.tournament = JSON.stringify(tournament);
+    torneoGestionSelect.appendChild(option);
+  });
+
+  actualizarEstadoGestion(null);
+}
+
+async function cambiarEstadoTorneo(changes, message) {
+  const tournamentId = torneoGestionSelect.value;
+  if (!tournamentId) {
+    mostrarGestionMensaje('Selecciona un torneo.', 'red');
+    return;
+  }
+
+  const button = document.activeElement;
+  if (button) button.disabled = true;
+  mostrarGestionMensaje('Guardando cambios...', 'blue');
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/tournaments?id=eq.${tournamentId}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify(changes)
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || error.details || 'No se pudo actualizar el torneo.');
+    }
+
+    mostrarGestionMensaje(message, 'blue');
+    await cargarGestionTorneos();
+  } catch (error) {
+    mostrarGestionMensaje(error.message, 'red');
+    actualizarEstadoGestion(JSON.parse(torneoGestionSelect.selectedOptions[0]?.dataset.tournament || 'null'));
+  }
 }
 
 function obtenerRondasFormulario() {
@@ -205,7 +292,7 @@ async function obtenerDatos(endpoint) {
 
 async function cargarOpcionesInscripcion() {
   const [torneos, razas] = await Promise.all([
-    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc'),
+    obtenerDatos('tournaments?select=id,name,year&status=eq.active&registration_open=eq.true&order=year.desc,name.asc'),
     obtenerDatos('races?select=id,name&active=eq.true&order=name.asc')
   ]);
 
@@ -543,17 +630,23 @@ async function descargarRoster(path) {
 }
 
 async function cargarSelectorClasificacion() {
-  const registrations = await obtenerDatos(
-    `tournament_users?select=tournament_id&user_id=eq.${session.user.id}`
-  );
+  const [registrations, tournaments] = await Promise.all([
+    obtenerDatos(`tournament_users?select=tournament_id&user_id=eq.${session.user.id}`),
+    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc')
+  ]);
   const enrolledTournamentIds = new Set(
     registrations.map(registration => String(registration.tournament_id))
   );
 
   torneoClasificacionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
-  [...torneoSelect.options]
-    .filter(option => option.value && enrolledTournamentIds.has(String(option.value)))
-    .forEach(option => torneoClasificacionSelect.appendChild(option.cloneNode(true)));
+  tournaments
+    .filter(tournament => enrolledTournamentIds.has(String(tournament.id)))
+    .forEach(tournament => {
+      const option = document.createElement('option');
+      option.value = tournament.id;
+      option.textContent = `${tournament.name} (${tournament.year})`;
+      torneoClasificacionSelect.appendChild(option);
+    });
 
   if (torneoClasificacionSelect.options.length === 1) {
     torneoClasificacionSelect.innerHTML = '<option value="">No estás inscrito en ningún torneo</option>';
@@ -568,6 +661,7 @@ async function prepararInscripcion() {
     await cargarOpcionesPartido();
     await cargarOpcionesRosters();
     await cargarRosters();
+    await cargarGestionTorneos();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
@@ -647,6 +741,35 @@ loginForm.addEventListener('submit', async event => {
 
 torneoClasificacionSelect.addEventListener('change', () => {
   cargarClasificacion(torneoClasificacionSelect.value);
+});
+
+torneoGestionSelect.addEventListener('change', () => {
+  const tournament = JSON.parse(
+    torneoGestionSelect.selectedOptions[0]?.dataset.tournament || 'null'
+  );
+  actualizarEstadoGestion(tournament);
+});
+
+abrirInscripcionesButton.addEventListener('click', () => {
+  cambiarEstadoTorneo(
+    { registration_open: true },
+    'Inscripciones abiertas correctamente.'
+  );
+});
+
+cerrarInscripcionesButton.addEventListener('click', () => {
+  cambiarEstadoTorneo(
+    { registration_open: false },
+    'Inscripciones cerradas correctamente.'
+  );
+});
+
+finalizarTorneoButton.addEventListener('click', () => {
+  if (!window.confirm('¿Quieres dar por finalizado este torneo?')) return;
+  cambiarEstadoTorneo(
+    { status: 'finished', registration_open: false, finished_at: new Date().toISOString() },
+    'Torneo finalizado correctamente.'
+  );
 });
 
 torneoRostersSelect.addEventListener('change', () => {
@@ -866,6 +989,7 @@ form.addEventListener('submit', async event => {
     mostrarMensaje('Torneo creado correctamente.', 'blue');
     form.reset();
     reiniciarRondas();
+    await prepararInscripcion();
   } catch (error) {
     console.error('Error al crear el torneo:', error);
     mostrarMensaje(`No se pudo crear el torneo: ${error.message}`, 'red');

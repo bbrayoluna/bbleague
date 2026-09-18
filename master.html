@@ -84,6 +84,17 @@
 
         <div id="mensaje" class="centered" aria-live="polite"></div>
 
+        <h2 class="nuffle red centered">Gestionar torneo</h2>
+        <form class="formulario" id="formGestionTorneo">
+          <label for="torneoGestion">Torneo creado por mí</label>
+          <select id="torneoGestion" required></select>
+          <div id="estadoTorneo" class="centered"></div>
+          <button type="button" class="master-action" id="abrirInscripciones">Abrir inscripciones</button>
+          <button type="button" class="master-action" id="cerrarInscripciones">Cerrar inscripciones</button>
+          <button type="button" class="master-action" id="finalizarTorneo">Finalizar torneo</button>
+        </form>
+        <div id="gestionMensaje" class="centered" aria-live="polite"></div>
+
         <h2 class="nuffle red centered">Inscribirse en un torneo</h2>
         <form class="formulario" id="formInscripcion">
           <label for="torneoInscripcion">Torneo</label>
