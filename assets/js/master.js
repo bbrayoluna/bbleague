@@ -15,6 +15,7 @@ function botonFormulario(formElement) {
 }
 
 const boton = botonFormulario(form);
+loginForm?.querySelector('button')?.setAttribute('type', 'submit');
 const inscripcionForm = document.getElementById('formInscripcion');
 const inscripcionMensaje = document.getElementById('inscripcionMensaje');
 const torneoSelect = document.getElementById('torneoInscripcion');
