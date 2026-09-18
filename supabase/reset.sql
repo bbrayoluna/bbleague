@@ -15,6 +15,7 @@ drop function if exists public.set_updated_at() cascade;
 drop function if exists public.is_admin() cascade;
 
 drop table if exists public.rosters cascade;
+drop table if exists public.tournament_bases cascade;
 drop table if exists public.results cascade;
 drop table if exists public.matches cascade;
 drop table if exists public.rounds cascade;
@@ -25,5 +26,7 @@ drop table if exists public.users cascade;
 
 delete from storage.objects where bucket_id = 'rosters';
 delete from storage.buckets where id = 'rosters';
+delete from storage.objects where bucket_id = 'tournament-documents';
+delete from storage.buckets where id = 'tournament-documents';
 
 commit;
