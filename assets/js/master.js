@@ -18,6 +18,11 @@ const razaSelect = document.getElementById('razaInscripcion');
 const resultadoForm = document.getElementById('formResultado');
 const resultadoMensaje = document.getElementById('resultadoMensaje');
 const partidoSelect = document.getElementById('partidoResultado');
+const partidoForm = document.getElementById('formPartido');
+const partidoMensaje = document.getElementById('partidoMensaje');
+const rondaPartidoSelect = document.getElementById('rondaPartido');
+const jugadorAPartidoSelect = document.getElementById('jugadorAPartido');
+const jugadorBPartidoSelect = document.getElementById('jugadorBPartido');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
 let session = null;
@@ -45,6 +50,11 @@ function mostrarInscripcionMensaje(texto, clase) {
 function mostrarResultadoMensaje(texto, clase) {
   resultadoMensaje.textContent = texto;
   resultadoMensaje.className = `${clase} centered`;
+}
+
+function mostrarPartidoMensaje(texto, clase) {
+  partidoMensaje.textContent = texto;
+  partidoMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
@@ -235,10 +245,81 @@ async function cargarPartidosPendientes() {
   });
 }
 
+async function cargarOpcionesPartido() {
+  const [rounds, registrations, users] = await Promise.all([
+    obtenerDatos('rounds?select=id,number,tournament_id&order=tournament_id.asc,number.asc'),
+    obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
+    obtenerDatos('users?select=id,username')
+  ]);
+
+  const usernameById = new Map(users.map(user => [user.id, user.username]));
+  const participantLabel = registration => {
+    const username = usernameById.get(registration.user_id) || 'Usuario';
+    return registration.team_name ? `${username} - ${registration.team_name}` : username;
+  };
+
+  rondaPartidoSelect.innerHTML = '<option value="">Selecciona una ronda</option>';
+  rounds.forEach(round => {
+    const option = document.createElement('option');
+    option.value = round.id;
+    option.dataset.tournamentId = round.tournament_id;
+    option.textContent = `Torneo ${round.tournament_id} - Ronda ${round.number}`;
+    rondaPartidoSelect.appendChild(option);
+  });
+
+  function cargarJugadores(tournamentId) {
+    jugadorAPartidoSelect.innerHTML = '<option value="">Selecciona jugador A</option>';
+    jugadorBPartidoSelect.innerHTML = '<option value="">Selecciona jugador B</option>';
+
+    registrations
+      .filter(registration => String(registration.tournament_id) === String(tournamentId))
+      .forEach(registration => {
+        const label = participantLabel(registration);
+        [jugadorAPartidoSelect, jugadorBPartidoSelect].forEach(select => {
+          const option = document.createElement('option');
+          option.value = registration.id;
+          option.textContent = label;
+          select.appendChild(option);
+        });
+      });
+  }
+
+  rondaPartidoSelect.onchange = () => {
+    const selected = rondaPartidoSelect.selectedOptions[0];
+    cargarJugadores(selected?.dataset.tournamentId);
+  };
+}
+
+async function crearPartido(roundId, playerAId, playerBId) {
+  const selectedRound = rondaPartidoSelect.selectedOptions[0];
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/matches`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify({
+      tournament_id: Number(selectedRound.dataset.tournamentId),
+      round_id: Number(roundId),
+      tournament_user_a_id: Number(playerAId),
+      tournament_user_b_id: Number(playerBId),
+      status: 'scheduled'
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.details || 'No se pudo crear el partido.');
+  }
+}
+
 async function prepararInscripcion() {
   try {
     await cargarOpcionesInscripcion();
     await cargarPartidosPendientes();
+    await cargarOpcionesPartido();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
@@ -313,6 +394,42 @@ loginForm.addEventListener('submit', async event => {
     mostrarLoginMensaje(error.message, 'red');
   } finally {
     loginButton.disabled = false;
+  }
+});
+
+partidoForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const partidoButton = partidoForm.querySelector('button[type="submit"]');
+  const roundId = rondaPartidoSelect.value;
+  const playerAId = jugadorAPartidoSelect.value;
+  const playerBId = jugadorBPartidoSelect.value;
+
+  if (!roundId || !playerAId || !playerBId) {
+    mostrarPartidoMensaje('Completa todos los campos.', 'red');
+    return;
+  }
+
+  if (playerAId === playerBId) {
+    mostrarPartidoMensaje('Los jugadores deben ser distintos.', 'red');
+    return;
+  }
+
+  partidoButton.disabled = true;
+  mostrarPartidoMensaje('Añadiendo partido...', 'blue');
+
+  try {
+    await crearPartido(roundId, playerAId, playerBId);
+    partidoForm.reset();
+    jugadorAPartidoSelect.innerHTML = '<option value="">Selecciona jugador A</option>';
+    jugadorBPartidoSelect.innerHTML = '<option value="">Selecciona jugador B</option>';
+    mostrarPartidoMensaje('Partido añadido correctamente.', 'blue');
+    await cargarPartidosPendientes();
+  } catch (error) {
+    console.error('Error al crear el partido:', error);
+    mostrarPartidoMensaje(error.message, 'red');
+  } finally {
+    partidoButton.disabled = false;
   }
 });
 
