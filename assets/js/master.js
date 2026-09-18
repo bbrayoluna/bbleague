@@ -27,6 +27,13 @@ const torneoClasificacionSelect = document.getElementById('torneoClasificacion')
 const clasificacionContenedor = document.getElementById('clasificacionContenedor');
 const clasificacionMensaje = document.getElementById('clasificacionMensaje');
 const clasificacionBody = document.querySelector('#tablaClasificacion tbody');
+const rosterForm = document.getElementById('formRoster');
+const rosterMensaje = document.getElementById('rosterMensaje');
+const inscripcionRosterSelect = document.getElementById('inscripcionRoster');
+const archivoRoster = document.getElementById('archivoRoster');
+const torneoRostersSelect = document.getElementById('torneoRosters');
+const rostersMensaje = document.getElementById('rostersMensaje');
+const rostersBody = document.querySelector('#tablaRosters tbody');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
 let session = null;
@@ -64,6 +71,16 @@ function mostrarPartidoMensaje(texto, clase) {
 function mostrarClasificacionMensaje(texto, clase) {
   clasificacionMensaje.textContent = texto;
   clasificacionMensaje.className = `${clase} centered`;
+}
+
+function mostrarRosterMensaje(texto, clase) {
+  rosterMensaje.textContent = texto;
+  rosterMensaje.className = `${clase} centered`;
+}
+
+function mostrarRostersMensaje(texto, clase) {
+  rostersMensaje.textContent = texto;
+  rostersMensaje.className = `${clase} centered`;
 }
 
 function mostrarAreaMaster(visible) {
@@ -174,7 +191,7 @@ async function obtenerDatos(endpoint) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`
     }
   });
 
@@ -337,7 +354,7 @@ async function cargarClasificacion(tournamentId) {
 
   try {
     const rows = await obtenerDatos(
-      `classification?select=rank,username,race_name,played,wins,draws,losses,points,touchdown_difference,casualty_difference&tournament_id=eq.${tournamentId}&order=rank.asc`
+      `classification_for_user?select=rank,username,race_name,played,wins,draws,losses,points,touchdown_difference,casualty_difference&tournament_id=eq.${tournamentId}&order=rank.asc`
     );
 
     if (rows.length === 0) {
@@ -369,19 +386,178 @@ async function cargarClasificacion(tournamentId) {
   }
 }
 
-function cargarSelectorClasificacion() {
+async function cargarOpcionesRosters() {
+  const [registrations, users, tournaments] = await Promise.all([
+    obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
+    obtenerDatos('users?select=id,username'),
+    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc')
+  ]);
+
+  const usernameById = new Map(users.map(user => [user.id, user.username]));
+  const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
+  const enrolledTournamentIds = new Set(
+    registrations
+      .filter(registration => registration.user_id === session.user.id)
+      .map(registration => String(registration.tournament_id))
+  );
+
+  inscripcionRosterSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  registrations
+    .filter(registration => registration.user_id === session.user.id)
+    .forEach(registration => {
+      const tournament = tournamentById.get(String(registration.tournament_id));
+      if (!tournament) return;
+      const option = document.createElement('option');
+      option.value = registration.id;
+      option.textContent = `${tournament.name} (${tournament.year}) - ${registration.team_name}`;
+      inscripcionRosterSelect.appendChild(option);
+    });
+
+  torneoRostersSelect.innerHTML = '<option value="">Todos los torneos</option>';
+  tournaments.filter(tournament => enrolledTournamentIds.has(String(tournament.id))).forEach(tournament => {
+    const option = document.createElement('option');
+    option.value = tournament.id;
+    option.textContent = `${tournament.name} (${tournament.year})`;
+    torneoRostersSelect.appendChild(option);
+  });
+
+  return { registrations, usernameById, tournamentById };
+}
+
+async function cargarRosters(tournamentId = '') {
+  mostrarRostersMensaje('Cargando rosters...', 'blue');
+  rostersBody.innerHTML = '';
+
+  const [rosters, registrations, users, tournaments] = await Promise.all([
+    obtenerDatos('rosters?select=id,tournament_user_id,file_name,storage_path,uploaded_at&order=uploaded_at.desc'),
+    obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
+    obtenerDatos('users?select=id,username'),
+    obtenerDatos('tournaments?select=id,name,year')
+  ]);
+
+  const registrationById = new Map(registrations.map(registration => [String(registration.id), registration]));
+  const usernameById = new Map(users.map(user => [user.id, user.username]));
+  const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
+  const filteredRosters = rosters.filter(roster => {
+    if (!tournamentId) return true;
+    const registration = registrationById.get(String(roster.tournament_user_id));
+    return String(registration?.tournament_id) === String(tournamentId);
+  });
+
+  filteredRosters.forEach(roster => {
+    const registration = registrationById.get(String(roster.tournament_user_id));
+    const tournament = tournamentById.get(String(registration?.tournament_id));
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${tournament ? `${tournament.name} (${tournament.year})` : ''}</td>
+      <td>${usernameById.get(registration?.user_id) || ''}</td>
+      <td>${registration?.team_name || ''}</td>
+      <td>${roster.file_name}</td>
+      <td>${new Date(roster.uploaded_at).toLocaleString('es-ES')}</td>
+      <td><button type="button" class="master-action descargar-roster" data-path="${roster.storage_path}">Descargar</button></td>
+    `;
+    rostersBody.appendChild(row);
+  });
+
+  mostrarRostersMensaje(
+    filteredRosters.length ? '' : 'No hay rosters disponibles.',
+    filteredRosters.length ? 'blue' : 'red'
+  );
+}
+
+async function subirRoster(registrationId, file) {
+  const path = `${registrationId}/roster.pdf`;
+  const uploadResponse = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/rosters/${path}`,
+    {
+      method: 'PUT',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/pdf',
+        'x-upsert': 'true'
+      },
+      body: file
+    }
+  );
+
+  if (!uploadResponse.ok) {
+    const error = await uploadResponse.json().catch(() => ({}));
+    throw new Error(error.message || error.error || 'No se pudo subir el archivo.');
+  }
+
+  const metadataResponse = await fetch(`${SUPABASE_URL}/rest/v1/rosters?on_conflict=tournament_user_id`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation'
+    },
+    body: JSON.stringify({
+      tournament_user_id: Number(registrationId),
+      file_name: file.name,
+      storage_path: path,
+      mime_type: 'application/pdf'
+    })
+  });
+
+  if (!metadataResponse.ok) {
+    const error = await metadataResponse.json().catch(() => ({}));
+    throw new Error(error.message || error.details || 'El archivo se subió, pero no se guardaron sus datos.');
+  }
+}
+
+async function descargarRoster(path) {
+  const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/rosters/${encodedPath}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ expiresIn: 3600 })
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || 'No se pudo preparar la descarga.');
+  }
+
+  const data = await response.json();
+  const signedUrl = data.signedURL.startsWith('http')
+    ? data.signedURL
+    : `${SUPABASE_URL}${data.signedURL}`;
+  window.open(signedUrl, '_blank', 'noopener');
+}
+
+async function cargarSelectorClasificacion() {
+  const registrations = await obtenerDatos(
+    `tournament_users?select=tournament_id&user_id=eq.${session.user.id}`
+  );
+  const enrolledTournamentIds = new Set(
+    registrations.map(registration => String(registration.tournament_id))
+  );
+
   torneoClasificacionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
   [...torneoSelect.options]
-    .filter(option => option.value)
+    .filter(option => option.value && enrolledTournamentIds.has(String(option.value)))
     .forEach(option => torneoClasificacionSelect.appendChild(option.cloneNode(true)));
+
+  if (torneoClasificacionSelect.options.length === 1) {
+    torneoClasificacionSelect.innerHTML = '<option value="">No estás inscrito en ningún torneo</option>';
+  }
 }
 
 async function prepararInscripcion() {
   try {
     await cargarOpcionesInscripcion();
-    cargarSelectorClasificacion();
+    await cargarSelectorClasificacion();
     await cargarPartidosPendientes();
     await cargarOpcionesPartido();
+    await cargarOpcionesRosters();
+    await cargarRosters();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
@@ -461,6 +637,59 @@ loginForm.addEventListener('submit', async event => {
 
 torneoClasificacionSelect.addEventListener('change', () => {
   cargarClasificacion(torneoClasificacionSelect.value);
+});
+
+torneoRostersSelect.addEventListener('change', () => {
+  cargarRosters(torneoRostersSelect.value).catch(error => {
+    mostrarRostersMensaje(`No se pudieron cargar los rosters: ${error.message}`, 'red');
+  });
+});
+
+rostersBody.addEventListener('click', async event => {
+  const button = event.target.closest('.descargar-roster');
+  if (!button) return;
+
+  button.disabled = true;
+  try {
+    await descargarRoster(button.dataset.path);
+  } catch (error) {
+    mostrarRostersMensaje(error.message, 'red');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+rosterForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const registrationId = inscripcionRosterSelect.value;
+  const file = archivoRoster.files[0];
+  const uploadButton = rosterForm.querySelector('button[type="submit"]');
+
+  if (!registrationId || !file) {
+    mostrarRosterMensaje('Selecciona un torneo y un archivo PDF.', 'red');
+    return;
+  }
+
+  if (file.type !== 'application/pdf') {
+    mostrarRosterMensaje('El roster debe estar en formato PDF.', 'red');
+    return;
+  }
+
+  uploadButton.disabled = true;
+  mostrarRosterMensaje('Subiendo roster...', 'blue');
+
+  try {
+    await subirRoster(registrationId, file);
+    rosterForm.reset();
+    await cargarRosters(torneoRostersSelect.value);
+    mostrarRosterMensaje('Roster subido correctamente.', 'blue');
+  } catch (error) {
+    console.error('Error al subir el roster:', error);
+    mostrarRosterMensaje(error.message, 'red');
+  } finally {
+    uploadButton.disabled = false;
+  }
 });
 
 partidoForm.addEventListener('submit', async event => {

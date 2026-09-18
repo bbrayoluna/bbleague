@@ -162,6 +162,42 @@
             <tbody></tbody>
           </table>
         </div>
+
+        <h2 class="nuffle red centered">Subir roster</h2>
+        <form class="formulario" id="formRoster">
+          <label for="inscripcionRoster">Torneo</label>
+          <select id="inscripcionRoster" required></select>
+
+          <label for="archivoRoster">Archivo PDF</label>
+          <input type="file" id="archivoRoster" accept="application/pdf,.pdf" required>
+
+          <button type="submit">Subir roster</button>
+        </form>
+        <div id="rosterMensaje" class="centered" aria-live="polite"></div>
+
+        <h2 class="nuffle red centered">Descargar rosters</h2>
+        <div class="formulario">
+          <label for="torneoRosters">Filtrar por torneo</label>
+          <select id="torneoRosters">
+            <option value="">Todos los torneos</option>
+          </select>
+        </div>
+        <div id="rostersMensaje" class="centered" aria-live="polite"></div>
+        <div id="rostersContenedor" class="classification-scroll">
+          <table id="tablaRosters">
+            <thead>
+              <tr>
+                <th>Torneo</th>
+                <th>Jugador</th>
+                <th>Equipo</th>
+                <th>Archivo</th>
+                <th>Fecha</th>
+                <th>Descargar</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </section>
     </main>
   </div>
