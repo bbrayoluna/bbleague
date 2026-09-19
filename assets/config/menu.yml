@@ -1,0 +1,11 @@
+# Configuración del menú lateral
+# Cada entrada tiene: texto (etiqueta) y path (ruta del archivo HTML)
+items:
+  - texto: Master
+    path: master.html
+  - texto: Jugadores
+    path: jugadoresNew.html
+  - texto: Registro
+    path: registroNew.html
+  - texto: Inicio
+    path: indexNew.html
