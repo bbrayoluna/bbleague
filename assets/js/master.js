@@ -591,7 +591,7 @@ function conectarBases() {
       const button = event.currentTarget.querySelector('button');
       if (!select.value || !file || file.type !== 'application/pdf') { message.textContent = 'Selecciona un torneo y un PDF.'; return; }
       button.disabled = true;
-            try {
+      try {
         // Usar el id numérico del torneo como prefijo del path de storage.
         // La política RLS hace split_part(name,'/',1)::bigint, por lo que el
         // primer segmento DEBE ser un número; si se usara el nombre del torneo
