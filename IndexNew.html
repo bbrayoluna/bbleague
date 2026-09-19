@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/menuNew.js"></script>
+<script type="module" src="assets/js/indexNew.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>League Rayo de Luna</title>
@@ -14,17 +16,21 @@
 	</header>
 	<div class="container">
 		<nav>
-			<div id="menu-container">
-				<ul>
-					<li><a href="master.html" class="nuffle yellow menu">Master</a></li>
-					<li><a href="jugadoresNew.html" class="nuffle yellow menu">Jugadores</a></li>
-					<li><a href="registroNew.html" class="nuffle yellow menu">Registro</a></li>
-				</ul>
-			</div>
+			<div id="menu-container"></div>
 			<img src="images/numuno.PNG" class="sideimg" alt="numuno">
 		</nav>
 		<main>
-			<p class="nuffle red big centered">Acceso</p>
+			<section id="loginSection">
+				<h2 class="nuffle red centered">Login</h2>
+				<form class="formulario" id="formLogin">
+					<label for="username">Usuario</label>
+					<input id="username" type="text" autocomplete="username" required>
+					<label for="password">Contraseña</label>
+					<input id="password" type="password" autocomplete="current-password" required>
+					<button type="submit">Entrar</button>
+				</form>
+				<p id="loginMensaje" class="centered"></p>
+			</section>
 		</main>
 	</div>
 </body>

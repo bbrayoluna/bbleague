@@ -1,5 +1,6 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
-import { iniciarSesion, registrarUsuario, obtenerSesion, cerrarSesion } from './auth.js';
+import { iniciarSesion, registrarUsuario, obtenerSesion } from './auth.js';
+import { setMenuLoggedIn } from './menuNew.js';
 
 const loginSection = document.getElementById('loginSection');
 const masterSection = document.getElementById('masterSection');
@@ -7,7 +8,6 @@ const loginForm = document.getElementById('formLogin');
 const loginMensaje = document.getElementById('loginMensaje');
 const registroForm = document.getElementById('formRegistroUsuario');
 const registroMensaje = document.getElementById('registroMensaje');
-const logoutButton = document.getElementById('logoutButton');
 const form = document.getElementById('formTorneo');
 const mensaje = document.getElementById('mensaje');
 function botonFormulario(formElement) {
@@ -886,6 +886,7 @@ loginForm?.addEventListener('submit', async event => {
   try {
     session = await iniciarSesion(username, password);
     mostrarAreaMaster(true);
+    setMenuLoggedIn(true);
     await prepararInscripcion();
     mostrarLoginMensaje('', 'blue');
   } catch (error) {
@@ -1112,8 +1113,7 @@ registroForm?.addEventListener('submit', async event => {
   }
 });
 
-logoutButton?.addEventListener('click', () => {
-  cerrarSesion();
+window.addEventListener('bbleague:logout', () => {
   session = null;
   form?.reset();
   mostrarAreaMaster(false);
@@ -1162,11 +1162,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     session = await obtenerSesion();
     mostrarAreaMaster(Boolean(session));
+    setMenuLoggedIn(Boolean(session));
     if (session) {
       await prepararInscripcion();
     }
   } catch (error) {
     mostrarAreaMaster(false);
+    setMenuLoggedIn(false);
     mostrarLoginMensaje(error.message, 'red');
   }
 });

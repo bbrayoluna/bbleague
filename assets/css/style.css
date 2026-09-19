@@ -100,6 +100,18 @@ h2 {
     }
 }
 
+#logoutButton.menu {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    color: inherit;
+    text-align: left;
+}
+
 /* Layout general */
 body {
     background-image: url('images/fondo.jpg');
