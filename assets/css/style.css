@@ -101,15 +101,21 @@ h2 {
 }
 
 #logoutButton.menu {
-    background: none;
+    background-color: #25396c;
+    color: #fac546;
     border: none;
-    padding: 0;
+    padding: 0.5rem 1rem;
     cursor: pointer;
     font-family: inherit;
     font-weight: inherit;
     font-size: inherit;
-    color: #25396c;
     text-align: left;
+    border-radius: 4px;
+}
+
+#logoutButton.menu:hover {
+    background-color: #fac546;
+    color: #25396c;
 }
 
 /* Layout general */
