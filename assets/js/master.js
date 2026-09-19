@@ -603,7 +603,9 @@ function conectarBases() {
         if (!upload.ok) { const error = await upload.json().catch(() => ({})); throw new Error(error.message || error.error || `No se pudieron subir las bases (HTTP ${upload.status}).`); }
         const metadata = await fetch(`${SUPABASE_URL}/rest/v1/tournament_bases?on_conflict=tournament_id`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ tournament_id: Number(select.value), file_name: file.name, storage_path: path, mime_type: 'application/pdf' }) });
         if (!metadata.ok) { const error = await metadata.json().catch(() => ({})); throw new Error(error.message || error.details || error.hint || `No se guardaron los datos de las bases (HTTP ${metadata.status}).`); }
-        event.currentTarget.reset(); message.textContent = 'Bases subidas correctamente.';
+                const form = document.getElementById('formBasesTorneo');
+        if (form) { try { form.reset(); } catch (e) {} }
+        message.textContent = 'Bases subidas correctamente.;
       } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
     });
     return;
