@@ -591,8 +591,14 @@ function conectarBases() {
       const button = event.currentTarget.querySelector('button');
       if (!select.value || !file || file.type !== 'application/pdf') { message.textContent = 'Selecciona un torneo y un PDF.'; return; }
       button.disabled = true;
-      try {
-        const path = `${select.value}/bases.pdf`;
+            try {
+        // Usar el id numérico del torneo como prefijo del path de storage.
+        // La política RLS hace split_part(name,'/',1)::bigint, por lo que el
+        // primer segmento DEBE ser un número; si se usara el nombre del torneo
+        // (p.ej. "Luna Nueva") PostgreSQL lanza:
+        //   invalid input syntax for type bigint: "Luna Nueva"
+        const tournamentId = Number(select.value);
+        const path = `${tournamentId}/bases.pdf`;
         const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/tournament-documents/${path}`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/pdf', 'x-upsert': 'true' }, body: file });
         if (!upload.ok) { const error = await upload.json().catch(() => ({})); throw new Error(error.message || error.error || `No se pudieron subir las bases (HTTP ${upload.status}).`); }
         const metadata = await fetch(`${SUPABASE_URL}/rest/v1/tournament_bases?on_conflict=tournament_id`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ tournament_id: Number(select.value), file_name: file.name, storage_path: path, mime_type: 'application/pdf' }) });
