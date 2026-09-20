@@ -574,7 +574,7 @@ function cargarSelectorResultados() {
     .forEach(option => torneoResultadosSelect.appendChild(option.cloneNode(true)));
 }
 
-function conectarBases() {
+async function conectarBases() {
   if (document.getElementById('basesMasterSection') || document.getElementById('basesJugadorSection')) return;
 
   if (form) {
@@ -874,7 +874,7 @@ async function prepararInscripcion() {
       await cargarRosters();
     }
     if (torneoGestionSelect) await cargarGestionTorneos();
-    conectarBases();
+      await conectarBases();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
