@@ -689,17 +689,19 @@ async function cargarOpcionesRosters() {
       .map(registration => String(registration.tournament_id))
   );
 
-  inscripcionRosterSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
-  registrations
-    .filter(registration => registration.user_id === session.user.id)
-    .forEach(registration => {
-      const tournament = tournamentById.get(String(registration.tournament_id));
-      if (!tournament) return;
-      const option = document.createElement('option');
-      option.value = registration.id;
-      option.textContent = `${tournament.name} (${tournament.year}) - ${registration.team_name}`;
-      inscripcionRosterSelect.appendChild(option);
-    });
+    if (inscripcionRosterSelect) {
+    inscripcionRosterSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+    registrations
+      .filter(registration => registration.user_id === session.user.id)
+      .forEach(registration => {
+        const tournament = tournamentById.get(String(registration.tournament_id));
+        if (!tournament) return;
+        const option = document.createElement('option');
+        option.value = registration.id;
+        option.textContent = `${tournament.name} (${tournament.year}) - ${registration.team_name}`;
+        inscripcionRosterSelect.appendChild(option);
+      });
+  }
 
   torneoRostersSelect.innerHTML = '<option value="">Todos los torneos</option>';
   tournaments.filter(tournament => enrolledTournamentIds.has(String(tournament.id))).forEach(tournament => {
@@ -869,9 +871,11 @@ async function prepararInscripcion() {
     }
     if (partidoSelect) await cargarPartidosPendientes();
     if (partidoForm) await cargarOpcionesPartido();
-    if (rosterForm) {
+      if (rosterForm) {
       await cargarOpcionesRosters();
       await cargarRosters();
+    } else if (torneoRostersSelect) {
+      await cargarOpcionesRosters();
     }
     if (torneoGestionSelect) await cargarGestionTorneos();
       await conectarBases();
