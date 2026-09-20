@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/miembros.js"></script>
+<script type="module" src="assets/js/menu.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area de Jugadores - League Rayo de Luna</title>
+</head>
+	<body>
+		<header>
+			<img src="images/logo.png" class="logosize"  alt="LogoBB">
+			<h1>League Rayo de Luna</h1>
+			<img src="images/logoliga.png" class="logosize6x6" alt="logoliga">
+		</header>
+		<div class="container">
+			<nav>
+				<div id="menu-container"></div>
+				<img src="images/members.jpeg" class="sideimg" alt="members">
+			</nav>
+			<main>
+				<div id="loginSection">
+				<div id="cheerme" class="hide centered">
+					<img src="images/bbPomPom.gif">
+				</div>
+				  <h2 class="nuffle red big centered">Iniciar sesión</h2>
+
+				  <form class="formulario" id="formLogin">
+					<label>Usuario</label>
+					<input type="text" id="loginUser" required>
+
+					<label>Contraseña</label>
+					<input type="password" id="loginPass" required>
+
+					<button type="submit">Entrar</button>
+				  </form>
+
+				  <div id="loginMensaje"></div>
+				</div>
+				<div class="hide nuffle red big" id="ronda-actual">Ronda Actual</div>
+				<div id="subirRoster" class="hide">
+					<h2 class="nuffle red centered">subir roster</h2>
+					<div id="progressContainer" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+					  <div id="progressBar" style="height: 10px; width: 0%; background: #ac342f;"></div>
+					</div>
+
+					<p id="status"></p>
+					<form  class="formulario" id="uploadRosterForm">
+					<label for="equipo">Equipo</label>
+					<select id="equipoRoster"></select>
+					  <input type="file" id="fileInput" required />
+					  <button type="submit">Subir roster</button>
+					</form>
+				</div>
+
+
+				<div id="form-wrapper" class="hide" >
+				  <h2 class="nuffle red centered">Enviar resultado</h2>
+
+				 <form class="formulario" id="resultadoForm">
+
+
+					<label for="jornada">Jornada</label>
+					<input type="text" id="jornada" readonly>
+
+					<label for="equipoA">Equipo A</label>
+					<select id="equipoA"></select>
+
+					<label for="equipoB">Equipo B</label>
+					<select id="equipoB"></select>
+
+					<label for="tdA">Touchdowns A</label>
+					<input type="number" id="tdA" min="0">
+
+					<label for="tdB">Touchdowns B</label>
+					<input type="number" id="tdB" min="0">
+
+					<label for="bajasA">Bajas causadas por equipo A</label>
+					<input type="number" id="bajasA" min="0">
+
+					<label for="bajasB">Bajas causadas por equipo B</label>
+					<input type="number" id="bajasB" min="0">
+
+					<button type="submit">Enviar resultado</button>
+				  </form>
+
+				  <div id="mensaje" style="margin-top:1rem;"></div>
+				</div>
+				
+				<div id="subirActas" class="hide">
+				<h2 class="nuffle red centered">OPCIONAL subir acta</h2>
+
+
+					<div id="progressContainerActa" style="width: 100%; background: #eee; height: 10px; margin-top: 10px; display:none;">
+					  <div id="progressBarActa" style="height: 10px; width: 0%; background: #ac342f;"></div>
+					</div>
+
+					<p id="statusActa"></p>
+					<form  class="formulario" id="uploadActaForm">
+					<label for="equipoA">Equipo A</label>
+					<select id="equipoAacta"></select>
+					<label for="equipoB">Equipo B</label>
+					<select id="equipoBacta"></select>
+					  <input type="file" id="fileInputActa" required />
+					  <button type="submit">Subir acta</button>
+					</form>
+					Plantilla Acta: <a href="descargas/general/plantillaActa.docx" download="plantillaActa.docx">Descargar</a>
+				</div>
+				<div id="listaRoster" class="hide">
+				  <h2 class="nuffle red centered">Rosters</h2>
+
+				  <table id="tablaRoster" border="1" style="margin-top: 10px; width: 100%; border-collapse: collapse;">
+					<thead>
+					  <tr>
+						<th>Nombre</th>
+						<th>Fecha</th>
+						<th>Descargar</th>
+					  </tr>
+					</thead>
+					<tbody></tbody>
+				  </table>
+
+				  <p id="mensajeRoster"></p>
+				</div>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+
+			</main>
+		</div>
+		<div id="overlay" class="hide">
+		  <div class="overlay-content nuffle red big">
+			Cargando...
+		  </div>
+		</div>
+	</body>
+
+
+</html>

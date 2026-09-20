@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="module" src="assets/js/registro.js"></script>
+<script type="module" src="assets/js/menu.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro - League Rayo de Luna</title>
+</head>
+	<body>
+		<header>
+			<img src="images/logo.png" class="logosize"  alt="LogoBB">
+			<h1>Registro</h1>
+			<img src="images/logoliga.png" class="logosize6x6" alt="logoliga">
+		</header>
+		<div class="container">
+			<nav>
+				<div id="menu-container"></div>
+				<img src="images/join.png" class="sideimg" alt="JOIN">
+		    <img src="images/2026/Navidad/CartelXmas26.jpg" class="sideimg" alt="cartel">
+			</nav>
+			<main>
+				<br>
+				<form class="formulario" id="formRegistro">
+				  <label>Nombre de usuario</label>
+				  <input type="text" id="username" required>
+
+				  <label>Nombre del equipo</label>
+				  <input type="text" id="equipo" required>
+
+				  <label for="raza">Raza</label>
+				  <select id="raza" required></select>
+
+				  <label>Contraseña</label>
+				  <input type="password" id="password" required>
+
+				  <button type="submit">Registrarse</button>
+				</form>
+
+				<div id="mensaje"></div>
+				<div class="hide nuffle red centered big" id="noregistros">Torneo en curso. Registro no permitido</div>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+			</main>
+		</div>
+		<div id="overlay" class="hide">
+		  <div class="overlay-content nuffle red big">
+			Cargando...
+		  </div>
+		</div>
+	</body>
+</html>
