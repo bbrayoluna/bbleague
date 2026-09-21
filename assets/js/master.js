@@ -722,7 +722,7 @@ async function cargarOpcionesRosters() {
 
 async function cargarRosters(tournamentId = '') {
   rostersContenedor?.classList.add('hide');
-  rostersBody?.innerHTML = '';
+  if (rostersBody) rostersBody.innerHTML = '';
 
   // Igual que clasificacion: sin torneo seleccionado no se muestra la lista.
   if (!tournamentId) {
