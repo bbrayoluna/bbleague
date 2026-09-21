@@ -44,6 +44,10 @@ const torneoRostersSelect = document.getElementById('torneoRosters');
 const rostersMensaje = document.getElementById('rostersMensaje');
 const rostersBody = document.querySelector('#tablaRosters tbody');
 const rostersContenedor = document.getElementById('rostersContenedor');
+const torneoBasesSelect = document.getElementById('torneoBasesFilter');
+const basesJugadorMensaje = document.getElementById('basesJugadorMensaje');
+const basesJugadorContenedor = document.getElementById('basesJugadorContenedor');
+const basesJugadorBody = document.querySelector('#tablaBasesJugador tbody');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
 const torneoGestionSelect = document.getElementById('torneoGestion');
@@ -112,6 +116,12 @@ function mostrarRostersMensaje(texto, clase) {
   if (!rostersMensaje) return;
   rostersMensaje.textContent = texto;
   rostersMensaje.className = `${clase} centered`;
+}
+
+function mostrarBasesJugadorMensaje(texto, clase) {
+  if (!basesJugadorMensaje) return;
+  basesJugadorMensaje.textContent = texto;
+  basesJugadorMensaje.className = `${clase} centered`;
 }
 
 function mostrarGestionMensaje(texto, clase) {
@@ -576,9 +586,10 @@ function cargarSelectorResultados() {
 }
 
 async function conectarBases() {
-  if (document.getElementById('basesMasterSection') || document.getElementById('basesJugadorSection')) return;
-
-  if (form) {
+  // El formulario para subir las bases solo existe en master.html. El guard
+  // evita inyectarlo dos veces, porque prepararInscripcion se ejecuta al
+  // cargar la página, al iniciar sesión y al crear un torneo.
+  if (form && !document.getElementById('formBasesTorneo')) {
     masterSection.insertAdjacentHTML('beforeend', '<h2 class="nuffle red centered">Bases del torneo</h2><form class="formulario" id="formBasesTorneo"><label>Torneo</label><select id="torneoBases" required></select><label>Archivo PDF</label><input id="archivoBases" type="file" accept="application/pdf,.pdf" required><button>Subir bases</button></form><div id="basesMensaje"></div>');
     const select = document.getElementById('torneoBases');
     obtenerDatos(`tournaments?select=id,name,year&creator_id=eq.${session.user.id}&order=year.desc,name.asc`).then(tournaments => {
@@ -609,71 +620,75 @@ async function conectarBases() {
         message.textContent = 'Bases subidas correctamente.';
       } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
     });
+  }
+}
+
+// --- Sección Bases de los torneos (parte jugador) ---
+// El markup vive en torneosNew.html, igual que clasificación, resultados y
+// rosters; aquí solo se rellenan el <select> y la tabla.
+async function cargarSelectorBases() {
+  const [registrations, tournaments] = await Promise.all([
+    obtenerDatos(`tournament_users?select=tournament_id&user_id=eq.${session.user.id}`),
+    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc')
+  ]);
+  const enrolledTournamentIds = new Set(
+    registrations.map(registration => String(registration.tournament_id))
+  );
+
+  torneoBasesSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  tournaments
+    .filter(tournament => enrolledTournamentIds.has(String(tournament.id)))
+    .forEach(tournament => {
+      const option = document.createElement('option');
+      option.value = tournament.id;
+      option.textContent = `${tournament.name} (${tournament.year})`;
+      torneoBasesSelect.appendChild(option);
+    });
+
+  if (torneoBasesSelect.options.length === 1) {
+    torneoBasesSelect.innerHTML = '<option value="">No estás inscrito en ningún torneo</option>';
+  }
+}
+
+async function cargarBasesJugador(tournamentId = '') {
+  if (!basesJugadorBody) return;
+
+  basesJugadorContenedor?.classList.add('hide');
+  basesJugadorBody.innerHTML = '';
+
+  // Igual que clasificacion: sin torneo seleccionado no se muestra la lista.
+  if (!tournamentId) {
+    mostrarBasesJugadorMensaje('Selecciona un torneo.', 'blue');
     return;
   }
 
-  // --- Sección Bases de los torneos (parte jugador) ---
-  // Igual que clasificacion: no se muestra la lista hasta que se
-  // seleccione un torneo. El <select> se rellena con los torneos en
-  // los que el usuario esta inscrito.
-  masterSection.insertAdjacentHTML('beforeend', '<section id="basesJugadorSection"><h2 class="nuffle red centered">Bases de los torneos</h2><div class="formulario"><label for="torneoBasesFilter">Torneo</label><select id="torneoBasesFilter" required></select></div><div id="basesJugadorMensaje"></div><div id="basesTablaContenedor" class="hide classification-scroll"><table id="tablaBasesJugador"><thead><tr><th>Torneo</th><th>Archivo</th><th>Fecha</th><th>Descargar</th></tr></thead><tbody></tbody></table></div></section>');
-  const basesSelect = document.getElementById('torneoBasesFilter');
-  const basesBody = document.querySelector('#tablaBasesJugador tbody');
-  const basesTablaContenedor = document.getElementById('basesTablaContenedor');
-  const basesJugadorMensaje = document.getElementById('basesJugadorMensaje');
+  mostrarBasesJugadorMensaje('Cargando bases...', 'blue');
 
-  const [registrations, bases, tournaments] = await Promise.all([
-    obtenerDatos(`tournament_users?select=tournament_id&user_id=eq.${session.user.id}`),
-    obtenerDatos('tournament_bases?select=tournament_id,file_name,storage_path,uploaded_at'),
-    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc')
+  const [bases, tournaments] = await Promise.all([
+    obtenerDatos(`tournament_bases?select=tournament_id,file_name,storage_path,uploaded_at&tournament_id=eq.${tournamentId}&order=uploaded_at.desc`),
+    obtenerDatos('tournaments?select=id,name,year')
   ]);
 
-  const enrolled = new Set(registrations.map(row => String(row.tournament_id)));
   const tournamentById = new Map(tournaments.map(row => [String(row.id), row]));
 
-  // Rellenar select con torneos inscritos (vacío por defecto).
-  basesSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
-  tournaments
-    .filter(t => enrolled.has(String(t.id)))
-    .forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t.id;
-      opt.textContent = `${t.name} (${t.year})`;
-      basesSelect.appendChild(opt);
-    });
-
-  // Cargar bases SOLO al cambiar el torneo.
-  const cargarBasesDelTorneo = (tournamentId) => {
-    basesJugadorMensaje.textContent = '';
-    basesTablaContenedor.classList.add('hide');
-    basesBody.innerHTML = '';
-    if (!tournamentId) { basesJugadorMensaje.textContent = 'Selecciona un torneo.'; return; }
-    const rows = bases
-      .filter(base => String(base.tournament_id) === String(tournamentId))
-      .map(base => {
-        const tournament = tournamentById.get(String(base.tournament_id));
-        const path = base.storage_path.split('/').map(encodeURIComponent).join('/');
-        return `<tr><td>${tournament ? `${tournament.name} (${tournament.year})` : ''}</td><td>${base.file_name}</td><td>${new Date(base.uploaded_at).toLocaleString('es-ES')}</td><td><button type="button" class="master-action descargar-bases" data-path="${path}">Descargar</button></td></tr>`;
-      })
-      .join('');
-    basesBody.insertAdjacentHTML('beforeend', rows);
-    if (rows) basesTablaContenedor.classList.remove('hide');
-    basesJugadorMensaje.textContent = rows ? '' : 'No hay bases disponibles.';
-  };
-
-  // Cargar al iniciar y al cambiar.
-  cargarBasesDelTorneo('');
-  basesSelect.addEventListener('change', () => cargarBasesDelTorneo(basesSelect.value));
-
-  document.querySelector('#tablaBasesJugador tbody').addEventListener('click', async event => {
-    const button = event.target.closest('.descargar-bases');
-    if (!button) return;
-    const path = button.dataset.path;
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/tournament-documents/${path}`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 3600 }) });
-    const data = await response.json();
-    const url = data.signedURL.startsWith('http') ? data.signedURL : `${SUPABASE_URL}${data.signedURL.startsWith('/storage/v1/') ? data.signedURL : `/storage/v1${data.signedURL}`}`;
-    window.open(url, '_blank', 'noopener');
+  bases.forEach(base => {
+    const tournament = tournamentById.get(String(base.tournament_id));
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${tournament ? `${tournament.name} (${tournament.year})` : ''}</td>
+      <td>${base.file_name}</td>
+      <td>${new Date(base.uploaded_at).toLocaleString('es-ES')}</td>
+      <td><button type="button" class="master-action descargar-bases" data-path="${base.storage_path}">Descargar</button></td>
+    `;
+    basesJugadorBody.appendChild(row);
   });
+
+  if (bases.length) basesJugadorContenedor?.classList.remove('hide');
+
+  mostrarBasesJugadorMensaje(
+    bases.length ? '' : 'No hay bases disponibles.',
+    bases.length ? 'blue' : 'red'
+  );
 }
 
 async function cargarOpcionesRosters() {
@@ -813,6 +828,35 @@ async function subirRoster(registrationId, file) {
   }
 }
 
+async function descargarBases(path) {
+  const normalizedPath = String(path)
+    .replace(/^\/+/, '')
+    .replace(/^tournament-documents\//, '');
+  const encodedPath = normalizedPath.split('/').map(encodeURIComponent).join('/');
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/tournament-documents/${encodedPath}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ expiresIn: 3600 })
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.error || `No se pudo preparar la descarga (HTTP ${response.status}).`);
+  }
+
+  const data = await response.json();
+  const signedUrl = data.signedURL.startsWith('http')
+    ? data.signedURL
+    : data.signedURL.startsWith('/storage/v1/')
+      ? `${SUPABASE_URL}${data.signedURL}`
+      : `${SUPABASE_URL}/storage/v1${data.signedURL}`;
+  window.open(signedUrl, '_blank', 'noopener');
+}
+
 async function descargarRoster(path) {
   const normalizedPath = String(path)
     .replace(/^\/+/, '')
@@ -880,14 +924,18 @@ async function prepararInscripcion() {
     }
     if (partidoSelect) await cargarPartidosPendientes();
     if (partidoForm) await cargarOpcionesPartido();
-      if (rosterForm) {
+    if (rosterForm) {
       await cargarOpcionesRosters();
       await cargarRosters();
     } else if (torneoRostersSelect) {
       await cargarOpcionesRosters();
     }
     if (torneoGestionSelect) await cargarGestionTorneos();
-      await conectarBases();
+    if (torneoBasesSelect) {
+      await cargarSelectorBases();
+      await cargarBasesJugador();
+    }
+    await conectarBases();
   } catch (error) {
     mostrarInscripcionMensaje(`No se pudieron cargar torneos y razas: ${error.message}`, 'red');
     mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
@@ -1018,6 +1066,26 @@ rostersBody?.addEventListener('click', async event => {
     await descargarRoster(button.dataset.path);
   } catch (error) {
     mostrarRostersMensaje(error.message, 'red');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+torneoBasesSelect?.addEventListener('change', () => {
+  cargarBasesJugador(torneoBasesSelect.value).catch(error => {
+    mostrarBasesJugadorMensaje(`No se pudieron cargar las bases: ${error.message}`, 'red');
+  });
+});
+
+basesJugadorBody?.addEventListener('click', async event => {
+  const button = event.target.closest('.descargar-bases');
+  if (!button) return;
+
+  button.disabled = true;
+  try {
+    await descargarBases(button.dataset.path);
+  } catch (error) {
+    mostrarBasesJugadorMensaje(error.message, 'red');
   } finally {
     button.disabled = false;
   }
