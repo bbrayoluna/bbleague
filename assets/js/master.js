@@ -43,6 +43,7 @@ const archivoRoster = document.getElementById('archivoRoster');
 const torneoRostersSelect = document.getElementById('torneoRosters');
 const rostersMensaje = document.getElementById('rostersMensaje');
 const rostersBody = document.querySelector('#tablaRosters tbody');
+const rostersContenedor = document.getElementById('rostersContenedor');
 const rondasTorneo = document.getElementById('rondasTorneo');
 const anadirRondaButton = document.getElementById('anadirRonda');
 const torneoGestionSelect = document.getElementById('torneoGestion');
@@ -611,13 +612,15 @@ async function conectarBases() {
     return;
   }
 
-    // --- Sección Bases de los torneos (parte jugador) ---
+  // --- Sección Bases de los torneos (parte jugador) ---
   // Igual que clasificacion: no se muestra la lista hasta que se
   // seleccione un torneo. El <select> se rellena con los torneos en
   // los que el usuario esta inscrito.
-  masterSection.insertAdjacentHTML('beforeend', '<section id="basesJugadorSection"><h2 class="nuffle red centered">Bases de los torneos</h2><div id="basesJugadorMensaje"></div><label>Torneo</label><select id="torneoBasesFilter" required></select><div class="classification-scroll"><table id="tablaBasesJugador"><thead><tr><th>Torneo</th><th>Archivo</th><th>Fecha</th><th>Descargar</th></tr></thead><tbody></tbody></table></div></section>');
+  masterSection.insertAdjacentHTML('beforeend', '<section id="basesJugadorSection"><h2 class="nuffle red centered">Bases de los torneos</h2><div class="formulario"><label for="torneoBasesFilter">Torneo</label><select id="torneoBasesFilter" required></select></div><div id="basesJugadorMensaje"></div><div id="basesTablaContenedor" class="hide classification-scroll"><table id="tablaBasesJugador"><thead><tr><th>Torneo</th><th>Archivo</th><th>Fecha</th><th>Descargar</th></tr></thead><tbody></tbody></table></div></section>');
   const basesSelect = document.getElementById('torneoBasesFilter');
   const basesBody = document.querySelector('#tablaBasesJugador tbody');
+  const basesTablaContenedor = document.getElementById('basesTablaContenedor');
+  const basesJugadorMensaje = document.getElementById('basesJugadorMensaje');
 
   const [registrations, bases, tournaments] = await Promise.all([
     obtenerDatos(`tournament_users?select=tournament_id&user_id=eq.${session.user.id}`),
@@ -639,14 +642,12 @@ async function conectarBases() {
       basesSelect.appendChild(opt);
     });
 
-  // Mensaje inicial (como clasificacion: nada hasta seleccionar).
-  document.getElementById('basesJugadorMensaje').textContent = 'Selecciona un torneo.';
-
   // Cargar bases SOLO al cambiar el torneo.
   const cargarBasesDelTorneo = (tournamentId) => {
     basesJugadorMensaje.textContent = '';
+    basesTablaContenedor.classList.add('hide');
     basesBody.innerHTML = '';
-    if (!tournamentId) { document.getElementById('basesJugadorMensaje').textContent = 'Selecciona un torneo.'; return; }
+    if (!tournamentId) { basesJugadorMensaje.textContent = 'Selecciona un torneo.'; return; }
     const rows = bases
       .filter(base => String(base.tournament_id) === String(tournamentId))
       .map(base => {
@@ -656,7 +657,8 @@ async function conectarBases() {
       })
       .join('');
     basesBody.insertAdjacentHTML('beforeend', rows);
-    document.getElementById('basesJugadorMensaje').textContent = rows ? '' : 'No hay bases disponibles.';
+    if (rows) basesTablaContenedor.classList.remove('hide');
+    basesJugadorMensaje.textContent = rows ? '' : 'No hay bases disponibles.';
   };
 
   // Cargar al iniciar y al cambiar.
@@ -689,7 +691,7 @@ async function cargarOpcionesRosters() {
       .map(registration => String(registration.tournament_id))
   );
 
-    if (inscripcionRosterSelect) {
+  if (inscripcionRosterSelect) {
     inscripcionRosterSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
     registrations
       .filter(registration => registration.user_id === session.user.id)
@@ -703,26 +705,32 @@ async function cargarOpcionesRosters() {
       });
   }
 
-  torneoRostersSelect.innerHTML = '<option value="">Todos los torneos</option>';
-  tournaments.filter(tournament => enrolledTournamentIds.has(String(tournament.id))).forEach(tournament => {
-    const option = document.createElement('option');
-    option.value = tournament.id;
-    option.textContent = `${tournament.name} (${tournament.year})`;
-    torneoRostersSelect.appendChild(option);
-  });
+  if (torneoRostersSelect) {
+    torneoRostersSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+    tournaments
+      .filter(tournament => enrolledTournamentIds.has(String(tournament.id)))
+      .forEach(tournament => {
+        const option = document.createElement('option');
+        option.value = tournament.id;
+        option.textContent = `${tournament.name} (${tournament.year})`;
+        torneoRostersSelect.appendChild(option);
+      });
+  }
 
   return { registrations, usernameById, tournamentById };
 }
 
 async function cargarRosters(tournamentId = '') {
-  mostrarRostersMensaje('Cargando rosters...', 'blue');
-  rostersBody.innerHTML = '';
+  rostersContenedor?.classList.add('hide');
+  rostersBody?.innerHTML = '';
 
-  // Igual que clasificacion: sin torneo seleccionado no se muestra lista.
+  // Igual que clasificacion: sin torneo seleccionado no se muestra la lista.
   if (!tournamentId) {
     mostrarRostersMensaje('Selecciona un torneo.', 'blue');
     return;
   }
+
+  mostrarRostersMensaje('Cargando rosters...', 'blue');
 
   const [rosters, registrations, users, tournaments] = await Promise.all([
     obtenerDatos('rosters?select=id,tournament_user_id,file_name,storage_path,uploaded_at&order=uploaded_at.desc'),
@@ -735,7 +743,6 @@ async function cargarRosters(tournamentId = '') {
   const usernameById = new Map(users.map(user => [user.id, user.username]));
   const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
   const filteredRosters = rosters.filter(roster => {
-    if (!tournamentId) return true;
     const registration = registrationById.get(String(roster.tournament_user_id));
     return String(registration?.tournament_id) === String(tournamentId);
   });
@@ -754,6 +761,8 @@ async function cargarRosters(tournamentId = '') {
     `;
     rostersBody.appendChild(row);
   });
+
+  if (filteredRosters.length) rostersContenedor?.classList.remove('hide');
 
   mostrarRostersMensaje(
     filteredRosters.length ? '' : 'No hay rosters disponibles.',
