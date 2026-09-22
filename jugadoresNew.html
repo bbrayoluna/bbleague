@@ -1,1 +1,76 @@
-<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="assets/css/style.css"><script type="module" src="assets/js/menuNew.js"></script><script type="module" src="assets/js/master.js"></script><title>Jugadores - League Rayo de Luna</title></head><body><header><img src="images/logo.png" class="logosize" alt="Logo"><h1>Jugadores</h1><img src="images/logoliga.png" class="logosize6x6" alt="Liga"></header><div class="container"><nav><div id="menu-container"></div><img src="images/numuno.PNG" class="sideimg" alt="numuno"></nav><main><section id="loginSection"><h2 class="nuffle red centered">Iniciar sesión</h2><form class="formulario" id="formLogin"><label for="username">Usuario</label><input id="username" required><label for="password">Contraseña</label><input id="password" type="password" required><button>Entrar</button></form><div id="loginMensaje"></div></section><section id="masterSection" class="hide"><h2 class="nuffle red centered">Inscripción</h2><form class="formulario" id="formInscripcion"><label>Torneo</label><select id="torneoInscripcion" required></select><label>Raza</label><select id="razaInscripcion" required></select><label>Nombre del equipo</label><input id="nombreEquipo" required><button>Inscribirse</button></form><div id="inscripcionMensaje"></div><h2 class="nuffle red centered">Subir resultado</h2><form class="formulario" id="formResultado"><label>Partido</label><select id="partidoResultado" required></select><label>TD A</label><input id="touchdownsA" type="number" min="0" required><label>TD B</label><input id="touchdownsB" type="number" min="0" required><label>Bajas A</label><input id="bajasA" type="number" min="0" required><label>Bajas B</label><input id="bajasB" type="number" min="0" required><button>Enviar resultado</button></form><div id="resultadoMensaje"></div><h2 class="nuffle red centered">Subir roster</h2><form class="formulario" id="formRoster"><label>Torneo</label><select id="inscripcionRoster" required></select><label>PDF</label><input id="archivoRoster" type="file" accept="application/pdf,.pdf" required><button>Subir roster</button></form><div id="rosterMensaje"></div></section></main></div></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Jugadores - League Rayo de Luna</title>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<!-- commons.js (que importa jugadoresNew.js) carga el menú lateral y la sesión -->
+	<script type="module" src="assets/js/jugadoresNew.js"></script>
+</head>
+<body>
+	<header>
+		<img src="images/logo.png" class="logosize" alt="Logo">
+		<h1>Jugadores</h1>
+		<img src="images/logoliga.png" class="logosize6x6" alt="Liga">
+	</header>
+	<div class="container">
+		<nav>
+			<div id="menu-container"></div>
+			<img src="images/numuno.PNG" class="sideimg" alt="numuno">
+		</nav>
+		<main>
+			<section id="loginSection">
+				<h2 class="nuffle red centered">Iniciar sesión</h2>
+				<form class="formulario" id="formLogin">
+					<label for="username">Usuario</label>
+					<input id="username" type="text" autocomplete="username" required>
+					<label for="password">Contraseña</label>
+					<input id="password" type="password" autocomplete="current-password" required>
+					<button type="submit">Entrar</button>
+				</form>
+				<div id="loginMensaje"></div>
+			</section>
+			<section id="masterSection" class="hide">
+				<h2 class="nuffle red centered">Inscripción</h2>
+				<form class="formulario" id="formInscripcion">
+					<label for="torneoInscripcion">Torneo</label>
+					<select id="torneoInscripcion" required></select>
+					<label for="razaInscripcion">Raza</label>
+					<select id="razaInscripcion" required></select>
+					<label for="nombreEquipo">Nombre del equipo</label>
+					<input id="nombreEquipo" required>
+					<button type="submit">Inscribirse</button>
+				</form>
+				<div id="inscripcionMensaje"></div>
+
+				<h2 class="nuffle red centered">Subir resultado</h2>
+				<form class="formulario" id="formResultado">
+					<label for="partidoResultado">Partido</label>
+					<select id="partidoResultado" required></select>
+					<label for="touchdownsA">TD A</label>
+					<input id="touchdownsA" type="number" min="0" required>
+					<label for="touchdownsB">TD B</label>
+					<input id="touchdownsB" type="number" min="0" required>
+					<label for="bajasA">Bajas A</label>
+					<input id="bajasA" type="number" min="0" required>
+					<label for="bajasB">Bajas B</label>
+					<input id="bajasB" type="number" min="0" required>
+					<button type="submit">Enviar resultado</button>
+				</form>
+				<div id="resultadoMensaje"></div>
+
+				<h2 class="nuffle red centered">Subir roster</h2>
+				<form class="formulario" id="formRoster">
+					<label for="inscripcionRoster">Torneo</label>
+					<select id="inscripcionRoster" required></select>
+					<label for="archivoRoster">PDF</label>
+					<input id="archivoRoster" type="file" accept="application/pdf,.pdf" required>
+					<button type="submit">Subir roster</button>
+				</form>
+				<div id="rosterMensaje"></div>
+			</section>
+		</main>
+	</div>
+</body>
+</html>
