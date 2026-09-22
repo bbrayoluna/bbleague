@@ -96,11 +96,11 @@ async function cargarClasificacion(tournamentId = '', aviso = 'Selecciona un tor
         <td>${row.rank}</td>
         <td>${row.username}</td>
         <td>${row.race_name}</td>
+        <td>${row.points}</td>
         <td>${row.played}</td>
         <td>${row.wins}</td>
         <td>${row.draws}</td>
         <td>${row.losses}</td>
-        <td>${row.points}</td>
         <td>${row.touchdown_difference}</td>
         <td>${row.casualty_difference}</td>
       `;
