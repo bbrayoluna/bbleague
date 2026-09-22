@@ -31,6 +31,7 @@ const finalizarTorneoButton = document.getElementById('finalizarTorneo');
 
 const partidoForm = document.getElementById('formPartido');
 const mostrarPartidoMensaje = crearMensaje('partidoMensaje');
+const torneoPartidoSelect = document.getElementById('torneoPartido');
 const rondaPartidoSelect = document.getElementById('rondaPartido');
 const jugadorAPartidoSelect = document.getElementById('jugadorAPartido');
 const jugadorBPartidoSelect = document.getElementById('jugadorBPartido');
@@ -191,61 +192,96 @@ finalizarTorneoButton?.addEventListener('click', () => {
 
 // --- Añadir partido ---------------------------------------------------------
 
+/** Rondas de los torneos del usuario conectado (para el formulario de partidos). */
+let rondasPartido = [];
+/** Inscripciones de los torneos del usuario conectado. */
+let inscripcionesPartido = [];
+/** Nombre de usuario de cada jugador, para etiquetar las inscripciones. */
+let usuariosPartidoPorId = new Map();
+
+/** Devuelve la etiqueta con la que se muestra una inscripción en los selectores. */
+function etiquetaParticipante(registration) {
+  const username = usuariosPartidoPorId.get(registration.user_id) || 'Usuario';
+  return registration.team_name ? `${username} - ${registration.team_name}` : username;
+}
+
+/** Rellena el selector de rondas con las del torneo elegido. */
+function cargarRondasPartido(tournamentId = '') {
+  rondaPartidoSelect.innerHTML = '<option value="">Selecciona una ronda</option>';
+
+  rondasPartido
+    .filter(round => String(round.tournament_id) === String(tournamentId))
+    .forEach(round => {
+      const option = document.createElement('option');
+      option.value = round.id;
+      option.textContent = `Ronda ${round.number}`;
+      rondaPartidoSelect.appendChild(option);
+    });
+}
+
+/** Rellena los selectores de jugadores con los inscritos en el torneo elegido. */
+function cargarJugadoresPartido(tournamentId = '') {
+  jugadorAPartidoSelect.innerHTML = '<option value="">Selecciona jugador A</option>';
+  jugadorBPartidoSelect.innerHTML = '<option value="">Selecciona jugador B</option>';
+
+  inscripcionesPartido
+    .filter(registration => String(registration.tournament_id) === String(tournamentId))
+    .forEach(registration => {
+      const label = etiquetaParticipante(registration);
+      [jugadorAPartidoSelect, jugadorBPartidoSelect].forEach(select => {
+        const option = document.createElement('option');
+        option.value = registration.id;
+        option.textContent = label;
+        select.appendChild(option);
+      });
+    });
+}
+
 /**
- * Rellena el selector de rondas y, al elegir una, los jugadores del torneo
- * al que pertenece.
+ * Rellena el selector de torneos del formulario de partidos y encadena los
+ * demás: el torneo elegido carga sus rondas y la ronda elegida sus jugadores.
  */
 async function cargarOpcionesPartido() {
-  const [rounds, registrations, users] = await Promise.all([
+  const [tournaments, rounds, registrations, users] = await Promise.all([
+    obtenerDatos(`tournaments?select=id,name,year&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`),
     obtenerDatos('rounds?select=id,number,tournament_id&order=tournament_id.asc,number.asc'),
     obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
     obtenerDatos('users?select=id,username')
   ]);
 
-  const usernameById = new Map(users.map(user => [user.id, user.username]));
-  const etiquetaParticipante = registration => {
-    const username = usernameById.get(registration.user_id) || 'Usuario';
-    return registration.team_name ? `${username} - ${registration.team_name}` : username;
-  };
+  const tournamentIds = new Set(tournaments.map(tournament => String(tournament.id)));
+  rondasPartido = rounds.filter(round => tournamentIds.has(String(round.tournament_id)));
+  inscripcionesPartido = registrations.filter(
+    registration => tournamentIds.has(String(registration.tournament_id))
+  );
+  usuariosPartidoPorId = new Map(users.map(user => [user.id, user.username]));
 
-  rondaPartidoSelect.innerHTML = '<option value="">Selecciona una ronda</option>';
-  rounds.forEach(round => {
+  torneoPartidoSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  tournaments.forEach(tournament => {
     const option = document.createElement('option');
-    option.value = round.id;
-    option.dataset.tournamentId = round.tournament_id;
-    option.textContent = `Torneo ${round.tournament_id} - Ronda ${round.number}`;
-    rondaPartidoSelect.appendChild(option);
+    option.value = tournament.id;
+    option.textContent = `${tournament.name} (${tournament.year})`;
+    torneoPartidoSelect.appendChild(option);
   });
 
-  function cargarJugadores(tournamentId) {
-    jugadorAPartidoSelect.innerHTML = '<option value="">Selecciona jugador A</option>';
-    jugadorBPartidoSelect.innerHTML = '<option value="">Selecciona jugador B</option>';
-
-    registrations
-      .filter(registration => String(registration.tournament_id) === String(tournamentId))
-      .forEach(registration => {
-        const label = etiquetaParticipante(registration);
-        [jugadorAPartidoSelect, jugadorBPartidoSelect].forEach(select => {
-          const option = document.createElement('option');
-          option.value = registration.id;
-          option.textContent = label;
-          select.appendChild(option);
-        });
-      });
-  }
-
-  rondaPartidoSelect.onchange = () => {
-    const selected = rondaPartidoSelect.selectedOptions[0];
-    cargarJugadores(selected?.dataset.tournamentId);
-  };
+  cargarRondasPartido();
+  cargarJugadoresPartido();
 }
 
+torneoPartidoSelect?.addEventListener('change', () => {
+  cargarRondasPartido(torneoPartidoSelect.value);
+  cargarJugadoresPartido();
+});
+
+rondaPartidoSelect?.addEventListener('change', () => {
+  cargarJugadoresPartido(torneoPartidoSelect.value);
+});
+
 /** Guarda un partido nuevo entre dos inscripciones del mismo torneo. */
-async function crearPartido(roundId, playerAId, playerBId) {
-  const selectedRound = rondaPartidoSelect.selectedOptions[0];
+async function crearPartido(tournamentId, roundId, playerAId, playerBId) {
   await enviarDatos('matches', {
     body: {
-      tournament_id: Number(selectedRound.dataset.tournamentId),
+      tournament_id: Number(tournamentId),
       round_id: Number(roundId),
       tournament_user_a_id: Number(playerAId),
       tournament_user_b_id: Number(playerBId),
@@ -258,11 +294,12 @@ partidoForm?.addEventListener('submit', async event => {
   event.preventDefault();
 
   const boton = botonFormulario(partidoForm);
+  const tournamentId = torneoPartidoSelect.value;
   const roundId = rondaPartidoSelect.value;
   const playerAId = jugadorAPartidoSelect.value;
   const playerBId = jugadorBPartidoSelect.value;
 
-  if (!roundId || !playerAId || !playerBId) {
+  if (!tournamentId || !roundId || !playerAId || !playerBId) {
     mostrarPartidoMensaje('Completa todos los campos.', 'red');
     return;
   }
@@ -276,10 +313,10 @@ partidoForm?.addEventListener('submit', async event => {
   mostrarPartidoMensaje('Añadiendo partido...', 'blue');
 
   try {
-    await crearPartido(roundId, playerAId, playerBId);
+    await crearPartido(tournamentId, roundId, playerAId, playerBId);
     partidoForm.reset();
-    jugadorAPartidoSelect.innerHTML = '<option value="">Selecciona jugador A</option>';
-    jugadorBPartidoSelect.innerHTML = '<option value="">Selecciona jugador B</option>';
+    cargarRondasPartido();
+    cargarJugadoresPartido();
     mostrarPartidoMensaje('Partido añadido correctamente.', 'blue');
   } catch (error) {
     console.error('Error al crear el partido:', error);
@@ -403,7 +440,7 @@ async function prepararPagina() {
       mostrarGestionMensaje(`No se pudieron cargar los torneos: ${error.message}`, 'red');
     }),
     cargarOpcionesPartido().catch(error => {
-      mostrarPartidoMensaje(`No se pudieron cargar las rondas: ${error.message}`, 'red');
+      mostrarPartidoMensaje(`No se pudieron cargar los torneos: ${error.message}`, 'red');
     }),
     cargarOpcionesBases().catch(error => {
       mostrarBasesMensaje(`No se pudieron cargar los torneos: ${error.message}`, 'red');
