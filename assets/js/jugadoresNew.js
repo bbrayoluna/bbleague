@@ -30,6 +30,9 @@ const mostrarRosterMensaje = crearMensaje('rosterMensaje');
 const inscripcionRosterSelect = document.getElementById('inscripcionRoster');
 const archivoRoster = document.getElementById('archivoRoster');
 
+/** Indica, por inscripción, si el torneo admite subir o sustituir el roster. */
+const rostersAbiertosPorInscripcion = new Map();
+
 /** Añade opciones a un selector a partir de una lista de valores. */
 function rellenarSelect(select, opciones, textoPorDefecto, textoVacio) {
   select.innerHTML = `<option value="">${opciones.length ? textoPorDefecto : textoVacio}</option>`;
@@ -195,15 +198,19 @@ resultadoForm?.addEventListener('submit', async event => {
 
 // --- Subir roster -----------------------------------------------------------
 
-/** Rellena el selector con las inscripciones del usuario conectado. */
+/**
+ * Rellena el selector con las inscripciones del usuario conectado. Los torneos
+ * que han cerrado los rosters se marcan en la etiqueta y no se pueden subir.
+ */
 async function cargarOpcionesRosters() {
   const [registrations, tournaments] = await Promise.all([
     obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
-    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc')
+    obtenerDatos('tournaments?select=id,name,year,rosters_open&order=year.desc,name.asc')
   ]);
 
   const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
 
+  rostersAbiertosPorInscripcion.clear();
   inscripcionRosterSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
   registrations
     .filter(registration => registration.user_id === getSesion().user.id)
@@ -211,9 +218,13 @@ async function cargarOpcionesRosters() {
       const tournament = tournamentById.get(String(registration.tournament_id));
       if (!tournament) return;
 
+      const rostersAbiertos = tournament.rosters_open !== false;
+      rostersAbiertosPorInscripcion.set(String(registration.id), rostersAbiertos);
+
       const option = document.createElement('option');
       option.value = registration.id;
-      option.textContent = `${tournament.name} (${tournament.year}) - ${registration.team_name}`;
+      option.textContent = `${tournament.name} (${tournament.year}) - ${registration.team_name}`
+        + (rostersAbiertos ? '' : ' - rosters cerrados');
       inscripcionRosterSelect.appendChild(option);
     });
 }
@@ -247,6 +258,11 @@ rosterForm?.addEventListener('submit', async event => {
 
   if (archivo.type !== 'application/pdf') {
     mostrarRosterMensaje('El roster debe estar en formato PDF.', 'red');
+    return;
+  }
+
+  if (rostersAbiertosPorInscripcion.get(String(registrationId)) === false) {
+    mostrarRosterMensaje('El torneo ha cerrado los rosters. Contacta con el organizador.', 'red');
     return;
   }
 

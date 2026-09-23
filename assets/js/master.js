@@ -1,8 +1,8 @@
 /**
  * master.js
  * Lógica exclusiva de master.html: crear torneos con sus rondas, gestionar su
- * estado (abrir y cerrar inscripciones y finalizarlo), subir las bases en PDF
- * y añadir partidos. Todo lo compartido está en commons.js.
+ * estado (abrir y cerrar inscripciones y rosters, y finalizarlo), subir las
+ * bases en PDF y añadir partidos. Todo lo compartido está en commons.js.
  */
 import {
   botonFormulario,
@@ -27,6 +27,8 @@ const estadoTorneo = document.getElementById('estadoTorneo');
 const mostrarGestionMensaje = crearMensaje('gestionMensaje');
 const abrirInscripcionesButton = document.getElementById('abrirInscripciones');
 const cerrarInscripcionesButton = document.getElementById('cerrarInscripciones');
+const abrirRostersButton = document.getElementById('abrirRosters');
+const cerrarRostersButton = document.getElementById('cerrarRosters');
 const finalizarTorneoButton = document.getElementById('finalizarTorneo');
 
 const partidoForm = document.getElementById('formPartido');
@@ -51,6 +53,7 @@ async function crearTorneo(name, year) {
       year,
       creator_id: getSesion().user.id,
       registration_open: true,
+      rosters_open: true,
       status: 'active'
     }
   });
@@ -114,22 +117,27 @@ function actualizarEstadoGestion(tournament) {
     estadoTorneo.textContent = '';
     abrirInscripcionesButton.disabled = true;
     cerrarInscripcionesButton.disabled = true;
+    abrirRostersButton.disabled = true;
+    cerrarRostersButton.disabled = true;
     finalizarTorneoButton.disabled = true;
     return;
   }
 
   estadoTorneo.textContent = tournament.status === 'finished'
     ? 'Estado: finalizado'
-    : `Estado: activo. Inscripciones: ${tournament.registration_open ? 'abiertas' : 'cerradas'}`;
+    : `Estado: activo. Inscripciones: ${tournament.registration_open ? 'abiertas' : 'cerradas'}`
+      + `. Rosters: ${tournament.rosters_open ? 'abiertos' : 'cerrados'}`;
   abrirInscripcionesButton.disabled = tournament.status === 'finished' || tournament.registration_open;
   cerrarInscripcionesButton.disabled = tournament.status === 'finished' || !tournament.registration_open;
+  abrirRostersButton.disabled = tournament.status === 'finished' || tournament.rosters_open;
+  cerrarRostersButton.disabled = tournament.status === 'finished' || !tournament.rosters_open;
   finalizarTorneoButton.disabled = tournament.status === 'finished';
 }
 
 /** Rellena el selector con los torneos creados por el usuario conectado. */
 async function cargarGestionTorneos() {
   const tournaments = await obtenerDatos(
-    `tournaments?select=id,name,year,creator_id,registration_open,status,finished_at&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`
+    `tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`
   );
 
   torneoGestionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
@@ -182,10 +190,23 @@ cerrarInscripcionesButton?.addEventListener('click', () => {
   cambiarEstadoTorneo({ registration_open: false }, 'Inscripciones cerradas correctamente.');
 });
 
+abrirRostersButton?.addEventListener('click', () => {
+  cambiarEstadoTorneo({ rosters_open: true }, 'Rosters abiertos correctamente.');
+});
+
+cerrarRostersButton?.addEventListener('click', () => {
+  cambiarEstadoTorneo({ rosters_open: false }, 'Rosters cerrados correctamente.');
+});
+
 finalizarTorneoButton?.addEventListener('click', () => {
-  if (!window.confirm('¿Quieres dar por finalizado este torneo?')) return;
+  if (!window.confirm('¿Quieres dar por finalizado este torneo? También se cerrarán los rosters.')) return;
   cambiarEstadoTorneo(
-    { status: 'finished', registration_open: false, finished_at: new Date().toISOString() },
+    {
+      status: 'finished',
+      registration_open: false,
+      rosters_open: false,
+      finished_at: new Date().toISOString()
+    },
     'Torneo finalizado correctamente.'
   );
 });
