@@ -416,6 +416,11 @@ color: #25396c;
     min-width: 760px;
 }
 
+/* Fila del partido del jugador conectado (vista de partidos de jugadoresNew) */
+tr.partido-propio td {
+    background-color: rgba(250, 197, 70, 0.2);
+}
+
 /* tablas de pairings*/
 .match-table {
   width: 100%;
