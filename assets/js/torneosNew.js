@@ -1,8 +1,8 @@
 /**
  * torneosNew.js
- * Lógica exclusiva de torneosNew.html: el selector único de torneo y los cuatro
- * bloques que alimenta (clasificación, resultados, rosters y bases), además de
- * la descarga de los PDF.
+ * Lógica exclusiva de torneosNew.html: el selector único de torneo y los cinco
+ * bloques que alimenta (clasificación, resultados, partidos de una ronda,
+ * rosters y bases), además de la descarga de los PDF.
  * Todo lo compartido está en commons.js.
  */
 import {
@@ -25,6 +25,18 @@ const clasificacionBody = document.querySelector('#tablaClasificacion tbody');
 const resultadosTorneoContenedor = document.getElementById('resultadosTorneoContenedor');
 const mostrarResultadosTorneoMensaje = crearMensaje('resultadosTorneoMensaje');
 const resultadosTorneoBody = document.querySelector('#tablaResultadosTorneo tbody');
+
+const partidosRondaSelector = document.getElementById('partidosRondaSelector');
+const rondaPartidosSelect = document.getElementById('rondaPartidos');
+const mostrarPartidosMensaje = crearMensaje('partidosMensaje');
+const partidosRondaContenedor = document.getElementById('partidosRondaContenedor');
+const partidosRondaBody = document.querySelector('#tablaPartidosRonda tbody');
+
+/** Rondas del torneo elegido, indexadas por id, para describirlas sin volver a consultarlas. */
+const rondasPorId = new Map();
+
+/** Estados de una ronda tal y como se muestran en la página. */
+const ESTADOS_RONDA = { pending: 'Pendiente', active: 'En curso', closed: 'Cerrada' };
 
 const rostersContenedor = document.getElementById('rostersContenedor');
 const mostrarRostersMensaje = crearMensaje('rostersMensaje');
@@ -186,6 +198,161 @@ async function cargarResultadosTorneo(tournamentId = '', aviso = 'Selecciona un 
   }
 }
 
+// --- Partidos de una ronda --------------------------------------------------
+
+/** Convierte una fecha 'YYYY-MM-DD' en 'DD/MM/YYYY' sin depender de la zona horaria. */
+function formatearFecha(fecha) {
+  if (!fecha) return '';
+  const [ano, mes, dia] = String(fecha).split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+/** Etiqueta de una ronda con sus fechas si las tiene: "Ronda 2 (08/10/2026 - 14/10/2026)". */
+function etiquetaRonda(round) {
+  const fechas = [formatearFecha(round.start_date), formatearFecha(round.end_date)].filter(Boolean);
+  if (fechas.length === 2) return `Ronda ${round.number} (${fechas[0]} - ${fechas[1]})`;
+  if (fechas.length === 1) return `Ronda ${round.number} (${fechas[0]})`;
+  return `Ronda ${round.number}`;
+}
+
+/** Oculta y vacía la tabla de partidos de la ronda. */
+function vaciarTablaPartidos() {
+  partidosRondaContenedor?.classList.add('hide');
+  if (partidosRondaBody) partidosRondaBody.innerHTML = '';
+}
+
+/** Oculta el selector de rondas, vacía la tabla de partidos y olvida las rondas. */
+function reiniciarPartidos() {
+  partidosRondaSelector?.classList.add('hide');
+  rondasPorId.clear();
+  vaciarTablaPartidos();
+}
+
+/**
+ * Rellena el selector de rondas con las del torneo elegido en el selector
+ * general. El selector de rondas solo aparece cuando hay un torneo elegido.
+ * @param {string} tournamentId
+ * @param {string} aviso mensaje a mostrar si no hay torneo elegido
+ */
+async function cargarRondasPartidos(tournamentId = '', aviso = 'Selecciona un torneo.') {
+  reiniciarPartidos();
+
+  if (!tournamentId) {
+    mostrarPartidosMensaje(aviso, 'blue');
+    return;
+  }
+
+  mostrarPartidosMensaje('Cargando rondas...', 'blue');
+
+  try {
+    const rounds = await obtenerDatos(
+      `rounds?select=id,number,start_date,end_date,status&tournament_id=eq.${tournamentId}&order=number.asc`
+    );
+
+    rounds.forEach(round => rondasPorId.set(String(round.id), round));
+
+    rondaPartidosSelect.innerHTML = `<option value="">${rounds.length
+      ? 'Selecciona una ronda'
+      : 'Este torneo no tiene rondas'}</option>`;
+    rounds.forEach(round => {
+      const option = document.createElement('option');
+      option.value = round.id;
+      option.textContent = etiquetaRonda(round);
+      rondaPartidosSelect.appendChild(option);
+    });
+
+    partidosRondaSelector?.classList.remove('hide');
+    mostrarPartidosMensaje(
+      rounds.length
+        ? 'Selecciona una ronda para ver todos sus partidos.'
+        : 'Este torneo todavía no tiene rondas.',
+      rounds.length ? 'blue' : 'red'
+    );
+  } catch (error) {
+    mostrarPartidosMensaje(`No se pudieron cargar las rondas: ${error.message}`, 'red');
+  }
+}
+
+/**
+ * Rellena la tabla con todos los partidos de la ronda elegida, no solo los del
+ * jugador conectado. El partido propio se resalta con la clase 'partido-propio'
+ * y cada fila indica si ya tiene resultado.
+ * @param {string} roundId vacío para dejar la tabla vacía
+ */
+async function cargarPartidosRonda(roundId = '') {
+  vaciarTablaPartidos();
+
+  if (!roundId) {
+    mostrarPartidosMensaje('Selecciona una ronda para ver todos sus partidos.', 'blue');
+    return;
+  }
+
+  mostrarPartidosMensaje('Cargando partidos...', 'blue');
+
+  const round = rondasPorId.get(String(roundId));
+  const descripcionRonda = round
+    ? `${etiquetaRonda(round)} · ${ESTADOS_RONDA[round.status] || round.status}`
+    : '';
+
+  try {
+    const [matches, results, registrations, users] = await Promise.all([
+      obtenerDatos(`matches?select=id,tournament_user_a_id,tournament_user_b_id&round_id=eq.${roundId}&order=id.asc`),
+      obtenerDatos('results?select=match_id,touchdowns_a,touchdowns_b,casualties_a,casualties_b'),
+      obtenerDatos('tournament_users?select=id,user_id,team_name'),
+      obtenerDatos('users?select=id,username')
+    ]);
+
+    if (matches.length === 0) {
+      mostrarPartidosMensaje(
+        `${descripcionRonda ? `${descripcionRonda}: ` : ''}esta ronda todavía no tiene partidos.`,
+        'red'
+      );
+      return;
+    }
+
+    const registrationById = new Map(registrations.map(registration => [String(registration.id), registration]));
+    const usernameById = new Map(users.map(user => [user.id, user.username]));
+    const resultByMatchId = new Map(results.map(result => [String(result.match_id), result]));
+    const tusInscripciones = new Set(
+      registrations
+        .filter(registration => registration.user_id === getSesion().user.id)
+        .map(registration => String(registration.id))
+    );
+
+    matches.forEach(match => {
+      const playerA = registrationById.get(String(match.tournament_user_a_id));
+      const playerB = registrationById.get(String(match.tournament_user_b_id));
+      const result = resultByMatchId.get(String(match.id));
+      const esTuPartido = tusInscripciones.has(String(match.tournament_user_a_id))
+        || tusInscripciones.has(String(match.tournament_user_b_id));
+
+      const row = document.createElement('tr');
+      if (esTuPartido) row.className = 'partido-propio';
+      row.innerHTML = `
+        <td>${usernameById.get(playerA?.user_id) || 'Jugador A'}</td>
+        <td>${playerA?.team_name || ''}</td>
+        <td>${result ? result.touchdowns_a : '-'}</td>
+        <td>${result ? result.casualties_a : '-'}</td>
+        <td>${result ? result.touchdowns_b : '-'}</td>
+        <td>${result ? result.casualties_b : '-'}</td>
+        <td>${playerB?.team_name || ''}</td>
+        <td>${usernameById.get(playerB?.user_id) || 'Jugador B'}</td>
+        <td>${result ? 'Jugado' : 'Pendiente'}</td>
+      `;
+      partidosRondaBody.appendChild(row);
+    });
+
+    partidosRondaContenedor?.classList.remove('hide');
+    mostrarPartidosMensaje(descripcionRonda, 'blue');
+  } catch (error) {
+    mostrarPartidosMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
+  }
+}
+
+rondaPartidosSelect?.addEventListener('change', () => {
+  cargarPartidosRonda(rondaPartidosSelect.value);
+});
+
 // --- Rosters -----------------------------------------------------------------
 
 /** Rellena la tabla de rosters subidos en el torneo elegido. */
@@ -322,7 +489,7 @@ conectarDescargas(basesJugadorBody, 'descargar-bases', descargarBases, mostrarBa
 // --- Arranque ---------------------------------------------------------------
 
 /**
- * Carga los cuatro bloques del torneo. Se lanzan en paralelo y cada uno informa
+ * Carga los cinco bloques del torneo. Se lanzan en paralelo y cada uno informa
  * de sus propios errores, de modo que un fallo no deja los demás en blanco.
  */
 async function cargarBloquesTorneo(tournamentId = '') {
@@ -333,6 +500,7 @@ async function cargarBloquesTorneo(tournamentId = '') {
   await Promise.all([
     cargarClasificacion(tournamentId, aviso),
     cargarResultadosTorneo(tournamentId, aviso),
+    cargarRondasPartidos(tournamentId, aviso),
     cargarRosters(tournamentId, aviso).catch(error => {
       mostrarRostersMensaje(`No se pudieron cargar los rosters: ${error.message}`, 'red');
     }),
