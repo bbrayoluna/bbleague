@@ -179,6 +179,7 @@ async function cargarResultadosTorneo(tournamentId = '', aviso = 'Selecciona un 
       const labelA = playerA?.team_name ? `${nameA} - ${playerA.team_name}` : nameA;
       const labelB = playerB?.team_name ? `${nameB} - ${playerB.team_name}` : nameB;
       const row = document.createElement('tr');
+      // Columnas centrales en orden espejo: Bajas A · TD A | TD B · Bajas B.
       row.innerHTML = `
         <td>${roundById.get(String(match.round_id)) || ''}</td>
         <td>${labelA}</td>
@@ -328,6 +329,7 @@ async function cargarPartidosRonda(roundId = '') {
 
       const row = document.createElement('tr');
       if (esTuPartido) row.className = 'partido-propio';
+      // Columnas centrales en orden espejo: Bajas A · TD A | TD B · Bajas B.
       row.innerHTML = `
         <td>${usernameById.get(playerA?.user_id) || 'Jugador A'}</td>
         <td>${playerA?.team_name || ''}</td>
