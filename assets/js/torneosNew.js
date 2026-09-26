@@ -182,8 +182,8 @@ async function cargarResultadosTorneo(tournamentId = '', aviso = 'Selecciona un 
       row.innerHTML = `
         <td>${roundById.get(String(match.round_id)) || ''}</td>
         <td>${labelA}</td>
-        <td>${result.touchdowns_a}</td>
         <td>${result.casualties_a}</td>
+        <td>${result.touchdowns_a}</td>
         <td>${result.touchdowns_b}</td>
         <td>${result.casualties_b}</td>
         <td>${labelB}</td>
@@ -331,8 +331,8 @@ async function cargarPartidosRonda(roundId = '') {
       row.innerHTML = `
         <td>${usernameById.get(playerA?.user_id) || 'Jugador A'}</td>
         <td>${playerA?.team_name || ''}</td>
-        <td>${result ? result.touchdowns_a : '-'}</td>
         <td>${result ? result.casualties_a : '-'}</td>
+        <td>${result ? result.touchdowns_a : '-'}</td>
         <td>${result ? result.touchdowns_b : '-'}</td>
         <td>${result ? result.casualties_b : '-'}</td>
         <td>${playerB?.team_name || ''}</td>
