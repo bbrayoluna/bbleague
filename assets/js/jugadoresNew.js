@@ -1,7 +1,8 @@
 /**
  * jugadoresNew.js
  * Lógica exclusiva de jugadoresNew.html: inscribirse en un torneo, subir el
- * resultado de un partido pendiente y subir el roster del equipo.
+ * resultado de cualquier partido pendiente (no solo los propios) y subir el
+ * roster del equipo.
  * Todo lo compartido está en commons.js.
  */
 import {
@@ -110,28 +111,33 @@ inscripcionForm?.addEventListener('submit', async event => {
 
 // --- Subir resultado --------------------------------------------------------
 
-/** Rellena el selector con los partidos del usuario que aún no tienen resultado. */
+/**
+ * Rellena el selector con todos los partidos que aún no tienen resultado, no
+ * solo los del jugador conectado: cualquiera puede subir el resultado de
+ * cualquier partido de la ronda. El partido propio se marca como "(tu partido)".
+ */
 async function cargarPartidosPendientes() {
-  const [matches, registrations, users, results] = await Promise.all([
-    obtenerDatos('matches?select=id,round_id,tournament_user_a_id,tournament_user_b_id&order=round_id.asc,id.asc'),
+  const [matches, registrations, users, results, tournaments, rounds] = await Promise.all([
+    obtenerDatos('matches?select=id,round_id,tournament_id,tournament_user_a_id,tournament_user_b_id&order=tournament_id.asc,round_id.asc,id.asc'),
     obtenerDatos('tournament_users?select=id,user_id,team_name'),
     obtenerDatos('users?select=id,username'),
-    obtenerDatos('results?select=match_id')
+    obtenerDatos('results?select=match_id'),
+    obtenerDatos('tournaments?select=id,name,year'),
+    obtenerDatos('rounds?select=id,number')
   ]);
 
-  const userRegistrations = registrations.filter(registration =>
-    registration.user_id === getSesion().user.id
-  );
-  const registrationIds = new Set(userRegistrations.map(registration => registration.id));
-  const registrationById = new Map(registrations.map(registration => [registration.id, registration]));
+  const registrationById = new Map(registrations.map(registration => [String(registration.id), registration]));
   const usernameById = new Map(users.map(user => [user.id, user.username]));
-  const completedMatchIds = new Set(results.map(result => result.match_id));
-
-  const pendingMatches = matches.filter(match =>
-    !completedMatchIds.has(match.id)
-    && (registrationIds.has(match.tournament_user_a_id)
-      || registrationIds.has(match.tournament_user_b_id))
+  const completedMatchIds = new Set(results.map(result => String(result.match_id)));
+  const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
+  const roundNumberById = new Map(rounds.map(round => [String(round.id), round.number]));
+  const tusInscripciones = new Set(
+    registrations
+      .filter(registration => registration.user_id === getSesion().user.id)
+      .map(registration => String(registration.id))
   );
+
+  const pendingMatches = matches.filter(match => !completedMatchIds.has(String(match.id)));
 
   partidoSelect.innerHTML = '<option value="">Selecciona un partido</option>';
   if (pendingMatches.length === 0) {
@@ -139,13 +145,19 @@ async function cargarPartidosPendientes() {
   }
 
   pendingMatches.forEach(match => {
-    const playerA = registrationById.get(match.tournament_user_a_id);
-    const playerB = registrationById.get(match.tournament_user_b_id);
+    const playerA = registrationById.get(String(match.tournament_user_a_id));
+    const playerB = registrationById.get(String(match.tournament_user_b_id));
     const nameA = usernameById.get(playerA?.user_id) || 'Jugador A';
     const nameB = usernameById.get(playerB?.user_id) || 'Jugador B';
+    const tournament = tournamentById.get(String(match.tournament_id));
+    const esTuPartido = tusInscripciones.has(String(match.tournament_user_a_id))
+      || tusInscripciones.has(String(match.tournament_user_b_id));
+    const torneo = tournament ? `${tournament.name} (${tournament.year})` : 'Torneo';
+    const ronda = roundNumberById.get(String(match.round_id)) ?? match.round_id;
     const option = document.createElement('option');
     option.value = match.id;
-    option.textContent = `Ronda ${match.round_id}: ${nameA} vs ${nameB}`;
+    option.textContent = `${torneo} - Ronda ${ronda}: ${nameA} vs ${nameB}`
+      + (esTuPartido ? ' (tu partido)' : '');
     partidoSelect.appendChild(option);
   });
 }
