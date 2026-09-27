@@ -1,8 +1,8 @@
 /**
  * torneosNew.js
- * Lógica exclusiva de torneosNew.html: el selector único de torneo y los cinco
- * bloques que alimenta (clasificación, resultados, partidos de una ronda,
- * rosters y bases), además de la descarga de los PDF.
+ * Lógica exclusiva de torneosNew.html: el selector único de torneo y los cuatro
+ * bloques que alimenta (clasificación, partidos de una ronda, rosters y bases),
+ * además de la descarga de los PDF.
  * Todo lo compartido está en commons.js.
  */
 import {
@@ -21,10 +21,6 @@ const mostrarTorneoSeleccionMensaje = crearMensaje('torneoSeleccionMensaje');
 const clasificacionContenedor = document.getElementById('clasificacionContenedor');
 const mostrarClasificacionMensaje = crearMensaje('clasificacionMensaje');
 const clasificacionBody = document.querySelector('#tablaClasificacion tbody');
-
-const resultadosTorneoContenedor = document.getElementById('resultadosTorneoContenedor');
-const mostrarResultadosTorneoMensaje = crearMensaje('resultadosTorneoMensaje');
-const resultadosTorneoBody = document.querySelector('#tablaResultadosTorneo tbody');
 
 const partidosRondaSelector = document.getElementById('partidosRondaSelector');
 const rondaPartidosSelect = document.getElementById('rondaPartidos');
@@ -123,79 +119,6 @@ async function cargarClasificacion(tournamentId = '', aviso = 'Selecciona un tor
     mostrarClasificacionMensaje('', 'blue');
   } catch (error) {
     mostrarClasificacionMensaje(`No se pudo cargar la clasificación: ${error.message}`, 'red');
-  }
-}
-
-// --- Resultados -------------------------------------------------------------
-
-/** Rellena la tabla de resultados confirmados del torneo elegido. */
-async function cargarResultadosTorneo(tournamentId = '', aviso = 'Selecciona un torneo.') {
-  resultadosTorneoContenedor?.classList.add('hide');
-  if (resultadosTorneoBody) resultadosTorneoBody.innerHTML = '';
-
-  if (!tournamentId) {
-    mostrarResultadosTorneoMensaje(aviso, 'blue');
-    return;
-  }
-
-  mostrarResultadosTorneoMensaje('Cargando resultados...', 'blue');
-
-  try {
-    const [matches, results, rounds, registrations, users] = await Promise.all([
-      obtenerDatos(`matches?select=id,round_id,tournament_user_a_id,tournament_user_b_id&tournament_id=eq.${tournamentId}`),
-      obtenerDatos('results?select=match_id,touchdowns_a,touchdowns_b,casualties_a,casualties_b,status'),
-      obtenerDatos(`rounds?select=id,number&tournament_id=eq.${tournamentId}`),
-      obtenerDatos(`tournament_users?select=id,user_id,team_name&tournament_id=eq.${tournamentId}`),
-      obtenerDatos('users?select=id,username')
-    ]);
-
-    const matchById = new Map(matches.map(match => [String(match.id), match]));
-    const roundById = new Map(rounds.map(round => [String(round.id), round.number]));
-    const registrationById = new Map(
-      registrations.map(registration => [String(registration.id), registration])
-    );
-    const usernameById = new Map(users.map(user => [user.id, user.username]));
-    const resultRows = results
-      .filter(result => result.status === 'confirmed')
-      .map(result => ({ result, match: matchById.get(String(result.match_id)) }))
-      .filter(row => row.match);
-
-    if (resultRows.length === 0) {
-      mostrarResultadosTorneoMensaje('Este torneo todavía no tiene resultados.', 'red');
-      return;
-    }
-
-    resultRows.sort((a, b) => {
-      const roundA = roundById.get(String(a.match.round_id)) || 0;
-      const roundB = roundById.get(String(b.match.round_id)) || 0;
-      return roundA - roundB || Number(a.match.id) - Number(b.match.id);
-    });
-
-    resultRows.forEach(({ result, match }) => {
-      const playerA = registrationById.get(String(match.tournament_user_a_id));
-      const playerB = registrationById.get(String(match.tournament_user_b_id));
-      const nameA = usernameById.get(playerA?.user_id) || 'Jugador A';
-      const nameB = usernameById.get(playerB?.user_id) || 'Jugador B';
-      const labelA = playerA?.team_name ? `${nameA} - ${playerA.team_name}` : nameA;
-      const labelB = playerB?.team_name ? `${nameB} - ${playerB.team_name}` : nameB;
-      const row = document.createElement('tr');
-      // Columnas centrales en orden espejo: Bajas A · TD A | TD B · Bajas B.
-      row.innerHTML = `
-        <td>${roundById.get(String(match.round_id)) || ''}</td>
-        <td>${labelA}</td>
-        <td>${result.casualties_a}</td>
-        <td>${result.touchdowns_a}</td>
-        <td>${result.touchdowns_b}</td>
-        <td>${result.casualties_b}</td>
-        <td>${labelB}</td>
-      `;
-      resultadosTorneoBody.appendChild(row);
-    });
-
-    resultadosTorneoContenedor.classList.remove('hide');
-    mostrarResultadosTorneoMensaje('', 'blue');
-  } catch (error) {
-    mostrarResultadosTorneoMensaje(`No se pudieron cargar los resultados: ${error.message}`, 'red');
   }
 }
 
@@ -491,7 +414,7 @@ conectarDescargas(basesJugadorBody, 'descargar-bases', descargarBases, mostrarBa
 // --- Arranque ---------------------------------------------------------------
 
 /**
- * Carga los cinco bloques del torneo. Se lanzan en paralelo y cada uno informa
+ * Carga los cuatro bloques del torneo. Se lanzan en paralelo y cada uno informa
  * de sus propios errores, de modo que un fallo no deja los demás en blanco.
  */
 async function cargarBloquesTorneo(tournamentId = '') {
@@ -501,7 +424,6 @@ async function cargarBloquesTorneo(tournamentId = '') {
 
   await Promise.all([
     cargarClasificacion(tournamentId, aviso),
-    cargarResultadosTorneo(tournamentId, aviso),
     cargarRondasPartidos(tournamentId, aviso),
     cargarRosters(tournamentId, aviso).catch(error => {
       mostrarRostersMensaje(`No se pudieron cargar los rosters: ${error.message}`, 'red');
