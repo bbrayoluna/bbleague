@@ -17,7 +17,7 @@
  */
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
 import { iniciarSesion, obtenerSesion, obtenerRoles } from './auth.js';
-import { setMenuLoggedIn, setMenuRoles } from './menu.js';
+import { setMenuSession } from './menu.js';
 
 // --- Sesión -----------------------------------------------------------------
 
@@ -241,17 +241,15 @@ async function mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje) {
   if (!sesionActual) {
     mostrarAreaPrivada(false);
     document.getElementById('roleAccessMessage')?.classList.add('hide');
-    setMenuRoles([]);
+    setMenuSession(false, []);
     return;
   }
 
-  if (requiereRol) {
-    const roles = await obtenerRoles(sesionActual);
-    setMenuRoles(roles);
-    if (!roles.includes(requiereRol)) {
-      mostrarAccesoDenegado(`Esta página requiere el rol ${requiereRol}.`);
-      return;
-    }
+  const roles = await obtenerRoles(sesionActual);
+  setMenuSession(true, roles);
+  if (requiereRol && !roles.includes(requiereRol)) {
+    mostrarAccesoDenegado(`Esta página requiere el rol ${requiereRol}.`);
+    return;
   }
 
   document.getElementById('roleAccessMessage')?.classList.add('hide');
@@ -286,9 +284,9 @@ function conectarSesion({ alEntrar = () => {}, alSalir = () => {}, requiereRol =
 
     try {
       setSesion(await iniciarSesion(username, password));
-      setMenuLoggedIn(true);
       await mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje);
     } catch (error) {
+      setMenuSession(Boolean(sesionActual), []);
       if (sesionActual && requiereRol) {
         mostrarAccesoDenegado(`No se pudieron comprobar los permisos: ${error.message}`);
       } else {
@@ -303,27 +301,32 @@ function conectarSesion({ alEntrar = () => {}, alSalir = () => {}, requiereRol =
     setSesion(null);
     mostrarAreaPrivada(false);
     document.getElementById('roleAccessMessage')?.classList.add('hide');
-    setMenuRoles([]);
+    setMenuSession(false, []);
     alSalir();
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       setSesion(await obtenerSesion());
-      setMenuLoggedIn(Boolean(sesionActual));
       if (sesionActual) {
         await mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje);
       } else {
+        setMenuSession(false, []);
         mostrarAreaPrivada(false);
         document.getElementById('roleAccessMessage')?.classList.add('hide');
       }
     } catch (error) {
-      if (sesionActual && requiereRol) {
-        mostrarAccesoDenegado(`No se pudieron comprobar los permisos: ${error.message}`);
+      if (sesionActual) {
+        setMenuSession(true, []);
+        if (requiereRol) {
+          mostrarAccesoDenegado(`No se pudieron comprobar los permisos: ${error.message}`);
+        } else {
+          mostrarLoginMensaje(`No se pudieron comprobar los permisos: ${error.message}`, 'red');
+        }
       } else {
         setSesion(null);
         mostrarAreaPrivada(false);
-        setMenuLoggedIn(false);
+        setMenuSession(false, []);
         mostrarLoginMensaje(error.message, 'red');
       }
     }

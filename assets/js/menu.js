@@ -7,6 +7,7 @@ const currentPath = window.location.pathname.split('/').pop();
 let menuConfig = { player_items: [], master_items: [] };
 let menuRoles = [];
 let menuLoggedIn = false;
+let menuStateVersion = 0;
 
 /**
  * Extrae la primera pareja key: value de una línea (el separador son los
@@ -113,17 +114,14 @@ function renderMenu() {
 
   document.getElementById('logoutButton')?.addEventListener('click', () => {
     cerrarSesion();
-    setMenuLoggedIn(false);
+    setMenuSession(false, []);
     window.dispatchEvent(new Event('bbleague:logout'));
   });
 }
 
-function setMenuLoggedIn(loggedIn) {
+function setMenuSession(loggedIn, roles) {
+  menuStateVersion += 1;
   menuLoggedIn = loggedIn;
-  renderMenu();
-}
-
-function setMenuRoles(roles) {
   menuRoles = roles;
   renderMenu();
 }
@@ -133,22 +131,17 @@ cargarMenu().then(config => {
   renderMenu();
 });
 
+const initialMenuStateVersion = menuStateVersion;
 obtenerSesion().then(async session => {
-  menuLoggedIn = Boolean(session);
-  menuRoles = [];
+  let roles = [];
   if (session) {
-    try {
-      menuRoles = await obtenerRoles(session);
-    } catch (error) {
-      console.error('Error comprobando los roles del menú:', error);
-    }
+    roles = await obtenerRoles(session);
   }
-  renderMenu();
+  if (menuStateVersion !== initialMenuStateVersion) return;
+  setMenuSession(Boolean(session), roles);
 }).catch(error => {
   console.error('Error comprobando la sesión del menú:', error);
-  menuLoggedIn = false;
-  menuRoles = [];
-  renderMenu();
+  if (menuStateVersion === initialMenuStateVersion) setMenuSession(false, []);
 });
 
-export { setMenuLoggedIn, setMenuRoles };
+export { setMenuSession };
