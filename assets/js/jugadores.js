@@ -1,6 +1,6 @@
 /**
- * jugadoresNew.js
- * Lógica exclusiva de jugadoresNew.html: inscribirse en un torneo, subir el
+ * jugadores.js
+ * Lógica exclusiva de jugadores.html: inscribirse en un torneo, subir el
  * resultado de los partidos propios y subir el roster del equipo.
  * Todo lo compartido está en commons.js.
  */
@@ -195,7 +195,7 @@ rosterForm?.addEventListener('submit', async event => {
 
 // --- Arranque ---------------------------------------------------------------
 
-/** Carga los selectores que necesita jugadoresNew.html tras iniciar sesión. */
+/** Carga los selectores que necesita jugadores.html tras iniciar sesión. */
 async function prepararPagina() {
   await Promise.all([
     cargarOpcionesInscripcion().catch(error => {

@@ -1,11 +1,11 @@
 # Enlaces visibles para jugadores y masters.
 player_items:
   - texto: Jugadores
-    path: jugadoresNew.html
+    path: jugadores.html
   - texto: Torneos
-    path: torneosNew.html
+    path: torneos.html
   - texto: Registro
-    path: registroNew.html
+    path: registro.html
   - texto: Inicio
     path: indexNew.html
 master_items:

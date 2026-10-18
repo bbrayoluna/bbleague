@@ -1,6 +1,6 @@
 /**
- * registroNew.js
- * Alta de usuario desde registroNew.html. El menú lateral y los mensajes de
+ * registro.js
+ * Alta de usuario desde registro.html. El menú lateral y los mensajes de
  * estado vienen de commons.js.
  */
 import { registrarUsuario } from './auth.js';

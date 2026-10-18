@@ -1,6 +1,6 @@
 /**
- * torneosNew.js
- * Lógica exclusiva de torneosNew.html: el selector único de torneo y los cuatro
+ * torneos.js
+ * Lógica exclusiva de torneos.html: el selector único de torneo y los cuatro
  * bloques que alimenta (clasificación, partidos de una ronda, rosters y bases),
  * además de la descarga de los PDF.
  * Todo lo compartido está en commons.js.

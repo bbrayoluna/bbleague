@@ -1,7 +1,6 @@
 /**
  * commons.js
- * Código compartido por las páginas nuevas: indexNew, registroNew,
- * jugadoresNew, torneosNew y master.
+ * Código compartido por las páginas de jugadores, torneos, registro e inicio.
  *
  * Aquí viven:
  *  - el estado de la sesión de Supabase (una única copia por página),
@@ -10,7 +9,7 @@
  *  - utilidades de interfaz: mensajes de estado, botones de formulario,
  *    mostrar/ocultar el área privada y descargas firmadas.
  *
- * El menú lateral lo carga menuNew.js, que se importa desde este módulo, así
+ * El menú lateral lo carga menu.js, que se importa desde este módulo, así
  * que cada página solo necesita incluir su propio script.
  *
  * Cada página decide qué hacer cuando hay sesión pasando `alEntrar` a
@@ -18,7 +17,7 @@
  */
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
 import { iniciarSesion, obtenerSesion, obtenerRoles } from './auth.js';
-import { setMenuLoggedIn, setMenuRoles } from './menuNew.js';
+import { setMenuLoggedIn, setMenuRoles } from './menu.js';
 
 // --- Sesión -----------------------------------------------------------------
 
