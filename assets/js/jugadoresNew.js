@@ -121,7 +121,7 @@ let partidosPendientes = [];
  */
 async function cargarPartidosPendientes() {
   const [matches, registrations, users, results, tournaments, rounds] = await Promise.all([
-    obtenerDatos('matches?select=id,round_id,tournament_id,tournament_user_a_id,tournament_user_b_id&order=tournament_id.asc,round_id.asc,id.asc'),
+    obtenerDatos('matches?select=id,round_id,tournament_id,tournament_user_a_id,tournament_user_b_id,status&order=tournament_id.asc,round_id.asc,id.asc'),
     obtenerDatos('tournament_users?select=id,user_id,team_name'),
     obtenerDatos('users?select=id,username'),
     obtenerDatos('results?select=match_id'),
@@ -141,7 +141,7 @@ async function cargarPartidosPendientes() {
   );
 
   partidosPendientes = matches
-    .filter(match => !completedMatchIds.has(String(match.id)))
+    .filter(match => match.status !== 'cancelled' && !completedMatchIds.has(String(match.id)))
     .map(match => {
       const playerA = registrationById.get(String(match.tournament_user_a_id));
       const playerB = registrationById.get(String(match.tournament_user_b_id));
