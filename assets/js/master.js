@@ -92,6 +92,10 @@ async function buscarJugadores(termino) {
     rolesPorUsuario.get(user_id).add(role);
   });
 
+  mostrarResultadosJugadores(jugadores, rolesPorUsuario);
+}
+
+function mostrarResultadosJugadores(jugadores, rolesPorUsuario) {
   resultadosBusquedaJugadores.replaceChildren();
   jugadores.forEach(jugador => {
     const fila = document.createElement('li');
@@ -99,30 +103,42 @@ async function buscarJugadores(termino) {
     nombre.textContent = jugador.username;
     fila.appendChild(nombre);
 
-    if (rolesPorUsuario.get(jugador.id)?.has('master')) {
+    const roles = rolesPorUsuario.get(jugador.id) || new Set();
+    const esMaster = roles.has('master');
+    if (esMaster && jugador.id === getSesion().user.id) {
       const estado = document.createElement('span');
-      estado.textContent = ' — Ya es master';
+      estado.textContent = ' — Tu cuenta master';
       fila.appendChild(estado);
     } else {
       const boton = document.createElement('button');
       boton.type = 'button';
-      boton.textContent = 'Dar rol de master';
+      boton.textContent = esMaster ? 'Quitar rol de master' : 'Dar rol de master';
       boton.addEventListener('click', async () => {
         boton.disabled = true;
-        mostrarBusquedaJugadoresMensaje(`Asignando rol de master a ${jugador.username}...`, 'blue');
+        const endpoint = esMaster ? 'rpc/revoke_master_role' : 'rpc/grant_master_role';
+        const accion = esMaster ? 'Quitando' : 'Asignando';
+        mostrarBusquedaJugadoresMensaje(`${accion} el rol de master a ${jugador.username}...`, 'blue');
         try {
-          await enviarDatos('rpc/grant_master_role', {
+          await enviarDatos(endpoint, {
             body: { target_user_id: jugador.id },
             prefer: ''
           });
-          boton.remove();
-          const estado = document.createElement('span');
-          estado.textContent = ' — Ya es master';
-          fila.appendChild(estado);
-          mostrarBusquedaJugadoresMensaje(`Rol de master asignado a ${jugador.username}.`, 'blue');
+          if (esMaster) {
+            roles.delete('master');
+          } else {
+            roles.add('master');
+          }
+          rolesPorUsuario.set(jugador.id, roles);
+          mostrarResultadosJugadores(jugadores, rolesPorUsuario);
+          mostrarBusquedaJugadoresMensaje(
+            esMaster
+              ? `Rol de master quitado a ${jugador.username}.`
+              : `Rol de master asignado a ${jugador.username}.`,
+            'blue'
+          );
         } catch (error) {
           boton.disabled = false;
-          mostrarBusquedaJugadoresMensaje(`No se pudo asignar el rol: ${error.message}`, 'red');
+          mostrarBusquedaJugadoresMensaje(`No se pudo cambiar el rol: ${error.message}`, 'red');
         }
       });
       fila.appendChild(boton);
