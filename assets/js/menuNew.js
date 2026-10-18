@@ -94,20 +94,18 @@ function renderMenu() {
   const canSeePlayerLinks = !menuLoggedIn
     || menuRoles.includes('player')
     || menuRoles.includes('master');
-  const sections = [];
-  if (canSeePlayerLinks) sections.push(['Jugador', menuConfig.player_items]);
-  if (menuRoles.includes('master')) sections.push(['Master', menuConfig.master_items]);
+  const items = [
+    ...(menuRoles.includes('master') ? menuConfig.master_items : []),
+    ...(canSeePlayerLinks ? menuConfig.player_items : [])
+  ];
 
   let menuHtml = '<ul>';
-  sections.forEach(([title, items]) => {
-    menuHtml += `<li class="menu-section-title nuffle red">${title}</li>`;
-    items.forEach(({ texto, path }) => {
-      if (path === currentPath) {
-        menuHtml += `<li class="nuffle yellow menu">${texto}</li>`;
-      } else {
-        menuHtml += `<li><a href="${path}" class="nuffle yellow menu">${texto}</a></li>`;
-      }
-    });
+  items.forEach(({ texto, path }) => {
+    if (path === currentPath) {
+      menuHtml += `<li class="nuffle yellow menu">${texto}</li>`;
+    } else {
+      menuHtml += `<li><a href="${path}" class="nuffle yellow menu">${texto}</a></li>`;
+    }
   });
   menuHtml += `<li id="logoutMenuItem" class="${menuLoggedIn ? '' : 'hide'}"><button type="button" id="logoutButton" class="nuffle yellow menu">Cerrar sesión</button></li>`;
   menuHtml += '</ul>';
