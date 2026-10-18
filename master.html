@@ -81,6 +81,26 @@
 				</form>
 				<div id="partidoMensaje"></div>
 
+				<h2 class="nuffle red centered">Subir resultado</h2>
+				<form class="formulario" id="formResultadoMaster">
+					<label for="torneoResultadoMaster">Torneo</label>
+					<select id="torneoResultadoMaster" required></select>
+					<label for="rondaResultadoMaster">Ronda</label>
+					<select id="rondaResultadoMaster" required disabled></select>
+					<label for="partidoResultadoMaster">Partido</label>
+					<select id="partidoResultadoMaster" required disabled></select>
+					<label for="touchdownsAMaster">TD A</label>
+					<input id="touchdownsAMaster" type="number" min="0" required>
+					<label for="touchdownsBMaster">TD B</label>
+					<input id="touchdownsBMaster" type="number" min="0" required>
+					<label for="bajasAMaster">Bajas A</label>
+					<input id="bajasAMaster" type="number" min="0" required>
+					<label for="bajasBMaster">Bajas B</label>
+					<input id="bajasBMaster" type="number" min="0" required>
+					<button type="submit">Enviar resultado</button>
+				</form>
+				<div id="resultadoMensajeMaster"></div>
+
 				<h2 class="nuffle red centered">Próxima ronda</h2>
 				<div class="formulario">
 					<label for="torneoProximaRonda">Torneo</label>

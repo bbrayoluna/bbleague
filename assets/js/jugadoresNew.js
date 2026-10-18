@@ -1,8 +1,7 @@
 /**
  * jugadoresNew.js
  * Lógica exclusiva de jugadoresNew.html: inscribirse en un torneo, subir el
- * resultado de cualquier partido pendiente (no solo los propios) y subir el
- * roster del equipo.
+ * resultado de los partidos propios y subir el roster del equipo.
  * Todo lo compartido está en commons.js.
  */
 import {
@@ -14,6 +13,7 @@ import {
   obtenerDatos,
   subirArchivo
 } from './commons.js';
+import { inicializarFormularioResultados } from './resultados.js';
 
 // --- Elementos de la página -------------------------------------------------
 
@@ -22,11 +22,8 @@ const mostrarInscripcionMensaje = crearMensaje('inscripcionMensaje');
 const torneoSelect = document.getElementById('torneoInscripcion');
 const razaSelect = document.getElementById('razaInscripcion');
 
-const resultadoForm = document.getElementById('formResultado');
 const mostrarResultadoMensaje = crearMensaje('resultadoMensaje');
-const torneoResultadoSelect = document.getElementById('torneoResultado');
-const rondaResultadoSelect = document.getElementById('rondaResultado');
-const partidoSelect = document.getElementById('partidoResultado');
+const cargarPartidosPendientes = inicializarFormularioResultados({ alcance: 'participante' });
 
 const rosterForm = document.getElementById('formRoster');
 const mostrarRosterMensaje = crearMensaje('rosterMensaje');
@@ -106,154 +103,6 @@ inscripcionForm?.addEventListener('submit', async event => {
   } catch (error) {
     console.error('Error al inscribirse:', error);
     mostrarInscripcionMensaje(error.message, 'red');
-  } finally {
-    if (boton) boton.disabled = false;
-  }
-});
-
-// --- Subir resultado --------------------------------------------------------
-
-let partidosPendientes = [];
-
-/**
- * Carga los partidos sin resultado. Cualquier usuario conectado puede registrar
- * resultados, aunque no participe en esos partidos.
- */
-async function cargarPartidosPendientes() {
-  const [matches, registrations, users, results, tournaments, rounds] = await Promise.all([
-    obtenerDatos('matches?select=id,round_id,tournament_id,tournament_user_a_id,tournament_user_b_id,status&order=tournament_id.asc,round_id.asc,id.asc'),
-    obtenerDatos('tournament_users?select=id,user_id,team_name'),
-    obtenerDatos('users?select=id,username'),
-    obtenerDatos('results?select=match_id'),
-    obtenerDatos('tournaments?select=id,name,year'),
-    obtenerDatos('rounds?select=id,number')
-  ]);
-
-  const registrationById = new Map(registrations.map(registration => [String(registration.id), registration]));
-  const usernameById = new Map(users.map(user => [user.id, user.username]));
-  const completedMatchIds = new Set(results.map(result => String(result.match_id)));
-  const tournamentById = new Map(tournaments.map(tournament => [String(tournament.id), tournament]));
-  const roundNumberById = new Map(rounds.map(round => [String(round.id), round.number]));
-  const tusInscripciones = new Set(
-    registrations
-      .filter(registration => registration.user_id === getSesion().user.id)
-      .map(registration => String(registration.id))
-  );
-
-  partidosPendientes = matches
-    .filter(match => match.status !== 'cancelled' && !completedMatchIds.has(String(match.id)))
-    .map(match => {
-      const playerA = registrationById.get(String(match.tournament_user_a_id));
-      const playerB = registrationById.get(String(match.tournament_user_b_id));
-      const nameA = usernameById.get(playerA?.user_id) || 'Jugador A';
-      const nameB = usernameById.get(playerB?.user_id) || 'Jugador B';
-      const tournament = tournamentById.get(String(match.tournament_id));
-      const esTuPartido = tusInscripciones.has(String(match.tournament_user_a_id))
-        || tusInscripciones.has(String(match.tournament_user_b_id));
-      const torneo = tournament ? `${tournament.name} (${tournament.year})` : 'Torneo';
-      const ronda = roundNumberById.get(String(match.round_id)) ?? match.round_id;
-      return {
-        ...match,
-        torneo,
-        ronda: Number(ronda),
-        texto: `${nameA} vs ${nameB}${esTuPartido ? ' (tu partido)' : ''}`
-      };
-    });
-
-  const torneosPendientes = [...new Map(
-    partidosPendientes.map(match => [String(match.tournament_id), {
-      value: match.tournament_id,
-      text: match.torneo
-    }])
-  ).values()].sort((a, b) => a.text.localeCompare(b.text, 'es'));
-
-  rellenarSelect(
-    torneoResultadoSelect,
-    torneosPendientes,
-    'Selecciona un torneo',
-    'No hay partidos pendientes'
-  );
-  rellenarSelect(rondaResultadoSelect, [], 'Selecciona una ronda', 'No hay rondas pendientes');
-  rellenarSelect(partidoSelect, [], 'Selecciona un partido', 'No hay partidos pendientes');
-  rondaResultadoSelect.disabled = true;
-  partidoSelect.disabled = true;
-}
-
-function cargarRondasResultado() {
-  const torneoId = torneoResultadoSelect.value;
-  const rondas = [...new Map(
-    partidosPendientes
-      .filter(match => String(match.tournament_id) === torneoId)
-      .map(match => [String(match.round_id), {
-        value: match.round_id,
-        text: `Ronda ${match.ronda}`,
-        numero: match.ronda
-      }])
-  ).values()]
-    .sort((a, b) => a.numero - b.numero)
-    .map(({ value, text }) => ({ value, text }));
-
-  rellenarSelect(rondaResultadoSelect, rondas, 'Selecciona una ronda', 'No hay rondas pendientes');
-  rondaResultadoSelect.disabled = !torneoId;
-  cargarPartidosDeRonda();
-}
-
-function cargarPartidosDeRonda() {
-  const torneoId = torneoResultadoSelect.value;
-  const rondaId = rondaResultadoSelect.value;
-  const partidos = partidosPendientes
-    .filter(match => String(match.tournament_id) === torneoId
-      && String(match.round_id) === rondaId)
-    .map(match => ({ value: match.id, text: match.texto }));
-
-  rellenarSelect(partidoSelect, partidos, 'Selecciona un partido', 'No hay partidos pendientes');
-  partidoSelect.disabled = !torneoId || !rondaId;
-}
-
-torneoResultadoSelect?.addEventListener('change', cargarRondasResultado);
-rondaResultadoSelect?.addEventListener('change', cargarPartidosDeRonda);
-
-/** Guarda el resultado de un partido (la base de datos lo confirma sola). */
-async function enviarResultado(matchId, touchdownsA, touchdownsB, bajasA, bajasB) {
-  await enviarDatos('results', {
-    body: {
-      match_id: Number(matchId),
-      submitted_by: getSesion().user.id,
-      touchdowns_a: Number(touchdownsA),
-      touchdowns_b: Number(touchdownsB),
-      casualties_a: Number(bajasA),
-      casualties_b: Number(bajasB),
-      status: 'confirmed'
-    }
-  });
-}
-
-resultadoForm?.addEventListener('submit', async event => {
-  event.preventDefault();
-
-  const boton = botonFormulario(resultadoForm);
-  const partidoId = partidoSelect.value;
-  const touchdownsA = document.getElementById('touchdownsA').value;
-  const touchdownsB = document.getElementById('touchdownsB').value;
-  const bajasA = document.getElementById('bajasA').value;
-  const bajasB = document.getElementById('bajasB').value;
-
-  if (!partidoId || [touchdownsA, touchdownsB, bajasA, bajasB].some(value => value === '')) {
-    mostrarResultadoMensaje('Completa todos los campos.', 'red');
-    return;
-  }
-
-  if (boton) boton.disabled = true;
-  mostrarResultadoMensaje('Enviando resultado...', 'blue');
-
-  try {
-    await enviarResultado(partidoId, touchdownsA, touchdownsB, bajasA, bajasB);
-    resultadoForm.reset();
-    await cargarPartidosPendientes();
-    mostrarResultadoMensaje('Resultado enviado correctamente.', 'blue');
-  } catch (error) {
-    console.error('Error al enviar el resultado:', error);
-    mostrarResultadoMensaje(error.message, 'red');
   } finally {
     if (boton) boton.disabled = false;
   }

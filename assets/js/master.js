@@ -14,6 +14,7 @@ import {
   obtenerDatos,
   subirArchivo
 } from './commons.js';
+import { inicializarFormularioResultados } from './resultados.js';
 
 // --- Elementos de la página -------------------------------------------------
 
@@ -38,6 +39,11 @@ const torneoPartidoSelect = document.getElementById('torneoPartido');
 const rondaPartidoSelect = document.getElementById('rondaPartido');
 const jugadorAPartidoSelect = document.getElementById('jugadorAPartido');
 const jugadorBPartidoSelect = document.getElementById('jugadorBPartido');
+const mostrarResultadoMensaje = crearMensaje('resultadoMensajeMaster');
+const cargarResultadosTorneo = inicializarFormularioResultados({
+  sufijo: 'Master',
+  alcance: 'organizador'
+});
 
 const torneoProximaRondaSelect = document.getElementById('torneoProximaRonda');
 const proximaRondaContenedor = document.getElementById('proximaRondaContenedor');
@@ -730,6 +736,9 @@ async function prepararPagina() {
     }),
     cargarOpcionesPartido().catch(error => {
       mostrarPartidoMensaje(`No se pudieron cargar los torneos: ${error.message}`, 'red');
+    }),
+    cargarResultadosTorneo().catch(error => {
+      mostrarResultadoMensaje(`No se pudieron cargar los partidos: ${error.message}`, 'red');
     }),
     cargarOpcionesBases().catch(error => {
       mostrarBasesMensaje(`No se pudieron cargar los torneos: ${error.message}`, 'red');
