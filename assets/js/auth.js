@@ -149,8 +149,38 @@ async function obtenerSesion() {
   return session;
 }
 
+async function obtenerRoles(session) {
+  if (!session?.access_token || !session.user?.id) return [];
+
+  validarConfiguracion();
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/user_roles?select=role&user_id=eq.${encodeURIComponent(session.user.id)}`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const error = await response.json();
+      detail = error.message || error.details || error.hint || '';
+    } catch {
+      detail = await response.text();
+    }
+    throw new Error(detail || `No se pudieron comprobar los roles (HTTP ${response.status}).`);
+  }
+
+  const assignments = await response.json();
+  return assignments.map(assignment => assignment.role);
+}
+
 function cerrarSesion() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-export { iniciarSesion, registrarUsuario, obtenerSesion, cerrarSesion };
+export { iniciarSesion, registrarUsuario, obtenerSesion, obtenerRoles, cerrarSesion };

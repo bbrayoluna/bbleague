@@ -31,7 +31,17 @@
 				</form>
 				<div id="loginMensaje"></div>
 			</section>
+			<section id="roleAccessMessage" class="hide centered red" role="alert"></section>
 			<section id="masterSection" class="hide">
+				<h2 class="nuffle red centered">Dar rol de master</h2>
+				<form class="formulario" id="formBuscarJugador">
+					<label for="buscarJugador">Buscar jugador por nombre</label>
+					<input id="buscarJugador" type="search" minlength="2" required>
+					<button type="submit">Buscar</button>
+				</form>
+				<div id="buscarJugadorMensaje"></div>
+				<ul id="resultadosBusquedaJugadores"></ul>
+
 				<h2 class="nuffle red centered">Crear torneo</h2>
 				<form class="formulario" id="formTorneo">
 					<label for="nombreTorneo">Nombre</label>

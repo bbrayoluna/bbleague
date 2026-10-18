@@ -17,8 +17,8 @@
  * conectarSesion().
  */
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
-import { iniciarSesion, obtenerSesion } from './auth.js';
-import { setMenuLoggedIn } from './menuNew.js';
+import { iniciarSesion, obtenerSesion, obtenerRoles } from './auth.js';
+import { setMenuLoggedIn, setMenuRoles } from './menuNew.js';
 
 // --- Sesión -----------------------------------------------------------------
 
@@ -228,14 +228,48 @@ function mostrarAreaPrivada(visible) {
   document.getElementById('masterSection')?.classList.toggle('hide', !visible);
 }
 
+function mostrarAccesoDenegado(mensaje) {
+  document.getElementById('loginSection')?.classList.add('hide');
+  document.getElementById('masterSection')?.classList.add('hide');
+  const aviso = document.getElementById('roleAccessMessage');
+  if (aviso) {
+    aviso.textContent = mensaje;
+    aviso.classList.remove('hide');
+  }
+}
+
+async function mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje) {
+  if (!sesionActual) {
+    mostrarAreaPrivada(false);
+    document.getElementById('roleAccessMessage')?.classList.add('hide');
+    setMenuRoles([]);
+    return;
+  }
+
+  if (requiereRol) {
+    const roles = await obtenerRoles(sesionActual);
+    setMenuRoles(roles);
+    if (!roles.includes(requiereRol)) {
+      mostrarAccesoDenegado(`Esta página requiere el rol ${requiereRol}.`);
+      return;
+    }
+  }
+
+  document.getElementById('roleAccessMessage')?.classList.add('hide');
+  mostrarAreaPrivada(true);
+  await alEntrar();
+  mostrarLoginMensaje('', 'blue');
+}
+
 /**
  * Conecta el formulario de login, la restauración de la sesión al cargar y el
  * cierre de sesión del menú.
- * @param {{ alEntrar?: () => Promise<void>|void, alSalir?: () => void }} opciones
+ * @param {{ alEntrar?: () => Promise<void>|void, alSalir?: () => void, requiereRol?: string }} opciones
  *   alEntrar: se ejecuta cuando hay sesión (tras mostrar el área privada).
+ *   requiereRol: rol que se debe comprobar antes de mostrar la página privada.
  *   alSalir: se ejecuta al cerrar sesión, para limpiar formularios, etc.
  */
-function conectarSesion({ alEntrar = () => {}, alSalir = () => {} } = {}) {
+function conectarSesion({ alEntrar = () => {}, alSalir = () => {}, requiereRol = null } = {}) {
   const loginForm = document.getElementById('formLogin');
   const mostrarLoginMensaje = crearMensaje('loginMensaje');
 
@@ -253,12 +287,14 @@ function conectarSesion({ alEntrar = () => {}, alSalir = () => {} } = {}) {
 
     try {
       setSesion(await iniciarSesion(username, password));
-      mostrarAreaPrivada(true);
       setMenuLoggedIn(true);
-      await alEntrar();
-      mostrarLoginMensaje('', 'blue');
+      await mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje);
     } catch (error) {
-      mostrarLoginMensaje(error.message, 'red');
+      if (sesionActual && requiereRol) {
+        mostrarAccesoDenegado(`No se pudieron comprobar los permisos: ${error.message}`);
+      } else {
+        mostrarLoginMensaje(error.message, 'red');
+      }
     } finally {
       if (boton) boton.disabled = false;
     }
@@ -267,20 +303,30 @@ function conectarSesion({ alEntrar = () => {}, alSalir = () => {} } = {}) {
   window.addEventListener('bbleague:logout', () => {
     setSesion(null);
     mostrarAreaPrivada(false);
+    document.getElementById('roleAccessMessage')?.classList.add('hide');
+    setMenuRoles([]);
     alSalir();
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       setSesion(await obtenerSesion());
-      mostrarAreaPrivada(Boolean(sesionActual));
       setMenuLoggedIn(Boolean(sesionActual));
-      if (sesionActual) await alEntrar();
+      if (sesionActual) {
+        await mostrarAreaSegunRol(requiereRol, alEntrar, mostrarLoginMensaje);
+      } else {
+        mostrarAreaPrivada(false);
+        document.getElementById('roleAccessMessage')?.classList.add('hide');
+      }
     } catch (error) {
-      setSesion(null);
-      mostrarAreaPrivada(false);
-      setMenuLoggedIn(false);
-      mostrarLoginMensaje(error.message, 'red');
+      if (sesionActual && requiereRol) {
+        mostrarAccesoDenegado(`No se pudieron comprobar los permisos: ${error.message}`);
+      } else {
+        setSesion(null);
+        mostrarAreaPrivada(false);
+        setMenuLoggedIn(false);
+        mostrarLoginMensaje(error.message, 'red');
+      }
     }
   });
 }
@@ -298,4 +344,3 @@ export {
   mostrarAreaPrivada,
   conectarSesion
 };
-

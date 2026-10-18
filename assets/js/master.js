@@ -60,6 +60,99 @@ const basesForm = document.getElementById('formBasesTorneo');
 const torneoBasesSelect = document.getElementById('torneoBases');
 const archivoBases = document.getElementById('archivoBases');
 const mostrarBasesMensaje = crearMensaje('basesMensaje');
+const formBuscarJugador = document.getElementById('formBuscarJugador');
+const campoBuscarJugador = document.getElementById('buscarJugador');
+const resultadosBusquedaJugadores = document.getElementById('resultadosBusquedaJugadores');
+const mostrarBusquedaJugadoresMensaje = crearMensaje('buscarJugadorMensaje');
+
+// --- Asignar rol de master --------------------------------------------------
+
+async function buscarJugadores(termino) {
+  const parametros = new URLSearchParams({
+    select: 'id,username',
+    username: `ilike.*${termino}*`,
+    order: 'username.asc',
+    limit: '20'
+  });
+  const jugadores = await obtenerDatos(`users?${parametros}`);
+  if (!jugadores.length) {
+    resultadosBusquedaJugadores.textContent = 'No se encontraron jugadores.';
+    return;
+  }
+
+  const ids = jugadores.map(jugador => jugador.id);
+  const rolesQuery = new URLSearchParams({
+    select: 'user_id,role',
+    user_id: `in.(${ids.join(',')})`
+  });
+  const asignaciones = await obtenerDatos(`user_roles?${rolesQuery}`);
+  const rolesPorUsuario = new Map();
+  asignaciones.forEach(({ user_id, role }) => {
+    if (!rolesPorUsuario.has(user_id)) rolesPorUsuario.set(user_id, new Set());
+    rolesPorUsuario.get(user_id).add(role);
+  });
+
+  resultadosBusquedaJugadores.replaceChildren();
+  jugadores.forEach(jugador => {
+    const fila = document.createElement('li');
+    const nombre = document.createElement('span');
+    nombre.textContent = jugador.username;
+    fila.appendChild(nombre);
+
+    if (rolesPorUsuario.get(jugador.id)?.has('master')) {
+      const estado = document.createElement('span');
+      estado.textContent = ' — Ya es master';
+      fila.appendChild(estado);
+    } else {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.textContent = 'Dar rol de master';
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        mostrarBusquedaJugadoresMensaje(`Asignando rol de master a ${jugador.username}...`, 'blue');
+        try {
+          await enviarDatos('rpc/grant_master_role', {
+            body: { target_user_id: jugador.id },
+            prefer: ''
+          });
+          boton.remove();
+          const estado = document.createElement('span');
+          estado.textContent = ' — Ya es master';
+          fila.appendChild(estado);
+          mostrarBusquedaJugadoresMensaje(`Rol de master asignado a ${jugador.username}.`, 'blue');
+        } catch (error) {
+          boton.disabled = false;
+          mostrarBusquedaJugadoresMensaje(`No se pudo asignar el rol: ${error.message}`, 'red');
+        }
+      });
+      fila.appendChild(boton);
+    }
+
+    resultadosBusquedaJugadores.appendChild(fila);
+  });
+}
+
+formBuscarJugador?.addEventListener('submit', async event => {
+  event.preventDefault();
+  const termino = campoBuscarJugador.value.trim().replace(/[%,*()\\]/g, '');
+  if (termino.length < 2) {
+    mostrarBusquedaJugadoresMensaje('Escribe al menos dos caracteres para buscar.', 'red');
+    return;
+  }
+
+  const boton = botonFormulario(formBuscarJugador);
+  if (boton) boton.disabled = true;
+  mostrarBusquedaJugadoresMensaje('Buscando jugadores...', 'blue');
+  resultadosBusquedaJugadores.replaceChildren();
+  try {
+    await buscarJugadores(termino);
+    mostrarBusquedaJugadoresMensaje('', 'blue');
+  } catch (error) {
+    mostrarBusquedaJugadoresMensaje(`No se pudieron buscar jugadores: ${error.message}`, 'red');
+  } finally {
+    if (boton) boton.disabled = false;
+  }
+});
 
 // --- Crear torneo -----------------------------------------------------------
 
@@ -152,10 +245,10 @@ function actualizarEstadoGestion(tournament) {
   finalizarTorneoButton.disabled = tournament.status === 'finished';
 }
 
-/** Rellena el selector con los torneos creados por el usuario conectado. */
+/** Rellena el selector con los torneos disponibles para los masters. */
 async function cargarGestionTorneos() {
   const tournaments = await obtenerDatos(
-    `tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`
+    'tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at&order=year.desc,name.asc'
   );
 
   torneoGestionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
@@ -282,7 +375,7 @@ function cargarJugadoresPartido(tournamentId = '') {
  */
 async function cargarOpcionesPartido() {
   const [tournaments, rounds, registrations, users] = await Promise.all([
-    obtenerDatos(`tournaments?select=id,name,year&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`),
+    obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc'),
     obtenerDatos('rounds?select=id,number,tournament_id&order=tournament_id.asc,number.asc'),
     obtenerDatos('tournament_users?select=id,tournament_id,user_id,team_name'),
     obtenerDatos('users?select=id,username')
@@ -528,7 +621,7 @@ function cargarRondasPendientesProximaRonda(rounds, matches, seleccionada = '') 
 /** Rellena el selector de torneos del bloque de próxima ronda. */
 async function cargarOpcionesProximaRonda() {
   const tournaments = await obtenerDatos(
-    `tournaments?select=id,name,year&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`
+    'tournaments?select=id,name,year&order=year.desc,name.asc'
   );
 
   torneoProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
@@ -730,7 +823,7 @@ crearPartidosProximaRondaButton?.addEventListener('click', async () => {
 /** Rellena el selector del formulario de bases con los torneos del usuario. */
 async function cargarOpcionesBases() {
   const tournaments = await obtenerDatos(
-    `tournaments?select=id,name,year&creator_id=eq.${getSesion().user.id}&order=year.desc,name.asc`
+    'tournaments?select=id,name,year&order=year.desc,name.asc'
   );
 
   torneoBasesSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
@@ -854,6 +947,11 @@ async function prepararPagina() {
 }
 
 conectarSesion({
+  requiereRol: 'master',
   alEntrar: prepararPagina,
-  alSalir: () => formTorneo?.reset()
+  alSalir: () => {
+    formTorneo?.reset();
+    formBuscarJugador?.reset();
+    resultadosBusquedaJugadores?.replaceChildren();
+  }
 });

@@ -1,9 +1,12 @@
-import { obtenerSesion, cerrarSesion } from './auth.js';
+import { obtenerSesion, obtenerRoles, cerrarSesion } from './auth.js';
 
 const MENU_CONFIG_URL = 'assets/config/menu.yml';
 
 const menuContainer = document.getElementById('menu-container');
 const currentPath = window.location.pathname.split('/').pop();
+let menuConfig = { player_items: [], master_items: [] };
+let menuRoles = [];
+let menuLoggedIn = false;
 
 /**
  * Extrae la primera pareja key: value de una línea (el separador son los
@@ -24,12 +27,12 @@ function parseSimpleKeyValue(text) {
 /**
  * Parsea YAML simple (solo soporta la estructura de menu.yml).
  * @param {string} text
- * @returns {{ items: Array<{ texto: string, path: string }> }}
+ * @returns {{ player_items: Array<{ texto: string, path: string }>, master_items: Array<{ texto: string, path: string }> }}
  */
 function parseMenuYaml(text) {
-  const items = [];
+  const config = { player_items: [], master_items: [] };
   const lines = text.split('\n');
-  let inItems = false;
+  let currentSection = null;
   let currentItem = null;
 
   for (const rawLine of lines) {
@@ -38,30 +41,26 @@ function parseMenuYaml(text) {
 
     if (trimmed.startsWith('#') || trimmed === '') continue;
 
-    if (trimmed === 'items:') {
-      inItems = true;
+    if (trimmed === 'player_items:' || trimmed === 'master_items:') {
+      currentSection = trimmed.slice(0, -1);
+      currentItem = null;
       continue;
     }
 
-    if (!inItems) continue;
+    if (!currentSection) continue;
 
     if (trimmed.startsWith('- ')) {
-      // Nueva entrada: el resto de la línea contiene la primera pareja
-      // key: value (p.ej. "texto: Master"). Se crea la entrada y se guarda
-      // como referencia activa para que las siguientes líneas le añadan
-      // las demás propiedades (p.ej. "path: master.html").
       currentItem = {};
       const content = trimmed.slice(2).trim();
       const kv = parseSimpleKeyValue(content);
       if (kv) {
         currentItem[kv.key] = kv.value;
       }
-      items.push(currentItem);
+      config[currentSection].push(currentItem);
       continue;
     }
 
     if (trimmed.includes(':')) {
-      // Propiedad adicional de la entrada actual (p.ej. "path: master.html")
       const kv = parseSimpleKeyValue(trimmed);
       if (kv && currentItem) {
         currentItem[kv.key] = kv.value;
@@ -69,8 +68,10 @@ function parseMenuYaml(text) {
     }
   }
 
-  // Solo se devuelven las entradas completas (texto y path).
-  return { items: items.filter(item => item.texto && item.path) };
+  for (const section of Object.keys(config)) {
+    config[section] = config[section].filter(item => item.texto && item.path);
+  }
+  return config;
 }
 
 async function cargarMenu() {
@@ -83,22 +84,32 @@ async function cargarMenu() {
     return parseMenuYaml(text);
   } catch (error) {
     console.error('Error cargando el menú:', error);
-    return { items: [] };
+    return { player_items: [], master_items: [] };
   }
 }
 
-function renderMenu(items) {
+function renderMenu() {
   if (!menuContainer) return;
 
+  const canSeePlayerLinks = !menuLoggedIn
+    || menuRoles.includes('player')
+    || menuRoles.includes('master');
+  const sections = [];
+  if (canSeePlayerLinks) sections.push(['Jugador', menuConfig.player_items]);
+  if (menuRoles.includes('master')) sections.push(['Master', menuConfig.master_items]);
+
   let menuHtml = '<ul>';
-  items.forEach(({ texto, path }) => {
-    if (path === currentPath) {
-      menuHtml += `<li class="nuffle yellow menu">${texto}</li>`;
-    } else {
-      menuHtml += `<li><a href="${path}" class="nuffle yellow menu">${texto}</a></li>`;
-    }
+  sections.forEach(([title, items]) => {
+    menuHtml += `<li class="menu-section-title nuffle red">${title}</li>`;
+    items.forEach(({ texto, path }) => {
+      if (path === currentPath) {
+        menuHtml += `<li class="nuffle yellow menu">${texto}</li>`;
+      } else {
+        menuHtml += `<li><a href="${path}" class="nuffle yellow menu">${texto}</a></li>`;
+      }
+    });
   });
-  menuHtml += '<li id="logoutMenuItem" class="hide"><button type="button" id="logoutButton" class="nuffle yellow menu">Cerrar sesión</button></li>';
+  menuHtml += `<li id="logoutMenuItem" class="${menuLoggedIn ? '' : 'hide'}"><button type="button" id="logoutButton" class="nuffle yellow menu">Cerrar sesión</button></li>`;
   menuHtml += '</ul>';
   menuContainer.innerHTML = menuHtml;
 
@@ -110,13 +121,36 @@ function renderMenu(items) {
 }
 
 function setMenuLoggedIn(loggedIn) {
-  document.getElementById('logoutMenuItem')?.classList.toggle('hide', !loggedIn);
+  menuLoggedIn = loggedIn;
+  renderMenu();
 }
 
-cargarMenu().then(config => renderMenu(config.items));
+function setMenuRoles(roles) {
+  menuRoles = roles;
+  renderMenu();
+}
 
-obtenerSesion()
-  .then(session => setMenuLoggedIn(Boolean(session)))
-  .catch(() => setMenuLoggedIn(false));
+cargarMenu().then(config => {
+  menuConfig = config;
+  renderMenu();
+});
 
-export { setMenuLoggedIn };
+obtenerSesion().then(async session => {
+  menuLoggedIn = Boolean(session);
+  menuRoles = [];
+  if (session) {
+    try {
+      menuRoles = await obtenerRoles(session);
+    } catch (error) {
+      console.error('Error comprobando los roles del menú:', error);
+    }
+  }
+  renderMenu();
+}).catch(error => {
+  console.error('Error comprobando la sesión del menú:', error);
+  menuLoggedIn = false;
+  menuRoles = [];
+  renderMenu();
+});
+
+export { setMenuLoggedIn, setMenuRoles };

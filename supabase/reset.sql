@@ -13,6 +13,9 @@ drop trigger if exists results_set_updated_at on public.results;
 drop function if exists public.handle_new_user() cascade;
 drop function if exists public.set_updated_at() cascade;
 drop function if exists public.is_admin() cascade;
+drop function if exists public.is_master(uuid) cascade;
+drop function if exists public.grant_master_role(uuid) cascade;
+drop function if exists public.add_default_player_role() cascade;
 
 drop table if exists public.rosters cascade;
 drop table if exists public.tournament_bases cascade;
@@ -21,6 +24,7 @@ drop table if exists public.matches cascade;
 drop table if exists public.rounds cascade;
 drop table if exists public.tournament_users cascade;
 drop table if exists public.tournaments cascade;
+drop table if exists public.user_roles cascade;
 drop table if exists public.races cascade;
 drop table if exists public.users cascade;
 

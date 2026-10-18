@@ -1,6 +1,5 @@
-# Configuración del menú lateral
-# Cada entrada tiene: texto (etiqueta) y path (ruta del archivo HTML)
-items:
+# Enlaces visibles para jugadores y masters.
+player_items:
   - texto: Jugadores
     path: jugadoresNew.html
   - texto: Torneos
@@ -9,3 +8,6 @@ items:
     path: registroNew.html
   - texto: Inicio
     path: indexNew.html
+master_items:
+  - texto: Master
+    path: master.html

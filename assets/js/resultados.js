@@ -28,13 +28,12 @@ export function inicializarFormularioResultados({ sufijo = '', alcance }) {
 
   async function cargarPartidosPendientes() {
     const userId = getSesion().user.id;
-    const filtroTorneos = alcance === 'organizador' ? `&creator_id=eq.${userId}` : '';
     const [matches, registrations, users, results, tournaments, rounds] = await Promise.all([
       obtenerDatos('matches?select=id,round_id,tournament_id,tournament_user_a_id,tournament_user_b_id,status&order=tournament_id.asc,round_id.asc,id.asc'),
       obtenerDatos('tournament_users?select=id,user_id,team_name'),
       obtenerDatos('users?select=id,username'),
       obtenerDatos('results?select=id,match_id,touchdowns_a,touchdowns_b,casualties_a,casualties_b'),
-      obtenerDatos(`tournaments?select=id,name,year${filtroTorneos}&order=year.desc,name.asc`),
+      obtenerDatos('tournaments?select=id,name,year&order=year.desc,name.asc'),
       obtenerDatos('rounds?select=id,number')
     ]);
 
