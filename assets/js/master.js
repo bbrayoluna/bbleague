@@ -46,10 +46,16 @@ const cargarResultadosTorneo = inicializarFormularioResultados({
 });
 
 const torneoProximaRondaSelect = document.getElementById('torneoProximaRonda');
+const rondaProximaRondaSelect = document.getElementById('rondaProximaRonda');
+const rondaProximaRondaSugerida = document.getElementById('rondaProximaRondaSugerida');
+const crearPartidosProximaRondaButton = document.getElementById('crearPartidosProximaRonda');
 const proximaRondaContenedor = document.getElementById('proximaRondaContenedor');
 const proximaRondaTitulo = document.getElementById('proximaRondaTitulo');
 const proximaRondaEmparejamientos = document.getElementById('proximaRondaEmparejamientos');
 const mostrarProximaRondaMensaje = crearMensaje('proximaRondaMensaje');
+let emparejamientosCalculados = [];
+let rondaCalculada = null;
+let torneoEmparejamientosCalculados = '';
 
 const basesForm = document.getElementById('formBasesTorneo');
 const torneoBasesSelect = document.getElementById('torneoBases');
@@ -390,12 +396,6 @@ function emparejamientosJugados(matches) {
   return jugados;
 }
 
-/** Primera ronda del torneo sin partidos programados; null si no queda ninguna. */
-function rondaSiguiente(rounds, matches) {
-  const rondasConPartidos = new Set(matches.map(match => String(match.round_id)));
-  return rounds.find(round => !rondasConPartidos.has(String(round.id))) || null;
-}
-
 /**
  * Orden suizo, con los mismos criterios que la vista de clasificación: puntos,
  * diferencia de touchdowns, touchdowns a favor, bajas, victorias, partidos
@@ -497,7 +497,36 @@ function ocultarProximaRonda() {
   proximaRondaContenedor?.classList.add('hide');
   proximaRondaTitulo.textContent = '';
   proximaRondaEmparejamientos.innerHTML = '';
+  crearPartidosProximaRondaButton.disabled = true;
+  rondaProximaRondaSelect.disabled = true;
+  emparejamientosCalculados = [];
+  rondaCalculada = null;
+  torneoEmparejamientosCalculados = '';
   mostrarProximaRondaMensaje('', 'blue');
+}
+
+/** Muestra únicamente las rondas todavía sin partidos y selecciona la sugerida. */
+function cargarRondasPendientesProximaRonda(rounds, matches, seleccionada = '') {
+  const rondasConPartidos = new Set(matches.map(match => String(match.round_id)));
+  const pendientes = rounds.filter(round => !rondasConPartidos.has(String(round.id)));
+  const sugerida = pendientes[0] || null;
+
+  rondaProximaRondaSelect.innerHTML = '';
+  pendientes.forEach(round => {
+    const option = document.createElement('option');
+    option.value = round.id;
+    option.textContent = `Ronda ${round.number}`;
+    rondaProximaRondaSelect.appendChild(option);
+  });
+
+  const rondaSeleccionada = pendientes.find(round => String(round.id) === String(seleccionada))
+    || sugerida;
+  rondaProximaRondaSelect.value = rondaSeleccionada ? String(rondaSeleccionada.id) : '';
+  rondaProximaRondaSelect.disabled = pendientes.length === 0;
+  rondaProximaRondaSugerida.textContent = sugerida
+    ? `Según el orden del torneo, la ronda que toca es la ${sugerida.number}.`
+    : 'No quedan rondas pendientes.';
+  return { sugerida, rondaSeleccionada };
 }
 
 /** Rellena el selector de torneos del bloque de próxima ronda. */
@@ -507,6 +536,8 @@ async function cargarOpcionesProximaRonda() {
   );
 
   torneoProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  rondaProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+  rondaProximaRondaSugerida.textContent = '';
   tournaments.forEach(tournament => {
     const option = document.createElement('option');
     option.value = tournament.id;
@@ -519,14 +550,19 @@ async function cargarOpcionesProximaRonda() {
 }
 
 /**
- * Calcula y muestra los emparejamientos de la próxima ronda del torneo elegido:
- * la primera ronda sin partidos programados, con los jugadores ordenados por la
- * clasificación y emparejados por proximidad sin repetir enfrentamientos.
+ * Calcula y muestra los emparejamientos de la ronda pendiente elegida (por
+ * defecto, la primera según el orden del torneo).
  */
-async function cargarProximaRonda(tournamentId = '') {
+async function cargarProximaRonda(tournamentId = '', roundId = '') {
   ocultarProximaRonda();
+  rondaProximaRondaSelect.disabled = true;
+  rondaProximaRondaSelect.innerHTML = '';
+  rondaProximaRondaSugerida.textContent = '';
 
   if (!tournamentId) {
+    rondaProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
+    rondaProximaRondaSelect.disabled = true;
+    rondaProximaRondaSugerida.textContent = '';
     mostrarProximaRondaMensaje('Selecciona un torneo.', 'blue');
     return;
   }
@@ -547,16 +583,22 @@ async function cargarProximaRonda(tournamentId = '') {
       return;
     }
 
-    const ronda = rondaSiguiente(rounds, matches);
+    const { sugerida, rondaSeleccionada } =
+      cargarRondasPendientesProximaRonda(rounds, matches, roundId);
 
-    if (!ronda) {
+    if (!sugerida) {
       mostrarProximaRondaMensaje('Todas las rondas del torneo ya tienen partidos programados.', 'blue');
+      return;
+    }
+
+    if (!rondaSeleccionada) {
+      mostrarProximaRondaMensaje('Selecciona una ronda pendiente.', 'blue');
       return;
     }
 
     if (clasificacion.length === 0) {
       mostrarProximaRondaMensaje(
-        `La ronda ${ronda.number} está pendiente, pero el torneo no tiene jugadores inscritos.`,
+        `La ronda ${rondaSeleccionada.number} está pendiente, pero el torneo no tiene jugadores inscritos.`,
         'red'
       );
       return;
@@ -589,17 +631,24 @@ async function cargarProximaRonda(tournamentId = '') {
       matches
         .filter(match =>
           match.status !== 'cancelled' &&
-          (numeroPorRonda.get(String(match.round_id)) || 0) < ronda.number &&
+          (numeroPorRonda.get(String(match.round_id)) || 0) < rondaSeleccionada.number &&
           estadoPorPartido.get(String(match.id)) !== 'confirmed'
         )
         .map(match => numeroPorRonda.get(String(match.round_id)))
     )].sort((a, b) => a - b);
 
-    const fechas = [formatearFecha(ronda.start_date), formatearFecha(ronda.end_date)].filter(Boolean);
-    proximaRondaTitulo.textContent = `Ronda ${ronda.number}`
+    const fechas = [
+      formatearFecha(rondaSeleccionada.start_date),
+      formatearFecha(rondaSeleccionada.end_date)
+    ].filter(Boolean);
+    proximaRondaTitulo.textContent = `Ronda ${rondaSeleccionada.number}`
       + (fechas.length ? ` (${fechas.join(' - ')})` : '');
     proximaRondaEmparejamientos.innerHTML = renderEmparejamientos(emparejamientos, descansa);
     proximaRondaContenedor.classList.remove('hide');
+    emparejamientosCalculados = emparejamientos;
+    rondaCalculada = rondaSeleccionada;
+    torneoEmparejamientosCalculados = String(tournamentId);
+    crearPartidosProximaRondaButton.disabled = emparejamientos.length === 0;
 
     const avisos = [];
     if (rondasSinResultado.length) {
@@ -609,8 +658,12 @@ async function cargarProximaRonda(tournamentId = '') {
     if (repite) {
       avisos.push('Algún emparejamiento repite un enfrentamiento anterior porque no quedan rivales sin jugar.');
     }
+    if (emparejamientos.length === 0 && descansa) {
+      avisos.push('No hay partidos que crear porque solo hay un jugador inscrito; le toca descansar.');
+    }
     mostrarProximaRondaMensaje(avisos.join(' '), avisos.length ? 'red' : 'blue');
   } catch (error) {
+    rondaProximaRondaSelect.disabled = true;
     mostrarProximaRondaMensaje(`No se pudo calcular la próxima ronda: ${error.message}`, 'red');
   }
 }
@@ -619,6 +672,64 @@ torneoProximaRondaSelect?.addEventListener('change', () => {
   cargarProximaRonda(torneoProximaRondaSelect.value).catch(error => {
     mostrarProximaRondaMensaje(`No se pudo calcular la próxima ronda: ${error.message}`, 'red');
   });
+});
+
+rondaProximaRondaSelect?.addEventListener('change', () => {
+  cargarProximaRonda(torneoProximaRondaSelect.value, rondaProximaRondaSelect.value).catch(error => {
+    mostrarProximaRondaMensaje(`No se pudo calcular la ronda elegida: ${error.message}`, 'red');
+  });
+});
+
+crearPartidosProximaRondaButton?.addEventListener('click', async () => {
+  if (!rondaCalculada || !emparejamientosCalculados.length
+    || torneoEmparejamientosCalculados !== String(torneoProximaRondaSelect.value)
+    || String(rondaCalculada.id) !== String(rondaProximaRondaSelect.value)) {
+    mostrarProximaRondaMensaje('Vuelve a calcular los emparejamientos antes de crear los partidos.', 'red');
+    return;
+  }
+
+  crearPartidosProximaRondaButton.disabled = true;
+  rondaProximaRondaSelect.disabled = true;
+  mostrarProximaRondaMensaje(`Creando partidos de la ronda ${rondaCalculada.number}...`, 'blue');
+
+  try {
+    const partidosExistentes = await obtenerDatos(
+      `matches?select=id,round_id&tournament_id=eq.${torneoEmparejamientosCalculados}&round_id=eq.${rondaCalculada.id}`
+    );
+    if (partidosExistentes.length) {
+      const tournamentId = torneoEmparejamientosCalculados;
+      await cargarProximaRonda(tournamentId);
+      mostrarProximaRondaMensaje(
+        'La ronda ya tiene partidos. Se han actualizado las rondas pendientes y los emparejamientos.',
+        'red'
+      );
+      return;
+    }
+
+    await enviarDatos('matches', {
+      body: emparejamientosCalculados.map(({ jugadorA, jugadorB }) => ({
+        tournament_id: Number(torneoEmparejamientosCalculados),
+        round_id: Number(rondaCalculada.id),
+        tournament_user_a_id: Number(jugadorA.id),
+        tournament_user_b_id: Number(jugadorB.id),
+        status: 'scheduled'
+      }))
+    });
+
+    const numeroRondaCreada = rondaCalculada.number;
+    const cantidadPartidosCreados = emparejamientosCalculados.length;
+    const tournamentId = torneoEmparejamientosCalculados;
+    await cargarProximaRonda(tournamentId);
+    mostrarProximaRondaMensaje(
+      `Se han creado ${cantidadPartidosCreados} partidos en la ronda ${numeroRondaCreada}.`,
+      'blue'
+    );
+  } catch (error) {
+    console.error('Error al crear los partidos de la ronda:', error);
+    crearPartidosProximaRondaButton.disabled = false;
+    rondaProximaRondaSelect.disabled = false;
+    mostrarProximaRondaMensaje(`No se pudieron crear los partidos: ${error.message}`, 'red');
+  }
 });
 
 // --- Bases del torneo -------------------------------------------------------
