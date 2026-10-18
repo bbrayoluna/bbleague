@@ -47,7 +47,6 @@ const cargarResultadosTorneo = inicializarFormularioResultados({
 
 const torneoProximaRondaSelect = document.getElementById('torneoProximaRonda');
 const rondaProximaRondaSelect = document.getElementById('rondaProximaRonda');
-const rondaProximaRondaSugerida = document.getElementById('rondaProximaRondaSugerida');
 const crearPartidosProximaRondaButton = document.getElementById('crearPartidosProximaRonda');
 const proximaRondaContenedor = document.getElementById('proximaRondaContenedor');
 const proximaRondaTitulo = document.getElementById('proximaRondaTitulo');
@@ -523,9 +522,6 @@ function cargarRondasPendientesProximaRonda(rounds, matches, seleccionada = '') 
     || sugerida;
   rondaProximaRondaSelect.value = rondaSeleccionada ? String(rondaSeleccionada.id) : '';
   rondaProximaRondaSelect.disabled = pendientes.length === 0;
-  rondaProximaRondaSugerida.textContent = sugerida
-    ? `Según el orden del torneo, la ronda que toca es la ${sugerida.number}.`
-    : 'No quedan rondas pendientes.';
   return { sugerida, rondaSeleccionada };
 }
 
@@ -537,7 +533,6 @@ async function cargarOpcionesProximaRonda() {
 
   torneoProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
   rondaProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
-  rondaProximaRondaSugerida.textContent = '';
   tournaments.forEach(tournament => {
     const option = document.createElement('option');
     option.value = tournament.id;
@@ -557,12 +552,10 @@ async function cargarProximaRonda(tournamentId = '', roundId = '') {
   ocultarProximaRonda();
   rondaProximaRondaSelect.disabled = true;
   rondaProximaRondaSelect.innerHTML = '';
-  rondaProximaRondaSugerida.textContent = '';
 
   if (!tournamentId) {
     rondaProximaRondaSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
     rondaProximaRondaSelect.disabled = true;
-    rondaProximaRondaSugerida.textContent = '';
     mostrarProximaRondaMensaje('Selecciona un torneo.', 'blue');
     return;
   }
