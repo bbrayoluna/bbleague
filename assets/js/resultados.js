@@ -73,18 +73,31 @@ export function inicializarFormularioResultados({ sufijo = '', alcance }) {
         };
       });
 
-    const torneosPendientes = [...new Map(
-      partidosPendientes.map(match => [String(match.tournament_id), {
-        value: match.tournament_id,
-        text: match.torneo
-      }])
-    ).values()].sort((a, b) => a.text.localeCompare(b.text, 'es'));
+    if (alcance === 'participante') {
+      rellenarSelect(
+        partidoSelect,
+        partidosPendientes.map(match => ({
+          value: match.id,
+          text: `${match.torneo}: Ronda ${match.ronda} - ${match.texto}`
+        })),
+        'Selecciona un partido',
+        'No tienes partidos pendientes'
+      );
+      partidoSelect.disabled = partidosPendientes.length === 0;
+    } else {
+      const torneosPendientes = [...new Map(
+        partidosPendientes.map(match => [String(match.tournament_id), {
+          value: match.tournament_id,
+          text: match.torneo
+        }])
+      ).values()].sort((a, b) => a.text.localeCompare(b.text, 'es'));
 
-    rellenarSelect(torneoSelect, torneosPendientes, 'Selecciona un torneo', 'No hay partidos pendientes');
-    rellenarSelect(rondaSelect, [], 'Selecciona una ronda', 'No hay rondas pendientes');
-    rellenarSelect(partidoSelect, [], 'Selecciona un partido', 'No hay partidos pendientes');
-    rondaSelect.disabled = true;
-    partidoSelect.disabled = true;
+      rellenarSelect(torneoSelect, torneosPendientes, 'Selecciona un torneo', 'No hay partidos pendientes');
+      rellenarSelect(rondaSelect, [], 'Selecciona una ronda', 'No hay rondas pendientes');
+      rellenarSelect(partidoSelect, [], 'Selecciona un partido', 'No hay partidos pendientes');
+      rondaSelect.disabled = true;
+      partidoSelect.disabled = true;
+    }
     cargarResultadoSeleccionado();
   }
 
@@ -143,8 +156,8 @@ export function inicializarFormularioResultados({ sufijo = '', alcance }) {
     }
   }
 
-  torneoSelect.addEventListener('change', cargarRondas);
-  rondaSelect.addEventListener('change', cargarPartidos);
+  torneoSelect?.addEventListener('change', cargarRondas);
+  rondaSelect?.addEventListener('change', cargarPartidos);
   partidoSelect.addEventListener('change', cargarResultadoSeleccionado);
   formulario.addEventListener('submit', async event => {
     event.preventDefault();
