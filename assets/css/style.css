@@ -496,3 +496,191 @@ tr.partido-propio td {
   margin-top: 1rem;
   user-select: none;
 }
+
+.roster-main {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.roster-summary {
+  box-sizing: border-box;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  color: #25396c;
+  background: #fff;
+  border: 2px solid #fac546;
+  border-radius: 8px;
+}
+
+.roster-summary h3,
+.roster-section h3 {
+  margin: 0 0 0.75rem;
+  color: #ac342f;
+  font-family: 'nuffle', sans-serif;
+  text-align: center;
+}
+
+.roster-summary-meta {
+  text-align: center;
+}
+
+.roster-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+}
+
+.roster-summary-grid strong {
+  text-align: right;
+}
+
+.roster-summary-total {
+  padding-top: 0.45rem;
+  border-top: 1px solid #ac342f;
+  color: #ac342f;
+  font-size: 1.1rem;
+}
+
+.roster-summary .over-budget {
+  color: #ac342f;
+}
+
+.roster-warning {
+  color: #ac342f;
+  font-weight: bold;
+  text-align: center;
+}
+
+.roster-summary-note,
+.roster-player-note {
+  color: #25396c;
+  font-size: 0.9rem;
+}
+
+.roster-section {
+  margin: 1.5rem auto;
+}
+
+.roster-fields {
+  max-width: 700px;
+}
+
+.roster-add-player {
+  max-width: 700px;
+}
+
+.roster-player-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.roster-player {
+  min-width: 0;
+  padding: 1rem;
+  color: #25396c;
+  background: #fff;
+  border: 1px solid #ac342f;
+  border-radius: 8px;
+}
+
+.roster-player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.roster-player-header h4 {
+  margin: 0;
+  color: #ac342f;
+}
+
+.roster-remove-player,
+.roster-remove-skill {
+  padding: 0.35rem 0.65rem;
+  color: #fff;
+  background: #ac342f;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.roster-player-cost {
+  margin: 0.5rem 0;
+  font-weight: bold;
+}
+
+.roster-subheading {
+  margin-bottom: 0.35rem;
+}
+
+.roster-skill-list {
+  margin: 0;
+}
+
+.roster-skill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.roster-skill-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.roster-skill-form select {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 0.5rem;
+}
+
+.roster-skill-form button {
+  padding: 0.5rem 0.75rem;
+}
+
+.roster-empty {
+  color: #25396c;
+  text-align: center;
+}
+
+.roster-download {
+  margin: 1.5rem auto;
+  text-align: center;
+}
+
+.roster-download button {
+  width: auto;
+  min-width: 260px;
+}
+
+.roster-download button:disabled,
+.roster-add-player button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 570px) {
+  .roster-summary {
+    padding: 0.75rem;
+  }
+
+  .roster-summary-grid {
+    gap: 0.4rem 0.5rem;
+  }
+
+  .roster-skill {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

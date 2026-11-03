@@ -1,0 +1,3141 @@
+[
+  {
+    "name": "Alianza del Viejo Mundo",
+    "positions": [
+      {
+        "name": "Human Lineman",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Halfling Hopeful",
+        "cost": 30000,
+        "max": 3,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide Bala"
+        ]
+      },
+      {
+        "name": "Human Catcher",
+        "cost": 75000,
+        "max": 1,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Atrapar",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Dwarf Lineman",
+        "cost": 70000,
+        "max": 3,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placar",
+          "Romper defensas"
+        ]
+      },
+      {
+        "name": "Human Thrower",
+        "cost": 75000,
+        "max": 1,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Manos seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Dwarf Runner",
+        "cost": 80000,
+        "max": 1,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Esprintar",
+          "Manos seguras"
+        ]
+      },
+      {
+        "name": "Human Blitzer",
+        "cost": 85000,
+        "max": 1,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Placaje defensivo",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Dwarf Blitzer",
+        "cost": 100000,
+        "max": 1,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "P"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placaje defensivo",
+          "Placaje heroico",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Troll Slayer",
+        "cost": 95000,
+        "max": 1,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Cabeza dura",
+          "Furia",
+          "Odio (Troll)",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Ogre",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Golpe mortífero",
+          "Solitario (3+)",
+          "Lanzar compañero"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Altern Forest Treeman",
+        "cost": 120000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Brazo fuerte",
+          "Cabeza dura",
+          "Echar raíces",
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Tronco va",
+          "Mantenerse firme",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      }
+    ],
+    "maxBigGuys": 1
+  },
+  {
+    "name": "Altos Elfos",
+    "positions": [
+      {
+        "name": "High Elf Lineman",
+        "cost": 65000,
+        "max": 16,
+        "primary": [
+          "A",
+          "G"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Phoenix Warrior",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "A",
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Pasar",
+          "Pase seguro",
+          "Partenubes"
+        ]
+      },
+      {
+        "name": "Dragon Prince",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "A",
+          "G"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Placar",
+          "Equilibrio firme",
+          "El balón es mío"
+        ]
+      },
+      {
+        "name": "White Lion",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "A",
+          "G"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Forcejear"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Amazonas",
+    "positions": [
+      {
+        "name": "Eagle Warrior",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Python Warrior",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Atento al balón",
+          "Esquivar",
+          "Pasar",
+          "Pase seguro"
+        ]
+      },
+      {
+        "name": "Piranha Warrior",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Atacar y huir",
+          "En pie de un salto",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Jaguar Warrior",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Esquivar",
+          "Romper defensas"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bretonia",
+    "positions": [
+      {
+        "name": "Bretonnian Squire",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Forcejear"
+        ]
+      },
+      {
+        "name": "Bret. Knight Catcher",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Atrapar",
+          "Nervios de acero"
+        ]
+      },
+      {
+        "name": "Bret. Knight Thrower",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Nervios de acero",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Grail Knight",
+        "cost": 95000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Equilibrio firme",
+          "Placar"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Elegidos del Caos",
+    "positions": [
+      {
+        "name": "Beastmen Lineman",
+        "cost": 55000,
+        "max": 16,
+        "primary": [
+          "G",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cuernos"
+        ]
+      },
+      {
+        "name": "Chaos Chosen",
+        "cost": 100000,
+        "max": 4,
+        "primary": [
+          "F",
+          "G",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Llave de brazo"
+        ]
+      },
+      {
+        "name": "Troll",
+        "cost": 115000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Regeneración",
+          "Siempre hambriento",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Ogre",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Minotaur",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cuernos",
+          "Furia",
+          "Golpe mortífero",
+          "Ira descontrolada",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      }
+    ],
+    "maxBigGuys": 1
+  },
+  {
+    "name": "Elfos Oscuros",
+    "positions": [
+      {
+        "name": "Dark Elf Lineman",
+        "cost": 65000,
+        "max": 16,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "T"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Dark Elf Runner",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Pase precipitado",
+          "Patada de despeje"
+        ]
+      },
+      {
+        "name": "Dark Elf Assassin",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F"
+        ],
+        "baseSkills": [
+          "Apuñalar",
+          "Atacar y huir"
+        ]
+      },
+      {
+        "name": "Dark Elf Blitzer",
+        "cost": 105000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Placar"
+        ]
+      },
+      {
+        "name": "Witch Elf",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "En pie de un salto",
+          "Esquivar",
+          "Furia"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Elfos Silvanos",
+    "positions": [
+      {
+        "name": "Wood Elf Lineman",
+        "cost": 65000,
+        "max": 16,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Wood Elf Thrower",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Pasar",
+          "Proteger el cuero"
+        ]
+      },
+      {
+        "name": "Wood Elf Catcher",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Atrapar",
+          "Esprintar",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Wardancer",
+        "cost": 130000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Esquivar",
+          "Placar",
+          "Saltar"
+        ]
+      },
+      {
+        "name": "Loren Forest Treeman",
+        "cost": 120000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Brazo fuerte",
+          "Cabeza dura",
+          "Echar raíces",
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Mantenerse firme",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Enanos",
+    "positions": [
+      {
+        "name": "Dwarf Lineman",
+        "cost": 70000,
+        "max": 16,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placar",
+          "Romper defensas"
+        ]
+      },
+      {
+        "name": "Dwarf Runner",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Esprintar",
+          "Manos seguras"
+        ]
+      },
+      {
+        "name": "Dwarf Blitzer",
+        "cost": 100000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "P"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placaje defensivo",
+          "Placaje heroico",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Troll Slayer",
+        "cost": 95000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "T"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Cabeza dura",
+          "Furia",
+          "Odio (Troll)",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Deathroller",
+        "cost": 170000,
+        "max": 1,
+        "primary": [
+          "F",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Abrirse paso",
+          "Arma secreta",
+          "El balón ni verlo",
+          "Imparable",
+          "Golpe mortífero",
+          "Mantenerse firme",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Enanos del Caos",
+    "positions": [
+      {
+        "name": "Hobgoblin Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Sneaky Stabba",
+        "cost": 60000,
+        "max": 2,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Apuñalar"
+        ]
+      },
+      {
+        "name": "Chaos Dwarf",
+        "cost": 70000,
+        "max": 4,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Flamesmith",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Exhalar fuego",
+          "Luchador"
+        ]
+      },
+      {
+        "name": "Bull Centaur",
+        "cost": 130000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Esprintar",
+          "Pies firmes",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Minotaur",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cuernos",
+          "Furia",
+          "Golpe mortífero",
+          "Ira descontrolada",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gnomos",
+    "positions": [
+      {
+        "name": "Gnome Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "En pie de un salto",
+          "Escurridizo",
+          "Forcejear",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Woodland Fox",
+        "cost": 50000,
+        "max": 2,
+        "primary": [],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Echarse a un lado",
+          "Esquivar",
+          "El balón es mío",
+          "Escurridizo"
+        ]
+      },
+      {
+        "name": "Gnome Illusionist",
+        "cost": 50000,
+        "max": 2,
+        "primary": [
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "G",
+          "T"
+        ],
+        "baseSkills": [
+          "En pie de un salto",
+          "Escurridizo",
+          "Forcejear",
+          "Embustero"
+        ]
+      },
+      {
+        "name": "Gnome Beastmaster",
+        "cost": 55000,
+        "max": 2,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "En pie de un salto",
+          "Escurridizo",
+          "Forcejear",
+          "Defensa"
+        ]
+      },
+      {
+        "name": "Altern Forest Treeman",
+        "cost": 120000,
+        "max": 2,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Brazo fuerte",
+          "Cabeza dura",
+          "Echar raíces",
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Tronco va",
+          "Mantenerse firme"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Goblins",
+    "positions": [
+      {
+        "name": "Goblin Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Loony",
+        "cost": 40000,
+        "max": 1,
+        "primary": [
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Arma secreta",
+          "Escurridizo",
+          "El balón ni verlo",
+          "Motosierra"
+        ]
+      },
+      {
+        "name": "Bomma",
+        "cost": 45000,
+        "max": 1,
+        "primary": [
+          "P",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Arma secreta",
+          "Bombardero"
+        ]
+      },
+      {
+        "name": "Ooligan",
+        "cost": 60000,
+        "max": 1,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Provocar"
+        ]
+      },
+      {
+        "name": "Doom Diver",
+        "cost": 65000,
+        "max": 1,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Planear"
+        ]
+      },
+      {
+        "name": "Fanatic",
+        "cost": 70000,
+        "max": 1,
+        "primary": [
+          "F",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Arma secreta",
+          "Bola con cadena",
+          "El balón ni verlo",
+          "Escurridizo"
+        ]
+      },
+      {
+        "name": "Pogoer",
+        "cost": 75000,
+        "max": 1,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Pogo saltarín"
+        ]
+      },
+      {
+        "name": "Trained Troll",
+        "cost": 115000,
+        "max": 2,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Halflings",
+    "positions": [
+      {
+        "name": "Halfling Hopeful",
+        "cost": 30000,
+        "max": 16,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Halfling Hefty",
+        "cost": 50000,
+        "max": 2,
+        "primary": [
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Zafarse"
+        ]
+      },
+      {
+        "name": "Halfling Catcher",
+        "cost": 55000,
+        "max": 2,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Esprintar",
+          "Humanoide bala",
+          "Atrapar"
+        ]
+      },
+      {
+        "name": "Altern Forest Treeman",
+        "cost": 120000,
+        "max": 2,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Brazo fuerte",
+          "Cabeza dura",
+          "Echar raíces",
+          "Golpe mortífero",
+          "Lanzar compañero",
+          "Tronco va",
+          "Mantenerse firme"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hombres Lagarto",
+    "positions": [
+      {
+        "name": "Skink Lineman",
+        "cost": 60000,
+        "max": 16,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Chameleon Skink",
+        "cost": 70000,
+        "max": 2,
+        "primary": [
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Atento al balón"
+        ]
+      },
+      {
+        "name": "Saurus Blocker",
+        "cost": 90000,
+        "max": 6,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Imparable",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Kroxigor",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cola prensil",
+          "Estúpido",
+          "Golpe mortífero",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Humanos",
+    "positions": [
+      {
+        "name": "Human Lineman",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Halfling Hopeful",
+        "cost": 30000,
+        "max": 3,
+        "primary": [
+          "A"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Human Catcher",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Atrapar",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Human Thrower",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Manos seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Human Blitzer",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Placar",
+          "Placaje defensivo"
+        ]
+      },
+      {
+        "name": "Ogre",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Golpe Mortífero",
+          "Solitario (3+)",
+          "Lanzar Compañero"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Inframundo",
+    "positions": [
+      {
+        "name": "Goblin Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Snotling Lineman",
+        "cost": 15000,
+        "max": 6,
+        "primary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Canijo",
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide Bala",
+          "Insignificante"
+        ]
+      },
+      {
+        "name": "Skaven Clanrat",
+        "cost": 50000,
+        "max": 3,
+        "primary": [
+          "G",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Goblin)"
+        ]
+      },
+      {
+        "name": "Skaven Thrower",
+        "cost": 80000,
+        "max": 1,
+        "primary": [
+          "G",
+          "M",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Animosidad (Goblin)",
+          "Manos seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Gutter Runner",
+        "cost": 85000,
+        "max": 1,
+        "primary": [
+          "G",
+          "A",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Goblin)",
+          "Apuñalar",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Skaven Blitzer",
+        "cost": 90000,
+        "max": 1,
+        "primary": [
+          "G",
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Animosidad (Goblin)",
+          "Placar",
+          "Robar balón"
+        ]
+      },
+      {
+        "name": "Troll",
+        "cost": 115000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Rat Ogre",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cola prensil",
+          "Ferocidad animal",
+          "Furia",
+          "Golpe mortífero",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      }
+    ],
+    "maxBigGuys": 1
+  },
+  {
+    "name": "Khorne",
+    "positions": [
+      {
+        "name": "Bloodborn Marauder",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Furia"
+        ]
+      },
+      {
+        "name": "Khorngor",
+        "cost": 70000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "En pie de un salto",
+          "Cuernos",
+          "Imparable"
+        ]
+      },
+      {
+        "name": "Bloodseeker",
+        "cost": 105000,
+        "max": 4,
+        "primary": [
+          "G",
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Furia"
+        ]
+      },
+      {
+        "name": "Bloodspawn",
+        "cost": 160000,
+        "max": 1,
+        "primary": [
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Furia",
+          "Golpe mortífero",
+          "Ira descontrolada",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Nigromantes",
+    "positions": [
+      {
+        "name": "Zombie Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Regeneración",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Ghoul Runner",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Esquivar",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Wraith",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Placar",
+          "Echarse a un lado",
+          "Regeneración",
+          "El balón ni verlo"
+        ]
+      },
+      {
+        "name": "Flesh Golem",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Mantenerse firme",
+          "Regeneración",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Werewolf",
+        "cost": 120000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Furia",
+          "Regeneración"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "No Muertos",
+    "positions": [
+      {
+        "name": "Skeleton Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Zombie Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Regeneración",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Ghoul Runner",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Esquivar",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Wight Blitzer",
+        "cost": 95000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placaje defensivo",
+          "Placar",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Mummy",
+        "cost": 125000,
+        "max": 2,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Golpe Mortífero",
+          "Regeneración"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Nobles Imperiales",
+    "positions": [
+      {
+        "name": "Imperial Retainer",
+        "cost": 45000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Zafarse"
+        ]
+      },
+      {
+        "name": "Imperial Thrower",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Pasar",
+          "Pasar y seguir",
+          "Profesional"
+        ]
+      },
+      {
+        "name": "Bodyguard",
+        "cost": 85000,
+        "max": 4,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Forcejear",
+          "Mantenerse firme"
+        ]
+      },
+      {
+        "name": "Noble Blitzer",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Atrapar",
+          "Placar",
+          "Profesional"
+        ]
+      },
+      {
+        "name": "Ogre",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Golpe mortífero",
+          "Solitario (3+)",
+          "Lanzar compañero"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Nurgle",
+    "positions": [
+      {
+        "name": "Rotter Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Descomposición",
+          "Infectado"
+        ]
+      },
+      {
+        "name": "Pestigor",
+        "cost": 70000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Equilibrio firme",
+          "Cuernos",
+          "Infectado",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Bloater",
+        "cost": 110000,
+        "max": 4,
+        "primary": [
+          "G",
+          "F",
+          "M"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Infectado",
+          "Mantenerse firme",
+          "Regeneración",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Rotspawn",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "T",
+          "M"
+        ],
+        "baseSkills": [
+          "Infectado",
+          "Golpe mortífero",
+          "Regeneración",
+          "Levantar compañero",
+          "Realmente estúpido",
+          "Tentáculos",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "N?rdicos",
+    "positions": [
+      {
+        "name": "Norse Raider",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Borracho",
+          "Cabeza dura",
+          "Placar",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Beer Boar",
+        "cost": 20000,
+        "max": 2,
+        "primary": [],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Canijo",
+          "El balón ni verlo",
+          "Escurridizo",
+          "Esquivar",
+          "Levantar compañero"
+        ]
+      },
+      {
+        "name": "Norse Berserker",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "En pie de un salto",
+          "Furia",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Valkyrie",
+        "cost": 95000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Agallas",
+          "Atrapar",
+          "Pasar",
+          "Robar balón"
+        ]
+      },
+      {
+        "name": "Ulfwerner",
+        "cost": 105000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A"
+        ],
+        "baseSkills": [
+          "Furia",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Yhetee",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Furia",
+          "Ira descontrolada",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Ogros",
+    "positions": [
+      {
+        "name": "Gnoblar Lineman",
+        "cost": 15000,
+        "max": 16,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Canijo",
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide Bala"
+        ]
+      },
+      {
+        "name": "Ogre Blocker",
+        "cost": 140000,
+        "max": 5,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Lanzar compañero",
+          "Golpe mortífero"
+        ]
+      },
+      {
+        "name": "Ogre Runt Punter",
+        "cost": 145000,
+        "max": 1,
+        "primary": [
+          "F",
+          "P"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Chutar compañero",
+          "Golpe mortífero"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Orcos",
+    "positions": [
+      {
+        "name": "Orc Lineman",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Goblin Lineman",
+        "cost": 40000,
+        "max": 4,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Orc Thrower",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Manos seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Orc Blitzer",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Abrirse paso",
+          "Placar"
+        ]
+      },
+      {
+        "name": "Big Un Blocker",
+        "cost": 95000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Golpe mortífero",
+          "Provocar",
+          "Tembloroso"
+        ]
+      },
+      {
+        "name": "Trained Troll",
+        "cost": 115000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Solitario (4+)",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Orcos Negros",
+    "positions": [
+      {
+        "name": "Goblin Bruiser",
+        "cost": 45000,
+        "max": 16,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala"
+        ]
+      },
+      {
+        "name": "Black Orc",
+        "cost": 90000,
+        "max": 6,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Apartar",
+          "Luchador"
+        ]
+      },
+      {
+        "name": "Trained Troll",
+        "cost": 115000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Renegados del Caos",
+    "positions": [
+      {
+        "name": "Renegade Human",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)"
+        ]
+      },
+      {
+        "name": "Renegade Goblin",
+        "cost": 40000,
+        "max": 1,
+        "primary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "P"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide Bala"
+        ]
+      },
+      {
+        "name": "Renegade Orc",
+        "cost": 50000,
+        "max": 1,
+        "primary": [
+          "G",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)"
+        ]
+      },
+      {
+        "name": "Renegade Skaven",
+        "cost": 50000,
+        "max": 1,
+        "primary": [
+          "G",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)"
+        ]
+      },
+      {
+        "name": "Renegade Dark Elf",
+        "cost": 65000,
+        "max": 1,
+        "primary": [
+          "G",
+          "A",
+          "M",
+          "T"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)"
+        ]
+      },
+      {
+        "name": "Ren. Human Thrower",
+        "cost": 75000,
+        "max": 1,
+        "primary": [
+          "G",
+          "M",
+          "P",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Animosidad (Todos)",
+          "Manos Seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Troll",
+        "cost": 115000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "M",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Solitario (4+)",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Ogre",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "M"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Estúpido",
+          "Golpe mortífero",
+          "Solitario (3+)",
+          "Lanzar compañero"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Minotaur",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "M"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cuernos",
+          "Furia",
+          "Golpe mortífero",
+          "Ira descontrolada",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      },
+      {
+        "name": "Rat Ogre",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "M"
+        ],
+        "baseSkills": [
+          "Cola prensil",
+          "Ferocidad animal",
+          "Furia",
+          "Golpe mortífero",
+          "Solitario (4+)"
+        ],
+        "bigGuy": true
+      }
+    ],
+    "maxBigGuys": 3
+  },
+  {
+    "name": "Reyes Funerarios",
+    "positions": [
+      {
+        "name": "Skeleton Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Tomb Kings Thrower",
+        "cost": 65000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Manos seguras",
+          "Pasar",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Tomb Kings Blitzer",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "T"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Placar",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Tomb Guardian",
+        "cost": 115000,
+        "max": 4,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Descomposición",
+          "Luchador",
+          "Regeneración"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Skaven",
+    "positions": [
+      {
+        "name": "Skaven Clanrat",
+        "cost": 50000,
+        "max": 16,
+        "primary": [
+          "G",
+          "T"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "M"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Skaven Thrower",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "P"
+        ],
+        "secondary": [
+          "A",
+          "F",
+          "M",
+          "T"
+        ],
+        "baseSkills": [
+          "Manos seguras",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Gutter Runner",
+        "cost": 85000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "F",
+          "M"
+        ],
+        "baseSkills": [
+          "Apuñalar",
+          "Esquivar"
+        ]
+      },
+      {
+        "name": "Skaven Blitzer",
+        "cost": 90000,
+        "max": 2,
+        "primary": [
+          "G",
+          "F"
+        ],
+        "secondary": [
+          "A",
+          "M",
+          "T"
+        ],
+        "baseSkills": [
+          "Placar",
+          "Robar balón"
+        ]
+      },
+      {
+        "name": "Rat Ogre",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "M"
+        ],
+        "baseSkills": [
+          "Cola prensil",
+          "Ferocidad animal",
+          "Furia",
+          "Golpe mortífero",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Slann",
+    "positions": [
+      {
+        "name": "Slann Lineman",
+        "cost": 60000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": [
+          "Pogo saltarín"
+        ]
+      },
+      {
+        "name": "Slann Catcher",
+        "cost": 80000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Atento al balón",
+          "Pogo saltarín",
+          "Recepción heroica",
+          "Piernas muy largas"
+        ]
+      },
+      {
+        "name": "Slann Blitzer",
+        "cost": 100000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "F"
+        ],
+        "secondary": [
+          "P"
+        ],
+        "baseSkills": [
+          "Placaje heroico",
+          "Atacar y huir",
+          "En pie de un salto",
+          "Pogo saltarín"
+        ]
+      },
+      {
+        "name": "Kroxigor",
+        "cost": 140000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Cabeza dura",
+          "Cola prensil",
+          "Estúpido",
+          "Golpe mortífero",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Snotlings",
+    "positions": [
+      {
+        "name": "Snotling Lineman",
+        "cost": 15000,
+        "max": 16,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Canijo",
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Insignificante"
+        ]
+      },
+      {
+        "name": "Fun-hoppa",
+        "cost": 20000,
+        "max": 2,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Pogo saltarín"
+        ]
+      },
+      {
+        "name": "Stilly Runna",
+        "cost": 20000,
+        "max": 2,
+        "primary": [
+          "A",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Esprintar"
+        ]
+      },
+      {
+        "name": "Fungus Flinga",
+        "cost": 30000,
+        "max": 2,
+        "primary": [
+          "A",
+          "P",
+          "T"
+        ],
+        "secondary": [
+          "G"
+        ],
+        "baseSkills": [
+          "Canijo",
+          "Echarse a un lado",
+          "Escurridizo",
+          "Esquivar",
+          "Humanoide bala",
+          "Arma secreta",
+          "Bombardero"
+        ]
+      },
+      {
+        "name": "Pump Wagon",
+        "cost": 100000,
+        "max": 2,
+        "primary": [
+          "F",
+          "T"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Imparable",
+          "Mantenerse Firme",
+          "Realmente estúpido"
+        ]
+      },
+      {
+        "name": "Trained Troll",
+        "cost": 115000,
+        "max": 2,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "baseSkills": [
+          "Golpe mortífero",
+          "Regeneración",
+          "Lanzar compañero",
+          "Proyectil de vómito",
+          "Realmente estúpido",
+          "Siempre hambriento"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Uni?n ?lfica",
+    "positions": [
+      {
+        "name": "Elf Lineman",
+        "cost": 65000,
+        "max": 16,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Elf Thrower",
+        "cost": 75000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Pasar",
+          "Pase a lo loco"
+        ]
+      },
+      {
+        "name": "Elf Catcher",
+        "cost": 100000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Atrapar",
+          "Nervios de acero",
+          "Recepción heroica"
+        ]
+      },
+      {
+        "name": "Elf Blitzer",
+        "cost": 115000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Echarse a un lado",
+          "Placar"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Vampiros",
+    "positions": [
+      {
+        "name": "Thrall Lineman",
+        "cost": 40000,
+        "max": 16,
+        "primary": [
+          "G"
+        ],
+        "secondary": [
+          "A",
+          "F"
+        ],
+        "baseSkills": []
+      },
+      {
+        "name": "Vampire Runner",
+        "cost": 100000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A"
+        ],
+        "secondary": [
+          "F",
+          "P"
+        ],
+        "baseSkills": [
+          "Mirada hipnótica",
+          "Regeneración"
+        ]
+      },
+      {
+        "name": "Vampire Thrower",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "P"
+        ],
+        "secondary": [
+          "F"
+        ],
+        "baseSkills": [
+          "Mirada hipnótica",
+          "Regeneración",
+          "Pasar"
+        ]
+      },
+      {
+        "name": "Vampire Blitzer",
+        "cost": 110000,
+        "max": 2,
+        "primary": [
+          "G",
+          "A",
+          "F"
+        ],
+        "secondary": [],
+        "baseSkills": [
+          "Mirada hipnótica",
+          "Regeneración",
+          "Imparable"
+        ]
+      },
+      {
+        "name": "Vargueist",
+        "cost": 150000,
+        "max": 1,
+        "primary": [
+          "F"
+        ],
+        "secondary": [
+          "G",
+          "A"
+        ],
+        "baseSkills": [
+          "Furia",
+          "Regeneración",
+          "Solitario (4+)"
+        ]
+      }
+    ]
+  }
+]

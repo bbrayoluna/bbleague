@@ -11,3 +11,5 @@ player_items:
 master_items:
   - texto: Master
     path: master.html
+  - texto: Listas
+    path: listas.html

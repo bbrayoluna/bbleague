@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Listas - League Rayo de Luna</title>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<script type="module" src="assets/js/listas.js"></script>
+</head>
+<body>
+	<header>
+		<img src="images/logo.png" class="logosize" alt="Logo">
+		<h1>Listas</h1>
+		<img src="images/logoliga.png" class="logosize6x6" alt="Liga">
+	</header>
+	<div class="container">
+		<nav>
+			<div id="menu-container"></div>
+			<img src="images/referee.png" class="sideimg" alt="Master">
+		</nav>
+		<main class="roster-main">
+			<section id="loginSection">
+				<h2 class="nuffle red centered">Iniciar sesión</h2>
+				<form class="formulario" id="formLogin">
+					<label for="username">Usuario</label>
+					<input id="username" type="text" autocomplete="username" required>
+					<label for="password">Contraseña</label>
+					<input id="password" type="password" autocomplete="current-password" required>
+					<button type="submit">Entrar</button>
+				</form>
+				<div id="loginMensaje"></div>
+			</section>
+			<section id="roleAccessMessage" class="hide centered red" role="alert"></section>
+			<section id="masterSection" class="hide">
+				<h2 class="nuffle red centered">Crear roster</h2>
+
+				<section class="roster-summary" aria-labelledby="summaryTitle">
+					<h3 id="summaryTitle">Resumen de costes</h3>
+					<p class="roster-summary-meta">
+						Equipo: <strong id="summaryRace">Selecciona un equipo</strong>
+						<span aria-hidden="true"> · </span>
+						Nombre: <strong id="summaryTeamName">Sin nombre</strong>
+					</p>
+					<div class="roster-summary-grid">
+						<span>Jugadores</span><strong id="summaryPlayersCost">0 m.o.</strong>
+						<span>Habilidades primarias</span><strong id="summaryPrimaryCost">0 m.o.</strong>
+						<span>Habilidades secundarias</span><strong id="summarySecondaryCost">0 m.o.</strong>
+						<span>Suplemento habilidades élite</span><strong id="summaryEliteCost">0 m.o.</strong>
+						<span>Segunda habilidad por jugador</span><strong id="summarySecondSkillCost">0 m.o.</strong>
+						<span class="roster-summary-total">Coste total</span><strong id="summaryTotalCost" class="roster-summary-total">0 m.o.</strong>
+						<span>Presupuesto</span><strong id="summaryBudget">1.000.000 m.o.</strong>
+						<span>Restante</span><strong id="summaryRemaining">1.000.000 m.o.</strong>
+					</div>
+					<p id="summaryPlayerCount" class="roster-summary-note">0 jugadores (máximo 16).</p>
+					<p id="budgetWarning" class="roster-warning" role="alert"></p>
+					<p class="roster-summary-note">El total incluye jugadores y habilidades añadidas; no incluye personal ni incentivos.</p>
+					<p class="roster-summary-note">Habilidades: 20.000 m.o. primaria, 40.000 m.o. secundaria; +10.000 m.o. por cada élite (Placar, Esquivar, Defensa o Golpe mortífero) y +10.000 m.o. por la segunda habilidad de un jugador. Máximo: 2 habilidades añadidas por jugador.</p>
+					<p class="roster-summary-note">Comprueba en las bases del torneo si exige un mínimo de jugadores.</p>
+				</section>
+
+				<section class="roster-section" aria-labelledby="rosterSettingsTitle">
+					<h3 id="rosterSettingsTitle">Datos del equipo</h3>
+					<div class="formulario roster-fields">
+						<label for="teamSelect">Equipo</label>
+						<select id="teamSelect" required></select>
+						<label for="rosterName">Nombre del equipo</label>
+						<input id="rosterName" type="text" maxlength="60" autocomplete="off" placeholder="Nombre del equipo">
+						<label for="teamBudget">Presupuesto total (m.o.)</label>
+						<input id="teamBudget" type="number" min="0" step="10000" value="1000000">
+					</div>
+				</section>
+
+				<section class="roster-section" aria-labelledby="addPlayerTitle">
+					<h3 id="addPlayerTitle">Añadir jugadores</h3>
+					<form id="addPlayerForm" class="formulario roster-add-player">
+						<label for="positionSelect">Tipo de jugador</label>
+						<select id="positionSelect" required disabled></select>
+						<button type="submit" id="addPlayerButton" disabled>Añadir jugador</button>
+					</form>
+				</section>
+
+				<section class="roster-section" aria-labelledby="playersTitle">
+					<h3 id="playersTitle">Plantilla</h3>
+					<div id="rosterPlayers" class="roster-player-list"></div>
+				</section>
+
+				<div id="listasMensaje" class="centered" role="status" aria-live="polite"></div>
+				<div class="roster-download">
+					<button type="button" id="downloadRosterButton" class="master-action" disabled>Descargar roster en PDF</button>
+				</div>
+			</section>
+		</main>
+	</div>
+</body>
+</html>
