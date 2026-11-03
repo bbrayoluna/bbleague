@@ -34,6 +34,48 @@
 			<section id="masterSection" class="hide">
 				<h2 class="nuffle red centered">Crear roster</h2>
 
+				<section class="roster-section" aria-labelledby="rosterSettingsTitle">
+					<h3 id="rosterSettingsTitle">Datos del equipo</h3>
+					<div class="formulario roster-fields">
+						<label for="teamSelect">Equipo</label>
+						<select id="teamSelect" required></select>
+						<label for="rosterName">Nombre del equipo</label>
+						<input id="rosterName" type="text" maxlength="60" autocomplete="off" placeholder="Nombre del equipo">
+						<label for="teamBudget">Presupuesto total (m.o.)</label>
+						<input id="teamBudget" type="number" min="0" step="10000" value="1000000">
+					</div>
+				</section>
+
+				<section class="roster-section" aria-labelledby="addPlayerTitle">
+					<h3 id="addPlayerTitle">Añadir jugadores</h3>
+					<form id="addPlayerForm" class="formulario roster-add-player">
+						<label for="positionSelect">Tipo de jugador</label>
+						<select id="positionSelect" required disabled></select>
+						<button type="submit" id="addPlayerButton" disabled>Añadir jugador</button>
+					</form>
+				</section>
+
+				<section class="roster-section" aria-labelledby="rosterExtrasTitle">
+					<h3 id="rosterExtrasTitle">Cuadro técnico e incentivos</h3>
+					<form id="addRosterExtraForm" class="formulario roster-add-player">
+						<label for="rosterExtraSelect">Elemento</label>
+						<select id="rosterExtraSelect" required disabled></select>
+						<button type="submit" id="addRosterExtraButton" disabled>Añadir</button>
+					</form>
+					<div id="rosterExtras" class="roster-extra-list"></div>
+					<p class="roster-summary-note">Incluye opciones comunes del compendio. Los jugadores estrella, mercenarios y algunos incentivos dependen de la competición o de reglas específicas del equipo.</p>
+				</section>
+
+				<section class="roster-section" aria-labelledby="playersTitle">
+					<h3 id="playersTitle">Plantilla</h3>
+					<div id="rosterPlayers" class="roster-player-list"></div>
+				</section>
+
+				<div id="listasMensaje" class="centered" role="status" aria-live="polite"></div>
+				<div class="roster-download">
+					<button type="button" id="downloadRosterButton" class="master-action" disabled>Descargar roster en PDF</button>
+				</div>
+
 				<section class="roster-summary" aria-labelledby="summaryTitle">
 					<h3 id="summaryTitle">Resumen de costes</h3>
 					<p class="roster-summary-meta">
@@ -59,48 +101,6 @@
 					<p class="roster-summary-note">Habilidades: 20.000 m.o. primaria, 40.000 m.o. secundaria; +10.000 m.o. por cada élite (Placar, Esquivar, Defensa o Golpe mortífero) y +10.000 m.o. por la segunda habilidad de un jugador. Máximo: 2 habilidades añadidas por jugador.</p>
 					<p class="roster-summary-note">Comprueba en las bases del torneo si exige un mínimo de jugadores.</p>
 				</section>
-
-				<section class="roster-section" aria-labelledby="rosterSettingsTitle">
-					<h3 id="rosterSettingsTitle">Datos del equipo</h3>
-					<div class="formulario roster-fields">
-						<label for="teamSelect">Equipo</label>
-						<select id="teamSelect" required></select>
-						<label for="rosterName">Nombre del equipo</label>
-						<input id="rosterName" type="text" maxlength="60" autocomplete="off" placeholder="Nombre del equipo">
-						<label for="teamBudget">Presupuesto total (m.o.)</label>
-						<input id="teamBudget" type="number" min="0" step="10000" value="1000000">
-					</div>
-				</section>
-
-				<section class="roster-section" aria-labelledby="addPlayerTitle">
-					<h3 id="addPlayerTitle">Añadir jugadores</h3>
-					<form id="addPlayerForm" class="formulario roster-add-player">
-						<label for="positionSelect">Tipo de jugador</label>
-						<select id="positionSelect" required disabled></select>
-						<button type="submit" id="addPlayerButton" disabled>Añadir jugador</button>
-					</form>
-				</section>
-
-				<section class="roster-section" aria-labelledby="playersTitle">
-					<h3 id="playersTitle">Plantilla</h3>
-					<div id="rosterPlayers" class="roster-player-list"></div>
-				</section>
-
-				<section class="roster-section" aria-labelledby="rosterExtrasTitle">
-					<h3 id="rosterExtrasTitle">Cuadro técnico e incentivos</h3>
-					<form id="addRosterExtraForm" class="formulario roster-add-player">
-						<label for="rosterExtraSelect">Elemento</label>
-						<select id="rosterExtraSelect" required disabled></select>
-						<button type="submit" id="addRosterExtraButton" disabled>Añadir</button>
-					</form>
-					<div id="rosterExtras" class="roster-extra-list"></div>
-					<p class="roster-summary-note">Incluye opciones comunes del compendio. Los jugadores estrella, mercenarios y algunos incentivos dependen de la competición o de reglas específicas del equipo.</p>
-				</section>
-
-				<div id="listasMensaje" class="centered" role="status" aria-live="polite"></div>
-				<div class="roster-download">
-					<button type="button" id="downloadRosterButton" class="master-action" disabled>Descargar roster en PDF</button>
-				</div>
 			</section>
 		</main>
 	</div>
