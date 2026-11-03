@@ -47,13 +47,15 @@
 						<span>Habilidades secundarias</span><strong id="summarySecondaryCost">0 m.o.</strong>
 						<span>Suplemento habilidades élite</span><strong id="summaryEliteCost">0 m.o.</strong>
 						<span>Segunda habilidad por jugador</span><strong id="summarySecondSkillCost">0 m.o.</strong>
+						<span>Cuadro técnico</span><strong id="summaryStaffCost">0 m.o.</strong>
+						<span>Incentivos</span><strong id="summaryInducementCost">0 m.o.</strong>
 						<span class="roster-summary-total">Coste total</span><strong id="summaryTotalCost" class="roster-summary-total">0 m.o.</strong>
 						<span>Presupuesto</span><strong id="summaryBudget">1.000.000 m.o.</strong>
 						<span>Restante</span><strong id="summaryRemaining">1.000.000 m.o.</strong>
 					</div>
 					<p id="summaryPlayerCount" class="roster-summary-note">0 jugadores (máximo 16).</p>
 					<p id="budgetWarning" class="roster-warning" role="alert"></p>
-					<p class="roster-summary-note">El total incluye jugadores y habilidades añadidas; no incluye personal ni incentivos.</p>
+					<p class="roster-summary-note">El total incluye jugadores, habilidades, cuadro técnico e incentivos comunes seleccionados. Comprueba las restricciones específicas de tu equipo y torneo.</p>
 					<p class="roster-summary-note">Habilidades: 20.000 m.o. primaria, 40.000 m.o. secundaria; +10.000 m.o. por cada élite (Placar, Esquivar, Defensa o Golpe mortífero) y +10.000 m.o. por la segunda habilidad de un jugador. Máximo: 2 habilidades añadidas por jugador.</p>
 					<p class="roster-summary-note">Comprueba en las bases del torneo si exige un mínimo de jugadores.</p>
 				</section>
@@ -82,6 +84,17 @@
 				<section class="roster-section" aria-labelledby="playersTitle">
 					<h3 id="playersTitle">Plantilla</h3>
 					<div id="rosterPlayers" class="roster-player-list"></div>
+				</section>
+
+				<section class="roster-section" aria-labelledby="rosterExtrasTitle">
+					<h3 id="rosterExtrasTitle">Cuadro técnico e incentivos</h3>
+					<form id="addRosterExtraForm" class="formulario roster-add-player">
+						<label for="rosterExtraSelect">Elemento</label>
+						<select id="rosterExtraSelect" required disabled></select>
+						<button type="submit" id="addRosterExtraButton" disabled>Añadir</button>
+					</form>
+					<div id="rosterExtras" class="roster-extra-list"></div>
+					<p class="roster-summary-note">Incluye opciones comunes del compendio. Los jugadores estrella, mercenarios y algunos incentivos dependen de la competición o de reglas específicas del equipo.</p>
 				</section>
 
 				<div id="listasMensaje" class="centered" role="status" aria-live="polite"></div>

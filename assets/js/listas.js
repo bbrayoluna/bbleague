@@ -3,6 +3,27 @@ import { conectarSesion, crearMensaje } from './commons.js';
 const rosterDataUrl = 'assets/data/rosters.json';
 const maxPlayers = 16;
 const skillPrices = { primary: 20000, secondary: 40000, elite: 10000, secondSkill: 10000 };
+const rosterExtraCatalog = [
+  { id: 'cheerleaders', name: 'Animadoras', group: 'Cuadro técnico', price: 10000, max: 6 },
+  { id: 'assistant-coaches', name: 'Ayudantes del entrenador', group: 'Cuadro técnico', price: 10000, max: 6 },
+  { id: 'fans', name: 'Hinchas', group: 'Cuadro técnico', price: 5000, max: 3 },
+  { id: 'temporary-cheerleaders', name: 'Animadoras temporales', group: 'Incentivos', price: 5000, max: 5 },
+  { id: 'prayers-to-nuffle', name: 'Plegarias a Nuffle', group: 'Incentivos', price: 10000, max: 3 },
+  { id: 'part-time-assistants', name: 'Ayudantes a tiempo parcial', group: 'Incentivos', price: 20000, max: 5 },
+  { id: 'team-mascot', name: 'Mascota del equipo', group: 'Incentivos', price: 25000, max: 1 },
+  { id: 'weather-mage', name: 'Cambiaclimas', group: 'Incentivos', price: 25000, max: 1 },
+  { id: 'beer-barrels', name: 'Barriles de cerveza Estrella Blitzer', group: 'Incentivos', price: 50000, max: 2 },
+  { id: 'extra-training', name: 'Entrenamientos adicionales', group: 'Incentivos', price: 100000, max: 8 },
+  { id: 'bribes', name: 'Sobornos', group: 'Incentivos', price: 100000, max: 3 },
+  {
+    id: 'halfling-master-chef',
+    name: 'Chef Maestro Halfling',
+    group: 'Incentivos',
+    price: 300000,
+    teamPrices: { Halflings: 100000 },
+    max: 1
+  }
+];
 const skillCategories = {
   G: {
     name: 'Generales',
@@ -65,12 +86,17 @@ const addPlayerForm = document.getElementById('addPlayerForm');
 const positionSelect = document.getElementById('positionSelect');
 const addPlayerButton = document.getElementById('addPlayerButton');
 const playersContainer = document.getElementById('rosterPlayers');
+const addRosterExtraForm = document.getElementById('addRosterExtraForm');
+const rosterExtraSelect = document.getElementById('rosterExtraSelect');
+const addRosterExtraButton = document.getElementById('addRosterExtraButton');
+const rosterExtrasContainer = document.getElementById('rosterExtras');
 const downloadButton = document.getElementById('downloadRosterButton');
 const mostrarMensaje = crearMensaje('listasMensaje');
 
 let teams = [];
 let selectedTeam = null;
 let rosterPlayers = [];
+let rosterExtras = [];
 let nextPlayerId = 1;
 
 function normalizarHabilidad(value) {
@@ -83,7 +109,7 @@ function normalizarHabilidad(value) {
 }
 
 function formatearCoste(value) {
-  return `${Number(value).toLocaleString('es-ES')} m.o.`;
+  return `${Number(value).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 0 })} m.o.`;
 }
 
 function crearElemento(tagName, className, text) {
@@ -99,6 +125,8 @@ function obtenerCostes() {
   let secondarySkillCost = 0;
   let eliteCost = 0;
   let secondSkillCost = 0;
+  let staffCost = 0;
+  let inducementCost = 0;
 
   rosterPlayers.forEach(player => {
     playersCost += player.position.cost;
@@ -110,13 +138,23 @@ function obtenerCostes() {
     });
   });
 
+  rosterExtras.forEach(extra => {
+    const definition = obtenerDefinicionExtra(extra.id);
+    const cost = obtenerCosteExtra(definition) * extra.quantity;
+    if (definition.group === 'Cuadro técnico') staffCost += cost;
+    else inducementCost += cost;
+  });
+
   return {
     playersCost,
     primarySkillCost,
     secondarySkillCost,
     eliteCost,
     secondSkillCost,
+    staffCost,
+    inducementCost,
     total: playersCost + primarySkillCost + secondarySkillCost + eliteCost + secondSkillCost
+      + staffCost + inducementCost
   };
 }
 
@@ -132,6 +170,8 @@ function actualizarResumen() {
   document.getElementById('summarySecondaryCost').textContent = formatearCoste(costs.secondarySkillCost);
   document.getElementById('summaryEliteCost').textContent = formatearCoste(costs.eliteCost);
   document.getElementById('summarySecondSkillCost').textContent = formatearCoste(costs.secondSkillCost);
+  document.getElementById('summaryStaffCost').textContent = formatearCoste(costs.staffCost);
+  document.getElementById('summaryInducementCost').textContent = formatearCoste(costs.inducementCost);
   document.getElementById('summaryTotalCost').textContent = formatearCoste(costs.total);
   document.getElementById('summaryBudget').textContent = formatearCoste(budget);
   const remainingElement = document.getElementById('summaryRemaining');
@@ -142,6 +182,110 @@ function actualizarResumen() {
     ? 'El coste supera el presupuesto. Reduce gastos o aumenta el presupuesto para descargar.'
     : '';
   downloadButton.disabled = rosterPlayers.length === 0 || remaining < 0;
+}
+
+function obtenerDefinicionExtra(id) {
+  return rosterExtraCatalog.find(extra => extra.id === id);
+}
+
+function obtenerCosteExtra(extra) {
+  return extra.teamPrices?.[selectedTeam?.name] ?? extra.price;
+}
+
+function obtenerCantidadExtra(id) {
+  return rosterExtras.find(extra => extra.id === id)?.quantity || 0;
+}
+
+function actualizarSelectorExtras() {
+  rosterExtraSelect.replaceChildren();
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = selectedTeam ? 'Selecciona un elemento' : 'Selecciona primero un equipo';
+  rosterExtraSelect.appendChild(placeholder);
+
+  rosterExtraCatalog.forEach(extra => {
+    const quantity = obtenerCantidadExtra(extra.id);
+    const option = document.createElement('option');
+    option.value = extra.id;
+    option.textContent = `${extra.name} — ${formatearCoste(obtenerCosteExtra(extra))} (${quantity}/${extra.max})`;
+    option.disabled = !selectedTeam || quantity >= extra.max;
+    rosterExtraSelect.appendChild(option);
+  });
+  rosterExtraSelect.disabled = !selectedTeam;
+  addRosterExtraButton.disabled = !selectedTeam;
+}
+
+function renderizarExtras() {
+  rosterExtrasContainer.replaceChildren();
+  ['Cuadro técnico', 'Incentivos'].forEach(groupName => {
+    const groupExtras = rosterExtras
+      .map(extra => ({ ...extra, definition: obtenerDefinicionExtra(extra.id) }))
+      .filter(extra => extra.definition.group === groupName);
+    if (!groupExtras.length) return;
+
+    rosterExtrasContainer.appendChild(crearElemento('h4', 'roster-extra-heading', groupName));
+    const list = crearElemento('ul', 'roster-extra-group');
+    groupExtras.forEach(extra => {
+      const item = crearElemento('li', 'roster-extra');
+      const total = obtenerCosteExtra(extra.definition) * extra.quantity;
+      item.appendChild(crearElemento(
+        'span',
+        '',
+        `${extra.definition.name} × ${extra.quantity} (${formatearCoste(obtenerCosteExtra(extra.definition))} c/u) — ${formatearCoste(total)}`
+      ));
+
+      const controls = crearElemento('div', 'roster-extra-controls');
+      const removeButton = crearElemento('button', 'roster-remove-skill', '−');
+      removeButton.type = 'button';
+      removeButton.setAttribute('aria-label', `Quitar una unidad de ${extra.definition.name}`);
+      removeButton.disabled = extra.quantity <= 0;
+      removeButton.addEventListener('click', () => cambiarCantidadExtra(extra.id, -1));
+      const addButton = crearElemento('button', 'roster-remove-skill', '+');
+      addButton.type = 'button';
+      addButton.setAttribute('aria-label', `Añadir una unidad de ${extra.definition.name}`);
+      addButton.disabled = extra.quantity >= extra.definition.max;
+      addButton.addEventListener('click', () => cambiarCantidadExtra(extra.id, 1));
+      controls.append(removeButton, addButton);
+      item.appendChild(controls);
+      list.appendChild(item);
+    });
+    rosterExtrasContainer.appendChild(list);
+  });
+  actualizarSelectorExtras();
+  actualizarResumen();
+}
+
+function cambiarCantidadExtra(id, amount) {
+  const definition = obtenerDefinicionExtra(id);
+  const existing = rosterExtras.find(extra => extra.id === id);
+  const nextQuantity = (existing?.quantity || 0) + amount;
+  if (!definition || nextQuantity < 0 || nextQuantity > definition.max) return;
+
+  const costDifference = obtenerCosteExtra(definition) * amount;
+  const budget = Math.max(0, Number(teamBudgetInput.value) || 0);
+  if (costDifference > 0 && obtenerCostes().total + costDifference > budget) {
+    mostrarMensaje('El elemento supera el presupuesto disponible.', 'red');
+    return;
+  }
+
+  if (nextQuantity === 0) {
+    rosterExtras = rosterExtras.filter(extra => extra.id !== id);
+  } else if (existing) {
+    existing.quantity = nextQuantity;
+  } else {
+    rosterExtras.push({ id, quantity: nextQuantity });
+  }
+  renderizarExtras();
+  mostrarMensaje('', 'blue');
+}
+
+function agregarExtra(event) {
+  event.preventDefault();
+  if (!obtenerDefinicionExtra(rosterExtraSelect.value)) {
+    mostrarMensaje('Selecciona un elemento válido del cuadro técnico o los incentivos.', 'red');
+    return;
+  }
+  cambiarCantidadExtra(rosterExtraSelect.value, 1);
 }
 
 function contarPosicion(position) {
@@ -346,9 +490,12 @@ function crearElementHeading(index, position) {
 function seleccionarEquipo() {
   selectedTeam = teams.find(team => team.name === teamSelect.value) || null;
   rosterPlayers = [];
+  rosterExtras = [];
   nextPlayerId = 1;
   actualizarSelectorPosiciones();
+  actualizarSelectorExtras();
   renderizarPlantilla();
+  renderizarExtras();
   mostrarMensaje('', 'blue');
 }
 
@@ -446,13 +593,29 @@ function crearPaginasRoster() {
       ...envolverTexto(measurementContext, `Iniciales: ${initialSkills}`, 505),
       ...envolverTexto(measurementContext, `Añadidas: ${addedSkills}`, 505)
     ];
-    return { player, index, detailLines, height: 23 + detailLines.length * 13 + 8 };
+    return { type: 'player', player, index, detailLines, height: 23 + detailLines.length * 13 + 8 };
+  });
+  ['Cuadro técnico', 'Incentivos'].forEach(groupName => {
+    const extras = rosterExtras
+      .map(extra => ({ ...extra, definition: obtenerDefinicionExtra(extra.id) }))
+      .filter(extra => extra.definition.group === groupName);
+    if (!extras.length) return;
+    rows.push({ type: 'section', heading: groupName, height: 22, keepWithNext: true });
+    extras.forEach(extra => {
+      rows.push({
+        type: 'extra',
+        heading: `${extra.definition.name} × ${extra.quantity}`,
+        cost: obtenerCosteExtra(extra.definition) * extra.quantity,
+        height: 20
+      });
+    });
   });
 
   let currentPage = [];
   let currentY = 310;
-  rows.forEach(row => {
-    if (currentY + row.height > 790) {
+  rows.forEach((row, index) => {
+    const nextRowHeight = row.keepWithNext ? rows[index + 1]?.height || 0 : 0;
+    if (currentY + row.height + nextRowHeight > 790) {
       pageRowsList.push(currentPage);
       currentPage = [];
       currentY = 125;
@@ -495,6 +658,8 @@ function crearPaginasRoster() {
         ['Habilidades secundarias', costs.secondarySkillCost],
         ['Habilidades élite', costs.eliteCost],
         ['Segunda habilidad por jugador', costs.secondSkillCost],
+        ['Cuadro técnico', costs.staffCost],
+        ['Incentivos', costs.inducementCost],
         ['Coste total', costs.total],
         ['Presupuesto', budget],
         ['Restante', budget - costs.total]
@@ -515,18 +680,31 @@ function crearPaginasRoster() {
 
     let y = pageIndex === 0 ? 286 : 108;
     pageRows.forEach(row => {
-      const heading = `Jugador ${row.index + 1} — ${row.player.position.name}`;
-      context.font = 'bold 10px Arial';
-      context.fillStyle = '#25396c';
-      context.fillText(heading, 42, y);
-      context.textAlign = 'right';
-      context.fillText(formatearCoste(row.player.position.cost), 553, y);
-      context.textAlign = 'left';
-      context.font = '9px Arial';
-      context.fillStyle = '#444444';
-      row.detailLines.forEach((line, lineIndex) => {
-        context.fillText(line, 48, y + 14 + lineIndex * 13);
-      });
+      if (row.type === 'section') {
+        context.font = 'bold 11px Arial';
+        context.fillStyle = '#ac342f';
+        context.fillText(row.heading, 42, y);
+      } else if (row.type === 'extra') {
+        context.font = '10px Arial';
+        context.fillStyle = '#25396c';
+        context.fillText(row.heading, 48, y);
+        context.textAlign = 'right';
+        context.fillText(formatearCoste(row.cost), 553, y);
+        context.textAlign = 'left';
+      } else {
+        const heading = `Jugador ${row.index + 1} — ${row.player.position.name}`;
+        context.font = 'bold 10px Arial';
+        context.fillStyle = '#25396c';
+        context.fillText(heading, 42, y);
+        context.textAlign = 'right';
+        context.fillText(formatearCoste(row.player.position.cost), 553, y);
+        context.textAlign = 'left';
+        context.font = '9px Arial';
+        context.fillStyle = '#444444';
+        row.detailLines.forEach((line, lineIndex) => {
+          context.fillText(line, 48, y + 14 + lineIndex * 13);
+        });
+      }
       y += row.height;
       context.strokeStyle = '#dddddd';
       context.beginPath();
@@ -651,6 +829,7 @@ teamSelect.addEventListener('change', seleccionarEquipo);
 rosterNameInput.addEventListener('input', actualizarResumen);
 teamBudgetInput.addEventListener('input', actualizarResumen);
 addPlayerForm.addEventListener('submit', agregarJugador);
+addRosterExtraForm.addEventListener('submit', agregarExtra);
 downloadButton.addEventListener('click', descargarRoster);
 
 async function inicializarPagina() {
@@ -671,7 +850,9 @@ conectarSesion({
     teams = [];
     selectedTeam = null;
     rosterPlayers = [];
+    rosterExtras = [];
     teamSelect.replaceChildren();
     renderizarPlantilla();
+    renderizarExtras();
   }
 });

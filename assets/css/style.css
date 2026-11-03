@@ -654,6 +654,49 @@ tr.partido-propio td {
   text-align: center;
 }
 
+.roster-extra-list {
+  max-width: 700px;
+  margin: 1rem auto 0;
+}
+
+.roster-extra-heading {
+  margin: 1rem 0 0.4rem;
+  color: #ac342f;
+}
+
+.roster-extra-group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster-extra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  color: #25396c;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.roster-extra-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.35rem;
+}
+
+.roster-extra-controls button {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.roster-extra-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .roster-download {
   margin: 1.5rem auto;
   text-align: center;
@@ -680,6 +723,11 @@ tr.partido-propio td {
   }
 
   .roster-skill {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roster-extra {
     align-items: flex-start;
     flex-direction: column;
   }
