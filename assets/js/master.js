@@ -32,6 +32,22 @@ const cerrarInscripcionesButton = document.getElementById('cerrarInscripciones')
 const abrirRostersButton = document.getElementById('abrirRosters');
 const cerrarRostersButton = document.getElementById('cerrarRosters');
 const finalizarTorneoButton = document.getElementById('finalizarTorneo');
+const skillPriceInputs = {
+  primary: document.getElementById('costeHabilidadPrimaria'),
+  secondary: document.getElementById('costeHabilidadSecundaria'),
+  elite: document.getElementById('suplementoHabilidadElite'),
+  secondSkill: document.getElementById('suplementoSegundaHabilidad')
+};
+const saveSkillPricesButton = document.getElementById('guardarPreciosHabilidades');
+const maxSkillsPerPlayerInput = document.getElementById('maxHabilidadesPorJugador');
+const defaultMaxSkillsPerPlayer = 2;
+const defaultSkillPrices = { primary: 20000, secondary: 40000, elite: 10000, secondSkill: 10000 };
+const tournamentSkillPriceColumns = {
+  primary: 'primary_skill_cost',
+  secondary: 'secondary_skill_cost',
+  elite: 'elite_skill_surcharge',
+  secondSkill: 'second_skill_surcharge'
+};
 
 const partidoForm = document.getElementById('formPartido');
 const mostrarPartidoMensaje = crearMensaje('partidoMensaje');
@@ -247,9 +263,11 @@ function actualizarEstadoGestion(tournament) {
     abrirRostersButton.disabled = true;
     cerrarRostersButton.disabled = true;
     finalizarTorneoButton.disabled = true;
+    actualizarFormularioPreciosHabilidades(null);
     return;
   }
 
+  actualizarFormularioPreciosHabilidades(tournament);
   estadoTorneo.textContent = tournament.status === 'finished'
     ? 'Estado: finalizado'
     : `Estado: activo. Inscripciones: ${tournament.registration_open ? 'abiertas' : 'cerradas'}`
@@ -261,10 +279,24 @@ function actualizarEstadoGestion(tournament) {
   finalizarTorneoButton.disabled = tournament.status === 'finished';
 }
 
+function actualizarFormularioPreciosHabilidades(tournament) {
+  Object.entries(skillPriceInputs).forEach(([key, input]) => {
+    input.value = tournament
+      ? String(tournament[tournamentSkillPriceColumns[key]])
+      : String(defaultSkillPrices[key]);
+    input.disabled = !tournament;
+  });
+  maxSkillsPerPlayerInput.value = tournament
+    ? String(tournament.max_added_skills_per_player)
+    : String(defaultMaxSkillsPerPlayer);
+  maxSkillsPerPlayerInput.disabled = !tournament;
+  saveSkillPricesButton.disabled = !tournament;
+}
+
 /** Rellena el selector con los torneos disponibles para los masters. */
 async function cargarGestionTorneos() {
   const tournaments = await obtenerDatos(
-    'tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at&order=year.desc,name.asc'
+    'tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at,primary_skill_cost,secondary_skill_cost,elite_skill_surcharge,second_skill_surcharge,max_added_skills_per_player&order=year.desc,name.asc'
   );
 
   torneoGestionSelect.innerHTML = '<option value="">Selecciona un torneo</option>';
@@ -278,6 +310,52 @@ async function cargarGestionTorneos() {
 
   actualizarEstadoGestion(null);
 }
+
+saveSkillPricesButton?.addEventListener('click', async () => {
+  const tournament = torneoSeleccionado();
+  if (!tournament) {
+    mostrarGestionMensaje('Selecciona un torneo antes de guardar sus tarifas.', 'red');
+    return;
+  }
+
+  const prices = Object.fromEntries(
+    Object.entries(skillPriceInputs).map(([key, input]) => [key, input.value.trim() ? Number(input.value) : NaN])
+  );
+  const maxSkillsPerPlayer = maxSkillsPerPlayerInput.value.trim()
+    ? Number(maxSkillsPerPlayerInput.value)
+    : NaN;
+  if (Object.values(prices).some(price => !Number.isSafeInteger(price) || price < 0 || price % 1000 !== 0)
+    || !Number.isSafeInteger(maxSkillsPerPlayer) || maxSkillsPerPlayer < 0) {
+    mostrarGestionMensaje('Introduce tarifas no negativas en múltiplos de 1.000 m.o. y un máximo entero no negativo.', 'red');
+    return;
+  }
+
+  const changes = {
+    primary_skill_cost: prices.primary,
+    secondary_skill_cost: prices.secondary,
+    elite_skill_surcharge: prices.elite,
+    second_skill_surcharge: prices.secondSkill,
+    max_added_skills_per_player: maxSkillsPerPlayer
+  };
+  saveSkillPricesButton.disabled = true;
+  mostrarGestionMensaje('Guardando tarifas de habilidades...', 'blue');
+  try {
+    await enviarDatos(`tournaments?id=eq.${tournament.id}`, { method: 'PATCH', body: changes });
+    const updatedTournament = { ...tournament, ...changes };
+    const option = [...torneoGestionSelect.options]
+      .find(item => String(item.value) === String(tournament.id));
+    if (option) option.dataset.tournament = JSON.stringify(updatedTournament);
+    if (String(torneoGestionSelect.value) === String(tournament.id)) {
+      actualizarEstadoGestion(updatedTournament);
+    }
+    mostrarGestionMensaje('Tarifas de habilidades guardadas correctamente.', 'blue');
+  } catch (error) {
+    console.error('Error guardando las tarifas de habilidades:', error);
+    mostrarGestionMensaje(`No se pudieron guardar las tarifas: ${error.message}`, 'red');
+  } finally {
+    saveSkillPricesButton.disabled = !torneoSeleccionado();
+  }
+});
 
 /**
  * Cambia el estado del torneo elegido (abrir/cerrar inscripciones, finalizar).

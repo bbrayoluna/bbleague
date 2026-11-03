@@ -1,8 +1,11 @@
-import { conectarSesion, crearMensaje } from './commons.js';
+import { conectarSesion, crearMensaje, obtenerDatos } from './commons.js';
 
 const rosterDataUrl = 'assets/data/rosters.json';
 const maxPlayers = 16;
-const skillPrices = { primary: 20000, secondary: 40000, elite: 10000, secondSkill: 10000 };
+const defaultMaxSkillsPerPlayer = 2;
+const defaultSkillPrices = { primary: 20000, secondary: 40000, elite: 10000, secondSkill: 10000 };
+let skillPrices = { ...defaultSkillPrices };
+let maxSkillsPerPlayer = defaultMaxSkillsPerPlayer;
 const rosterExtraCatalog = [
   {
     id: 'team-rerolls',
@@ -119,6 +122,7 @@ const skillCategories = {
 };
 const eliteSkills = new Set(['Placar', 'Esquivar', 'Defensa', 'Golpe mortífero'].map(normalizarHabilidad));
 
+const tournamentSelect = document.getElementById('tournamentSelect');
 const teamSelect = document.getElementById('teamSelect');
 const rosterNameInput = document.getElementById('rosterName');
 const teamBudgetInput = document.getElementById('teamBudget');
@@ -134,6 +138,8 @@ const downloadButton = document.getElementById('downloadRosterButton');
 const mostrarMensaje = crearMensaje('listasMensaje');
 
 let teams = [];
+let tournaments = [];
+let selectedTournament = null;
 let selectedTeam = null;
 let rosterPlayers = [];
 let rosterExtras = [];
@@ -150,6 +156,11 @@ function normalizarHabilidad(value) {
 
 function formatearCoste(value) {
   return `${Number(value).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 0 })} m.o.`;
+}
+
+function etiquetaMaxHabilidades() {
+  const noun = maxSkillsPerPlayer === 1 ? 'habilidad añadida' : 'habilidades añadidas';
+  return `${maxSkillsPerPlayer} ${noun}`;
 }
 
 function crearElemento(tagName, className, text) {
@@ -203,6 +214,9 @@ function actualizarResumen() {
   const budget = Math.max(0, Number(teamBudgetInput.value) || 0);
   const remaining = budget - costs.total;
 
+  document.getElementById('summaryTournament').textContent = selectedTournament
+    ? `${selectedTournament.name} (${selectedTournament.year})`
+    : 'Selecciona un torneo';
   document.getElementById('summaryRace').textContent = selectedTeam?.name || 'Selecciona un equipo';
   document.getElementById('summaryTeamName').textContent = rosterNameInput.value.trim() || 'Sin nombre';
   document.getElementById('summaryPlayersCost').textContent = formatearCoste(costs.playersCost);
@@ -221,7 +235,14 @@ function actualizarResumen() {
   document.getElementById('budgetWarning').textContent = remaining < 0
     ? 'El coste supera el presupuesto. Reduce gastos o aumenta el presupuesto para descargar.'
     : '';
-  downloadButton.disabled = rosterPlayers.length === 0 || remaining < 0;
+  document.getElementById('skillPricingNote').textContent = selectedTournament
+    ? `Tarifas de ${selectedTournament.name}: ${formatearCoste(skillPrices.primary)} primaria, `
+      + `${formatearCoste(skillPrices.secondary)} secundaria; suplemento élite de `
+      + `${formatearCoste(skillPrices.elite)} y ${formatearCoste(skillPrices.secondSkill)} `
+      + 'por la segunda habilidad. Habilidades élite: Placar, Esquivar, Defensa y Golpe mortífero. '
+      + `Máximo: ${etiquetaMaxHabilidades()} por jugador.`
+    : 'Selecciona un torneo para consultar sus tarifas de habilidades.';
+  downloadButton.disabled = !selectedTournament || rosterPlayers.length === 0 || remaining < 0;
 }
 
 function obtenerDefinicionExtra(id) {
@@ -248,11 +269,11 @@ function actualizarSelectorExtras() {
     const option = document.createElement('option');
     option.value = extra.id;
     option.textContent = `${extra.name} — ${formatearCoste(obtenerCosteExtra(extra))} (${quantity}/${extra.max})`;
-    option.disabled = !selectedTeam || quantity >= extra.max;
+    option.disabled = !selectedTournament || !selectedTeam || quantity >= extra.max;
     rosterExtraSelect.appendChild(option);
   });
-  rosterExtraSelect.disabled = !selectedTeam;
-  addRosterExtraButton.disabled = !selectedTeam;
+  rosterExtraSelect.disabled = !selectedTournament || !selectedTeam;
+  addRosterExtraButton.disabled = !selectedTournament || !selectedTeam;
 }
 
 function renderizarExtras() {
@@ -321,6 +342,10 @@ function cambiarCantidadExtra(id, amount) {
 
 function agregarExtra(event) {
   event.preventDefault();
+  if (!selectedTournament || !selectedTeam) {
+    mostrarMensaje('Selecciona un torneo y un equipo antes de añadir elementos.', 'red');
+    return;
+  }
   if (!obtenerDefinicionExtra(rosterExtraSelect.value)) {
     mostrarMensaje('Selecciona un elemento válido del cuadro técnico o los incentivos.', 'red');
     return;
@@ -343,7 +368,7 @@ function actualizarSelectorPosiciones() {
   placeholder.textContent = selectedTeam ? 'Selecciona un tipo de jugador' : 'Selecciona primero un equipo';
   positionSelect.appendChild(placeholder);
 
-  if (!selectedTeam) {
+  if (!selectedTeam || !selectedTournament) {
     positionSelect.disabled = true;
     addPlayerButton.disabled = true;
     return;
@@ -422,8 +447,11 @@ function actualizarHabilidades(player, card) {
 
   const skillForm = card.querySelector('.roster-skill-form');
   skillForm.replaceChildren();
-  if (player.skills.length >= 2) {
-    skillForm.appendChild(crearElemento('p', 'roster-player-note', 'Máximo: 2 habilidades añadidas por jugador.'));
+  if (player.skills.length >= maxSkillsPerPlayer) {
+    const message = player.skills.length > maxSkillsPerPlayer
+      ? `Este jugador supera el límite actual de ${etiquetaMaxHabilidades()}; quita alguna habilidad para ajustarte al torneo.`
+      : `Máximo del torneo: ${etiquetaMaxHabilidades()} por jugador.`;
+    skillForm.appendChild(crearElemento('p', 'roster-player-note', message));
     return;
   }
 
@@ -539,8 +567,33 @@ function seleccionarEquipo() {
   mostrarMensaje('', 'blue');
 }
 
+function seleccionarTorneo() {
+  selectedTournament = tournaments.find(tournament => String(tournament.id) === tournamentSelect.value) || null;
+  skillPrices = selectedTournament
+    ? {
+      primary: Number(selectedTournament.primary_skill_cost),
+      secondary: Number(selectedTournament.secondary_skill_cost),
+      elite: Number(selectedTournament.elite_skill_surcharge),
+      secondSkill: Number(selectedTournament.second_skill_surcharge)
+    }
+    : { ...defaultSkillPrices };
+  maxSkillsPerPlayer = selectedTournament
+    ? Number(selectedTournament.max_added_skills_per_player)
+    : defaultMaxSkillsPerPlayer;
+  teamSelect.disabled = !selectedTournament;
+  actualizarResumen();
+  renderizarPlantilla();
+  renderizarExtras();
+  mostrarMensaje('', 'blue');
+}
+
 async function cargarCatalogo() {
-  const response = await fetch(rosterDataUrl);
+  const [response, tournamentCatalog] = await Promise.all([
+    fetch(rosterDataUrl),
+    obtenerDatos(
+      'tournaments?select=id,name,year,primary_skill_cost,secondary_skill_cost,elite_skill_surcharge,second_skill_surcharge,max_added_skills_per_player&order=year.desc,name.asc'
+    )
+  ]);
   if (!response.ok) {
     throw new Error(`No se pudo cargar el catálogo de equipos (HTTP ${response.status}).`);
   }
@@ -549,6 +602,22 @@ async function cargarCatalogo() {
     throw new Error('El catálogo de equipos está vacío o tiene un formato no válido.');
   }
   teams = catalog;
+  if (!Array.isArray(tournamentCatalog) || !tournamentCatalog.length) {
+    throw new Error('No hay torneos disponibles para crear el roster.');
+  }
+  tournaments = tournamentCatalog;
+  tournamentSelect.replaceChildren();
+  const tournamentPlaceholder = document.createElement('option');
+  tournamentPlaceholder.value = '';
+  tournamentPlaceholder.textContent = 'Selecciona un torneo';
+  tournamentSelect.appendChild(tournamentPlaceholder);
+  tournaments.forEach(tournament => {
+    const option = document.createElement('option');
+    option.value = String(tournament.id);
+    option.textContent = `${tournament.name} (${tournament.year})`;
+    tournamentSelect.appendChild(option);
+  });
+  tournamentSelect.disabled = false;
   teamSelect.replaceChildren();
   const placeholder = document.createElement('option');
   placeholder.value = '';
@@ -560,11 +629,16 @@ async function cargarCatalogo() {
     option.textContent = team.name;
     teamSelect.appendChild(option);
   });
+  teamSelect.disabled = true;
   actualizarResumen();
 }
 
 function agregarJugador(event) {
   event.preventDefault();
+  if (!selectedTournament) {
+    mostrarMensaje('Selecciona el torneo para aplicar sus tarifas de habilidades.', 'red');
+    return;
+  }
   if (!selectedTeam) {
     mostrarMensaje('Selecciona un equipo antes de añadir jugadores.', 'red');
     return;
@@ -684,14 +758,15 @@ function crearPaginasRoster() {
     context.fillText(`${selectedTeam.name} — ${rosterNameInput.value.trim()}`, 42, 73);
     context.font = '10px Arial';
     context.fillStyle = '#25396c';
+    context.fillText(`${selectedTournament.name} (${selectedTournament.year})`, 42, 88);
     context.fillText(`Página ${pageIndex + 1} de ${pageRowsList.length}`, 460, 48);
 
     if (pageIndex === 0) {
       context.fillStyle = '#ac342f';
-      context.fillRect(42, 92, 511, 1.5);
+      context.fillRect(42, 100, 511, 1.5);
       context.font = 'bold 12px Arial';
       context.fillStyle = '#25396c';
-      context.fillText('Resumen de costes', 42, 116);
+      context.fillText('Resumen de costes', 42, 124);
       const costLines = [
         ['Jugadores', costs.playersCost],
         ['Habilidades primarias', costs.primarySkillCost],
@@ -707,18 +782,18 @@ function crearPaginasRoster() {
       context.font = '10px Arial';
       costLines.forEach(([label, amount], index) => {
         const x = index % 2 === 0 ? 42 : 305;
-        const y = 138 + Math.floor(index / 2) * 22;
+        const y = 146 + Math.floor(index / 2) * 19;
         context.fillStyle = label === 'Coste total' ? '#ac342f' : '#25396c';
         context.fillText(`${label}: ${formatearCoste(amount)}`, x, y);
       });
       context.fillStyle = '#ac342f';
-      context.fillRect(42, 238, 511, 1);
+      context.fillRect(42, 244, 511, 1);
       context.font = 'bold 12px Arial';
       context.fillStyle = '#25396c';
-      context.fillText(`Plantilla (${rosterPlayers.length}/${maxPlayers})`, 42, 261);
+      context.fillText(`Plantilla (${rosterPlayers.length}/${maxPlayers})`, 42, 267);
     }
 
-    let y = pageIndex === 0 ? 286 : 108;
+    let y = pageIndex === 0 ? 292 : 108;
     pageRows.forEach(row => {
       if (row.type === 'section') {
         context.font = 'bold 11px Arial';
@@ -755,7 +830,18 @@ function crearPaginasRoster() {
 
     context.font = '8px Arial';
     context.fillStyle = '#666666';
-    context.fillText('Habilidades: 20.000 m.o. primaria / 40.000 m.o. secundaria; +10.000 élite y +10.000 por segunda habilidad.', 42, 818);
+    context.fillText(
+      `Tarifas ${selectedTournament.name}: ${formatearCoste(skillPrices.primary)} primaria / `
+      + `${formatearCoste(skillPrices.secondary)} secundaria; +${formatearCoste(skillPrices.elite)} élite.`,
+      42,
+      810
+    );
+    context.fillText(
+      `+${formatearCoste(skillPrices.secondSkill)} por segunda habilidad. Máximo: `
+      + `${etiquetaMaxHabilidades()} por jugador.`,
+      42,
+      821
+    );
     canvases.push(canvas);
   });
   return canvases;
@@ -831,6 +917,10 @@ async function crearPdf(pages) {
 }
 
 async function descargarRoster() {
+  if (!selectedTournament) {
+    mostrarMensaje('Selecciona un torneo antes de descargar el roster.', 'red');
+    return;
+  }
   if (!selectedTeam || !rosterPlayers.length) {
     mostrarMensaje('Selecciona un equipo y añade al menos un jugador antes de descargar.', 'red');
     return;
@@ -865,6 +955,7 @@ async function descargarRoster() {
   }
 }
 
+tournamentSelect.addEventListener('change', seleccionarTorneo);
 teamSelect.addEventListener('change', seleccionarEquipo);
 rosterNameInput.addEventListener('input', actualizarResumen);
 teamBudgetInput.addEventListener('input', actualizarResumen);
@@ -877,6 +968,7 @@ async function inicializarPagina() {
     await cargarCatalogo();
     actualizarSelectorPosiciones();
     renderizarPlantilla();
+    renderizarExtras();
   } catch (error) {
     console.error('Error cargando el catálogo para el generador de listas:', error);
     mostrarMensaje(`No se pudo cargar el catálogo de equipos: ${error.message}`, 'red');
@@ -889,9 +981,16 @@ conectarSesion({
   alSalir: () => {
     teams = [];
     selectedTeam = null;
+    selectedTournament = null;
+    tournaments = [];
     rosterPlayers = [];
     rosterExtras = [];
+    tournamentSelect.replaceChildren();
     teamSelect.replaceChildren();
+    tournamentSelect.disabled = true;
+    teamSelect.disabled = true;
+    skillPrices = { ...defaultSkillPrices };
+    maxSkillsPerPlayer = defaultMaxSkillsPerPlayer;
     renderizarPlantilla();
     renderizarExtras();
   }

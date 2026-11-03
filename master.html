@@ -69,6 +69,21 @@
 					<label for="torneoGestion">Torneo</label>
 					<select id="torneoGestion" required></select>
 					<div id="estadoTorneo"></div>
+					<fieldset id="preciosHabilidadesTorneo">
+						<legend>Coste de habilidades mejoradas</legend>
+						<p>Esta configuración se aplica al crear rosters para este torneo. Valores predeterminados: 20.000 m.o. primaria, 40.000 m.o. secundaria, suplementos de 10.000 m.o. y un máximo de 2 habilidades añadidas por jugador.</p>
+						<label for="costeHabilidadPrimaria">Habilidad primaria (m.o.)</label>
+						<input id="costeHabilidadPrimaria" type="number" min="0" step="1000" value="20000" required disabled>
+						<label for="costeHabilidadSecundaria">Habilidad secundaria (m.o.)</label>
+						<input id="costeHabilidadSecundaria" type="number" min="0" step="1000" value="40000" required disabled>
+						<label for="suplementoHabilidadElite">Suplemento habilidad élite (m.o.)</label>
+						<input id="suplementoHabilidadElite" type="number" min="0" step="1000" value="10000" required disabled>
+						<label for="suplementoSegundaHabilidad">Suplemento segunda habilidad (m.o.)</label>
+						<input id="suplementoSegundaHabilidad" type="number" min="0" step="1000" value="10000" required disabled>
+						<label for="maxHabilidadesPorJugador">Máximo de habilidades añadidas por jugador</label>
+						<input id="maxHabilidadesPorJugador" type="number" min="0" step="1" value="2" required disabled>
+						<button type="button" id="guardarPreciosHabilidades" class="master-action" disabled>Guardar tarifas</button>
+					</fieldset>
 					<button type="button" id="abrirInscripciones" class="master-action">Abrir inscripciones</button>
 					<button type="button" id="cerrarInscripciones" class="master-action">Cerrar inscripciones</button>
 					<button type="button" id="abrirRosters" class="master-action">Abrir rosters</button>
