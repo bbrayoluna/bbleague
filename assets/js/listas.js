@@ -823,8 +823,8 @@ function crearPaginasRoster() {
       y += row.height;
       context.strokeStyle = '#dddddd';
       context.beginPath();
-      context.moveTo(42, y - 5);
-      context.lineTo(553, y - 5);
+      context.moveTo(42, y - 12);
+      context.lineTo(553, y - 12);
       context.stroke();
     });
 
