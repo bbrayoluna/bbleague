@@ -1,4 +1,11 @@
-import { conectarSesion, crearMensaje, obtenerDatos } from './commons.js';
+import {
+  conectarSesion,
+  crearMensaje,
+  enviarDatos,
+  getSesion,
+  obtenerDatos,
+  subirArchivo
+} from './commons.js';
 
 const rosterDataUrl = 'assets/data/rosters.json';
 const maxPlayers = 16;
@@ -135,6 +142,7 @@ const rosterExtraSelect = document.getElementById('rosterExtraSelect');
 const addRosterExtraButton = document.getElementById('addRosterExtraButton');
 const rosterExtrasContainer = document.getElementById('rosterExtras');
 const downloadButton = document.getElementById('downloadRosterButton');
+const uploadButton = document.getElementById('uploadRosterButton');
 const mostrarMensaje = crearMensaje('listasMensaje');
 
 let teams = [];
@@ -233,7 +241,7 @@ function actualizarResumen() {
   remainingElement.classList.toggle('over-budget', remaining < 0);
   document.getElementById('summaryPlayerCount').textContent = `${rosterPlayers.length} jugadores (máximo ${maxPlayers}).`;
   document.getElementById('budgetWarning').textContent = remaining < 0
-    ? 'El coste supera el presupuesto. Reduce gastos o aumenta el presupuesto para descargar.'
+    ? 'El coste supera el presupuesto. Reduce gastos o aumenta el presupuesto para descargar o subir.'
     : '';
   document.getElementById('skillPricingNote').textContent = selectedTournament
     ? `Tarifas de ${selectedTournament.name}: ${formatearCoste(skillPrices.primary)} primaria, `
@@ -242,7 +250,21 @@ function actualizarResumen() {
       + 'por la segunda habilidad. Habilidades élite: Placar, Esquivar, Defensa y Golpe mortífero. '
       + `Máximo: ${etiquetaMaxHabilidades()} por jugador.`
     : 'Selecciona un torneo para consultar sus tarifas de habilidades.';
-  downloadButton.disabled = !selectedTournament || rosterPlayers.length === 0 || remaining < 0;
+  const rosterReady = Boolean(
+    selectedTournament
+    && selectedTeam
+    && rosterPlayers.length
+    && rosterNameInput.value.trim()
+    && remaining >= 0
+  );
+  downloadButton.disabled = !rosterReady;
+  const canUploadRoster = Boolean(
+    selectedTournament
+    && selectedTournament.rosters_open === true
+    && selectedTournament.status === 'active'
+  );
+  uploadButton.classList.toggle('hide', !canUploadRoster);
+  uploadButton.disabled = !rosterReady || !canUploadRoster;
 }
 
 function obtenerDefinicionExtra(id) {
@@ -569,6 +591,9 @@ function seleccionarEquipo() {
 
 function seleccionarTorneo() {
   selectedTournament = tournaments.find(tournament => String(tournament.id) === tournamentSelect.value) || null;
+  if (selectedTournament && !rosterNameInput.value.trim()) {
+    rosterNameInput.value = selectedTournament.team_name;
+  }
   skillPrices = selectedTournament
     ? {
       primary: Number(selectedTournament.primary_skill_cost),
@@ -588,10 +613,13 @@ function seleccionarTorneo() {
 }
 
 async function cargarCatalogo() {
-  const [response, tournamentCatalog] = await Promise.all([
+  const [response, registrations, tournamentCatalog] = await Promise.all([
     fetch(rosterDataUrl),
     obtenerDatos(
-      'tournaments?select=id,name,year,primary_skill_cost,secondary_skill_cost,elite_skill_surcharge,second_skill_surcharge,max_added_skills_per_player&order=year.desc,name.asc'
+      `tournament_users?select=id,tournament_id,team_name&user_id=eq.${encodeURIComponent(getSesion().user.id)}`
+    ),
+    obtenerDatos(
+      'tournaments?select=id,name,year,status,rosters_open,primary_skill_cost,secondary_skill_cost,elite_skill_surcharge,second_skill_surcharge,max_added_skills_per_player&order=year.desc,name.asc'
     )
   ]);
   if (!response.ok) {
@@ -602,22 +630,37 @@ async function cargarCatalogo() {
     throw new Error('El catálogo de equipos está vacío o tiene un formato no válido.');
   }
   teams = catalog;
-  if (!Array.isArray(tournamentCatalog) || !tournamentCatalog.length) {
-    throw new Error('No hay torneos disponibles para crear el roster.');
+  if (!Array.isArray(registrations) || !Array.isArray(tournamentCatalog)) {
+    throw new Error('No se pudieron cargar las inscripciones del usuario.');
   }
-  tournaments = tournamentCatalog;
+  const registrationByTournamentId = new Map(
+    registrations.map(registration => [String(registration.tournament_id), registration])
+  );
+  tournaments = tournamentCatalog
+    .filter(tournament => registrationByTournamentId.has(String(tournament.id)))
+    .map(tournament => {
+      const registration = registrationByTournamentId.get(String(tournament.id));
+      return {
+        ...tournament,
+        registrationId: registration.id,
+        team_name: registration.team_name
+      };
+    });
   tournamentSelect.replaceChildren();
   const tournamentPlaceholder = document.createElement('option');
   tournamentPlaceholder.value = '';
-  tournamentPlaceholder.textContent = 'Selecciona un torneo';
+  tournamentPlaceholder.textContent = tournaments.length
+    ? 'Selecciona un torneo'
+    : 'No estás inscrito en ningún torneo';
   tournamentSelect.appendChild(tournamentPlaceholder);
   tournaments.forEach(tournament => {
     const option = document.createElement('option');
     option.value = String(tournament.id);
-    option.textContent = `${tournament.name} (${tournament.year})`;
+    option.textContent = `${tournament.name} (${tournament.year}) — ${tournament.team_name}`
+      + (tournament.rosters_open === false || tournament.status !== 'active' ? ' — rosters cerrados' : '');
     tournamentSelect.appendChild(option);
   });
-  tournamentSelect.disabled = false;
+  tournamentSelect.disabled = !tournaments.length;
   teamSelect.replaceChildren();
   const placeholder = document.createElement('option');
   placeholder.value = '';
@@ -631,6 +674,9 @@ async function cargarCatalogo() {
   });
   teamSelect.disabled = true;
   actualizarResumen();
+  if (!tournaments.length) {
+    mostrarMensaje('Para crear y subir un roster, primero debes estar inscrito en un torneo.', 'blue');
+  }
 }
 
 function agregarJugador(event) {
@@ -916,32 +962,46 @@ async function crearPdf(pages) {
   return new Blob(chunks, { type: 'application/pdf' });
 }
 
-async function descargarRoster() {
+function validarRoster() {
   if (!selectedTournament) {
-    mostrarMensaje('Selecciona un torneo antes de descargar el roster.', 'red');
-    return;
+    mostrarMensaje('Selecciona uno de tus torneos antes de crear el roster.', 'red');
+    return false;
   }
   if (!selectedTeam || !rosterPlayers.length) {
-    mostrarMensaje('Selecciona un equipo y añade al menos un jugador antes de descargar.', 'red');
-    return;
+    mostrarMensaje('Selecciona un equipo y añade al menos un jugador antes de continuar.', 'red');
+    return false;
   }
-  const rosterName = rosterNameInput.value.trim();
-  if (!rosterName) {
+  if (!rosterNameInput.value.trim()) {
     rosterNameInput.focus();
     mostrarMensaje('Introduce un nombre para el equipo.', 'red');
-    return;
+    return false;
   }
+  if (obtenerCostes().total > Math.max(0, Number(teamBudgetInput.value) || 0)) {
+    mostrarMensaje('El coste supera el presupuesto del roster.', 'red');
+    return false;
+  }
+  return true;
+}
+
+async function crearArchivoRoster() {
+  const safeName = rosterNameInput.value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9-_ ]/gi, '').trim().replace(/\s+/g, '-').toLowerCase();
+  const fileName = `roster-${safeName || 'equipo'}.pdf`;
+  const pdf = await crearPdf(crearPaginasRoster());
+  return new File([pdf], fileName, { type: 'application/pdf' });
+}
+
+async function descargarRoster() {
+  if (!validarRoster()) return;
 
   downloadButton.disabled = true;
   mostrarMensaje('Generando el PDF...', 'blue');
   try {
-    const pdf = await crearPdf(crearPaginasRoster());
-    const safeName = rosterName.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9-_ ]/gi, '').trim().replace(/\s+/g, '-').toLowerCase();
+    const archivo = await crearArchivoRoster();
     const link = document.createElement('a');
-    const url = URL.createObjectURL(pdf);
+    const url = URL.createObjectURL(archivo);
     link.href = url;
-    link.download = `roster-${safeName || 'equipo'}.pdf`;
+    link.download = archivo.name;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -951,7 +1011,39 @@ async function descargarRoster() {
     console.error('Error generando el roster PDF:', error);
     mostrarMensaje(`No se pudo generar el PDF: ${error.message}`, 'red');
   } finally {
-    downloadButton.disabled = false;
+    actualizarResumen();
+  }
+}
+
+async function subirRoster() {
+  if (!validarRoster()) return;
+  if (selectedTournament.rosters_open !== true || selectedTournament.status !== 'active') {
+    mostrarMensaje('El torneo ha cerrado los rosters. Contacta con el organizador.', 'red');
+    return;
+  }
+
+  uploadButton.disabled = true;
+  downloadButton.disabled = true;
+  mostrarMensaje('Generando y subiendo el roster...', 'blue');
+  try {
+    const archivo = await crearArchivoRoster();
+    const ruta = `${selectedTournament.registrationId}/roster.pdf`;
+    await subirArchivo('rosters', ruta, archivo, { method: 'PUT' });
+    await enviarDatos('rosters?on_conflict=tournament_user_id', {
+      prefer: 'resolution=merge-duplicates,return=representation',
+      body: {
+        tournament_user_id: Number(selectedTournament.registrationId),
+        file_name: archivo.name,
+        storage_path: ruta,
+        mime_type: 'application/pdf'
+      }
+    });
+    mostrarMensaje('Roster subido correctamente al torneo.', 'blue');
+  } catch (error) {
+    console.error('Error al subir el roster:', error);
+    mostrarMensaje(`No se pudo subir el roster: ${error.message}`, 'red');
+  } finally {
+    actualizarResumen();
   }
 }
 
@@ -962,6 +1054,7 @@ teamBudgetInput.addEventListener('input', actualizarResumen);
 addPlayerForm.addEventListener('submit', agregarJugador);
 addRosterExtraForm.addEventListener('submit', agregarExtra);
 downloadButton.addEventListener('click', descargarRoster);
+uploadButton.addEventListener('click', subirRoster);
 
 async function inicializarPagina() {
   try {
@@ -976,7 +1069,6 @@ async function inicializarPagina() {
 }
 
 conectarSesion({
-  requiereRol: 'master',
   alEntrar: inicializarPagina,
   alSalir: () => {
     teams = [];
@@ -989,6 +1081,7 @@ conectarSesion({
     teamSelect.replaceChildren();
     tournamentSelect.disabled = true;
     teamSelect.disabled = true;
+    uploadButton.disabled = true;
     skillPrices = { ...defaultSkillPrices };
     maxSkillsPerPlayer = defaultMaxSkillsPerPlayer;
     renderizarPlantilla();

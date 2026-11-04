@@ -1,5 +1,7 @@
 # Enlaces visibles para jugadores y masters.
 player_items:
+  - texto: Listas
+    path: listas.html
   - texto: Jugadores
     path: jugadores.html
   - texto: Torneos
@@ -11,5 +13,3 @@ player_items:
 master_items:
   - texto: Master
     path: master.html
-  - texto: Listas
-    path: listas.html
