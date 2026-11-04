@@ -614,6 +614,52 @@ tr.partido-propio td {
   font-weight: bold;
 }
 
+.roster-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.roster-stat {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.15rem;
+  background: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.roster-stat-label,
+.roster-stat-price {
+  font-size: 0.75rem;
+}
+
+.roster-stat-value {
+  font-size: 1rem;
+}
+
+.roster-stat-controls {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.roster-stat-button {
+  width: 1.5rem;
+  padding: 0.1rem;
+  color: #fff;
+  background: #25396c;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.roster-stat-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .roster-subheading {
   margin-bottom: 0.35rem;
 }

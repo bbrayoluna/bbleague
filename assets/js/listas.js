@@ -8,9 +8,20 @@ import {
 } from './commons.js';
 
 const rosterDataUrl = 'assets/data/rosters.json';
+const playerStatsUrl = 'assets/data/player-stats.json';
 const maxPlayers = 16;
 const defaultMaxSkillsPerPlayer = 2;
 const defaultSkillPrices = { primary: 20000, secondary: 40000, elite: 10000, secondSkill: 10000 };
+const playerStatFields = [
+  { id: 'ma', label: 'MA' },
+  { id: 'st', label: 'ST' },
+  { id: 'ag', label: 'AG' },
+  { id: 'pa', label: 'PA' },
+  { id: 'av', label: 'AV' }
+];
+const playerStatPrices = { ma: 20000, st: 80000, ag: 40000, pa: 20000, av: 10000 };
+const playerStatMaximums = { ma: 9, st: 8, ag: 1, pa: 1, av: 11 };
+const maxImprovementsPerStat = 2;
 let skillPrices = { ...defaultSkillPrices };
 let maxSkillsPerPlayer = defaultMaxSkillsPerPlayer;
 const rosterExtraCatalog = [
@@ -166,6 +177,42 @@ function formatearCoste(value) {
   return `${Number(value).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 0 })} m.o.`;
 }
 
+function formatearCaracteristica(stat, value) {
+  if (value === null) return '—';
+  return stat === 'ag' || stat === 'pa' || stat === 'av' ? `${value}+` : String(value);
+}
+
+function obtenerEstadisticas(player) {
+  return Object.fromEntries(playerStatFields.map(({ id }) => {
+    const baseValue = player.position.stats[id];
+    if (baseValue === null) return [id, null];
+    const improvements = player.statImprovements[id] || 0;
+    const direction = id === 'ag' || id === 'pa' ? -1 : 1;
+    return [id, baseValue + direction * improvements];
+  }));
+}
+
+function obtenerCosteMejoras(player) {
+  return playerStatFields.reduce(
+    (total, { id }) => total + (player.statImprovements[id] || 0) * playerStatPrices[id],
+    0
+  );
+}
+
+function puedeMejorarCaracteristica(player, stat) {
+  const currentValue = obtenerEstadisticas(player)[stat];
+  if (currentValue === null || (player.statImprovements[stat] || 0) >= maxImprovementsPerStat) return false;
+  return stat === 'ag' || stat === 'pa'
+    ? currentValue > playerStatMaximums[stat]
+    : currentValue < playerStatMaximums[stat];
+}
+
+function textoEstadisticas(stats) {
+  return playerStatFields
+    .map(({ id, label }) => `${label} ${formatearCaracteristica(id, stats[id])}`)
+    .join(' · ');
+}
+
 function etiquetaMaxHabilidades() {
   const noun = maxSkillsPerPlayer === 1 ? 'habilidad añadida' : 'habilidades añadidas';
   return `${maxSkillsPerPlayer} ${noun}`;
@@ -180,6 +227,7 @@ function crearElemento(tagName, className, text) {
 
 function obtenerCostes() {
   let playersCost = 0;
+  let playerStatCost = 0;
   let primarySkillCost = 0;
   let secondarySkillCost = 0;
   let eliteCost = 0;
@@ -189,6 +237,7 @@ function obtenerCostes() {
 
   rosterPlayers.forEach(player => {
     playersCost += player.position.cost;
+    playerStatCost += obtenerCosteMejoras(player);
     player.skills.forEach((skill, index) => {
       if (skill.primary) primarySkillCost += skillPrices.primary;
       else secondarySkillCost += skillPrices.secondary;
@@ -206,13 +255,14 @@ function obtenerCostes() {
 
   return {
     playersCost,
+    playerStatCost,
     primarySkillCost,
     secondarySkillCost,
     eliteCost,
     secondSkillCost,
     staffCost,
     inducementCost,
-    total: playersCost + primarySkillCost + secondarySkillCost + eliteCost + secondSkillCost
+    total: playersCost + playerStatCost + primarySkillCost + secondarySkillCost + eliteCost + secondSkillCost
       + staffCost + inducementCost
   };
 }
@@ -228,6 +278,7 @@ function actualizarResumen() {
   document.getElementById('summaryRace').textContent = selectedTeam?.name || 'Selecciona un equipo';
   document.getElementById('summaryTeamName').textContent = rosterNameInput.value.trim() || 'Sin nombre';
   document.getElementById('summaryPlayersCost').textContent = formatearCoste(costs.playersCost);
+  document.getElementById('summaryPlayerStatsCost').textContent = formatearCoste(costs.playerStatCost);
   document.getElementById('summaryPrimaryCost').textContent = formatearCoste(costs.primarySkillCost);
   document.getElementById('summarySecondaryCost').textContent = formatearCoste(costs.secondarySkillCost);
   document.getElementById('summaryEliteCost').textContent = formatearCoste(costs.eliteCost);
@@ -404,7 +455,8 @@ function actualizarSelectorPosiciones() {
     const count = contarPosicion(position);
     const option = document.createElement('option');
     option.value = String(index);
-    option.textContent = `${position.name} — ${formatearCoste(position.cost)} (${count}/${position.max})`;
+    option.textContent = `${position.name} — ${formatearCoste(position.cost)} (${count}/${position.max})`
+      + ` · ${textoEstadisticas(position.stats)}`;
     option.disabled = count >= position.max || atTeamLimit || (position.bigGuy && atBigGuyLimit);
     positionSelect.appendChild(option);
   });
@@ -440,6 +492,68 @@ function obtenerHabilidadesDisponibles(player) {
   });
 
   return available;
+}
+
+function actualizarEstadisticas(player, container) {
+  const stats = obtenerEstadisticas(player);
+  const list = crearElemento('div', 'roster-stat-grid');
+
+  playerStatFields.forEach(({ id, label }) => {
+    const item = crearElemento('div', 'roster-stat');
+    item.appendChild(crearElemento('span', 'roster-stat-label', label));
+    item.appendChild(crearElemento(
+      'strong',
+      'roster-stat-value',
+      formatearCaracteristica(id, stats[id])
+    ));
+
+    const controls = crearElemento('div', 'roster-stat-controls');
+    const improvementCount = player.statImprovements[id] || 0;
+    const removeButton = crearElemento('button', 'roster-stat-button', '−');
+    removeButton.type = 'button';
+    removeButton.setAttribute('aria-label', `Quitar mejora de ${label}`);
+    removeButton.disabled = improvementCount === 0;
+    removeButton.addEventListener('click', () => cambiarMejoraCaracteristica(player, id, -1));
+
+    const addButton = crearElemento('button', 'roster-stat-button', '+');
+    addButton.type = 'button';
+    addButton.setAttribute('aria-label', `Mejorar ${label} por ${formatearCoste(playerStatPrices[id])}`);
+    addButton.disabled = !puedeMejorarCaracteristica(player, id);
+    addButton.addEventListener('click', () => cambiarMejoraCaracteristica(player, id, 1));
+    controls.append(removeButton, addButton);
+    item.appendChild(controls);
+    item.appendChild(crearElemento(
+      'small',
+      'roster-stat-price',
+      stats[id] === null ? 'No disponible' : formatearCoste(playerStatPrices[id])
+    ));
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+}
+
+function cambiarMejoraCaracteristica(player, stat, amount) {
+  if (!playerStatFields.some(field => field.id === stat)) {
+    mostrarMensaje('La característica seleccionada no es válida.', 'red');
+    return;
+  }
+  if (amount < 0 && !(player.statImprovements[stat] || 0)) return;
+  if (amount > 0 && !puedeMejorarCaracteristica(player, stat)) {
+    mostrarMensaje('Esta característica ha alcanzado el límite permitido por las reglas.', 'red');
+    return;
+  }
+
+  const costDifference = playerStatPrices[stat] * amount;
+  const budget = Math.max(0, Number(teamBudgetInput.value) || 0);
+  if (costDifference > 0 && obtenerCostes().total + costDifference > budget) {
+    mostrarMensaje('La mejora supera el presupuesto disponible.', 'red');
+    return;
+  }
+
+  player.statImprovements[stat] = (player.statImprovements[stat] || 0) + amount;
+  renderizarPlantilla();
+  mostrarMensaje('', 'blue');
 }
 
 function actualizarHabilidades(player, card) {
@@ -556,7 +670,16 @@ function renderizarPlantilla() {
     header.appendChild(removePlayerButton);
     card.appendChild(header);
 
-    card.appendChild(crearElemento('p', 'roster-player-cost', formatearCoste(player.position.cost)));
+    const statCost = obtenerCosteMejoras(player);
+    card.appendChild(crearElemento(
+      'p',
+      'roster-player-cost',
+      `Coste: ${formatearCoste(player.position.cost + statCost)}`
+        + ` (base ${formatearCoste(player.position.cost)}`
+        + (statCost ? ` + mejoras ${formatearCoste(statCost)})` : ')')
+    ));
+    card.appendChild(crearElemento('p', 'roster-player-note', textoEstadisticas(obtenerEstadisticas(player))));
+    actualizarEstadisticas(player, card);
     if (player.position.baseSkills.length) {
       card.appendChild(crearElemento('p', 'roster-player-note', `Habilidades iniciales: ${player.position.baseSkills.join(', ')}`));
     }
@@ -613,8 +736,9 @@ function seleccionarTorneo() {
 }
 
 async function cargarCatalogo() {
-  const [response, registrations, tournamentCatalog] = await Promise.all([
+  const [response, statsResponse, registrations, tournamentCatalog] = await Promise.all([
     fetch(rosterDataUrl),
+    fetch(playerStatsUrl),
     obtenerDatos(
       `tournament_users?select=id,tournament_id,team_name&user_id=eq.${encodeURIComponent(getSesion().user.id)}`
     ),
@@ -625,11 +749,30 @@ async function cargarCatalogo() {
   if (!response.ok) {
     throw new Error(`No se pudo cargar el catálogo de equipos (HTTP ${response.status}).`);
   }
+  if (!statsResponse.ok) {
+    throw new Error(`No se pudieron cargar las características de jugadores (HTTP ${statsResponse.status}).`);
+  }
   const catalog = await response.json();
+  const statsCatalog = await statsResponse.json();
   if (!Array.isArray(catalog) || !catalog.length) {
     throw new Error('El catálogo de equipos está vacío o tiene un formato no válido.');
   }
-  teams = catalog;
+  if (!statsCatalog || typeof statsCatalog !== 'object' || Array.isArray(statsCatalog)) {
+    throw new Error('El catálogo de características de jugadores tiene un formato no válido.');
+  }
+  teams = catalog.map(team => ({
+    ...team,
+    positions: team.positions.map(position => {
+      const stats = statsCatalog[`${team.name}|${position.name}`] || statsCatalog[position.name];
+      const validStats = stats && playerStatFields.every(({ id }) => (
+        stats[id] === null || (Number.isInteger(stats[id]) && stats[id] >= 1)
+      ));
+      if (!validStats) {
+        throw new Error(`No hay características válidas para el tipo de jugador "${position.name}".`);
+      }
+      return { ...position, stats };
+    })
+  }));
   if (!Array.isArray(registrations) || !Array.isArray(tournamentCatalog)) {
     throw new Error('No se pudieron cargar las inscripciones del usuario.');
   }
@@ -709,7 +852,7 @@ function agregarJugador(event) {
     return;
   }
 
-  rosterPlayers.push({ id: nextPlayerId++, position, skills: [] });
+  rosterPlayers.push({ id: nextPlayerId++, position, skills: [], statImprovements: {} });
   renderizarPlantilla();
   mostrarMensaje('', 'blue');
 }
@@ -749,9 +892,15 @@ function crearPaginasRoster() {
     const addedSkills = player.skills.length
       ? player.skills.map(skill => `${skill.name} (${skill.primary ? 'primaria' : 'secundaria'}${skill.elite ? ', élite' : ''})`).join(', ')
       : 'Ninguna';
+    const improvements = playerStatFields
+      .filter(({ id }) => player.statImprovements[id])
+      .map(({ id, label }) => `${label} +${player.statImprovements[id]}`)
+      .join(', ') || 'Ninguna';
     const detailLines = [
+      ...envolverTexto(measurementContext, `Características: ${textoEstadisticas(obtenerEstadisticas(player))}`, 505),
       ...envolverTexto(measurementContext, `Iniciales: ${initialSkills}`, 505),
-      ...envolverTexto(measurementContext, `Añadidas: ${addedSkills}`, 505)
+      ...envolverTexto(measurementContext, `Añadidas: ${addedSkills}`, 505),
+      ...envolverTexto(measurementContext, `Mejoras de características: ${improvements}`, 505)
     ];
     return { type: 'player', player, index, detailLines, height: 23 + detailLines.length * 13 + 8 };
   });
@@ -815,6 +964,7 @@ function crearPaginasRoster() {
       context.fillText('Resumen de costes', 42, 124);
       const costLines = [
         ['Jugadores', costs.playersCost],
+        ['Mejoras de características', costs.playerStatCost],
         ['Habilidades primarias', costs.primarySkillCost],
         ['Habilidades secundarias', costs.secondarySkillCost],
         ['Habilidades élite', costs.eliteCost],
@@ -828,7 +978,7 @@ function crearPaginasRoster() {
       context.font = '10px Arial';
       costLines.forEach(([label, amount], index) => {
         const x = index % 2 === 0 ? 42 : 305;
-        const y = 146 + Math.floor(index / 2) * 19;
+        const y = 140 + Math.floor(index / 2) * 16;
         context.fillStyle = label === 'Coste total' ? '#ac342f' : '#25396c';
         context.fillText(`${label}: ${formatearCoste(amount)}`, x, y);
       });
@@ -858,7 +1008,11 @@ function crearPaginasRoster() {
         context.fillStyle = '#25396c';
         context.fillText(heading, 42, y);
         context.textAlign = 'right';
-        context.fillText(formatearCoste(row.player.position.cost), 553, y);
+        context.fillText(
+          formatearCoste(row.player.position.cost + obtenerCosteMejoras(row.player)),
+          553,
+          y
+        );
         context.textAlign = 'left';
         context.font = '9px Arial';
         context.fillStyle = '#444444';
@@ -887,6 +1041,13 @@ function crearPaginasRoster() {
       + `${etiquetaMaxHabilidades()} por jugador.`,
       42,
       821
+    );
+    context.fillText(
+      `Mejoras de características: MA/PA ${formatearCoste(playerStatPrices.ma)}, AG `
+      + `${formatearCoste(playerStatPrices.ag)}, ST ${formatearCoste(playerStatPrices.st)}, `
+      + `AV ${formatearCoste(playerStatPrices.av)}; máximo 2 por característica.`,
+      42,
+      832
     );
     canvases.push(canvas);
   });
