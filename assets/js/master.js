@@ -294,7 +294,7 @@ function actualizarFormularioPreciosHabilidades(tournament) {
 }
 
 /** Rellena el selector con los torneos disponibles para los masters. */
-async function cargarGestionTorneos() {
+async function cargarGestionTorneos(tournamentId = torneoGestionSelect.value) {
   const tournaments = await obtenerDatos(
     'tournaments?select=id,name,year,creator_id,registration_open,rosters_open,status,finished_at,primary_skill_cost,secondary_skill_cost,elite_skill_surcharge,second_skill_surcharge,max_added_skills_per_player&order=year.desc,name.asc'
   );
@@ -308,7 +308,10 @@ async function cargarGestionTorneos() {
     torneoGestionSelect.appendChild(option);
   });
 
-  actualizarEstadoGestion(null);
+  torneoGestionSelect.value = tournaments.some(tournament => String(tournament.id) === String(tournamentId))
+    ? String(tournamentId)
+    : '';
+  actualizarEstadoGestion(torneoSeleccionado());
 }
 
 saveSkillPricesButton?.addEventListener('click', async () => {
@@ -361,24 +364,33 @@ saveSkillPricesButton?.addEventListener('click', async () => {
  * Cambia el estado del torneo elegido (abrir/cerrar inscripciones, finalizar).
  * @param {object} changes campos que se actualizan en la tabla tournaments
  * @param {string} mensajeExito texto que se muestra si el cambio va bien
+ * @param {HTMLButtonElement} button boton de la accion
  */
-async function cambiarEstadoTorneo(changes, mensajeExito) {
+async function cambiarEstadoTorneo(changes, mensajeExito, button) {
   const tournamentId = torneoGestionSelect.value;
   if (!tournamentId) {
     mostrarGestionMensaje('Selecciona un torneo.', 'red');
     return;
   }
 
-  const button = document.activeElement;
-  if (button) button.disabled = true;
+  button.disabled = true;
   mostrarGestionMensaje('Guardando cambios...', 'blue');
 
   try {
-    await enviarDatos(`tournaments?id=eq.${tournamentId}`, { method: 'PATCH', body: changes });
+    const updatedTournaments = await enviarDatos(
+      `tournaments?id=eq.${tournamentId}`,
+      { method: 'PATCH', body: changes }
+    );
+    if (!updatedTournaments?.length) {
+      throw new Error('No se pudo actualizar el torneo seleccionado. Comprueba los permisos y vuelve a intentarlo.');
+    }
+
     mostrarGestionMensaje(mensajeExito, 'blue');
-    await cargarGestionTorneos();
+    await cargarGestionTorneos(tournamentId);
   } catch (error) {
-    mostrarGestionMensaje(error.message, 'red');
+    console.error('Error al cambiar el estado del torneo:', error);
+    mostrarGestionMensaje(`No se pudo actualizar el torneo: ${error.message}`, 'red');
+  } finally {
     actualizarEstadoGestion(torneoSeleccionado());
   }
 }
@@ -388,19 +400,19 @@ torneoGestionSelect?.addEventListener('change', () => {
 });
 
 abrirInscripcionesButton?.addEventListener('click', () => {
-  cambiarEstadoTorneo({ registration_open: true }, 'Inscripciones abiertas correctamente.');
+  cambiarEstadoTorneo({ registration_open: true }, 'Inscripciones abiertas correctamente.', abrirInscripcionesButton);
 });
 
 cerrarInscripcionesButton?.addEventListener('click', () => {
-  cambiarEstadoTorneo({ registration_open: false }, 'Inscripciones cerradas correctamente.');
+  cambiarEstadoTorneo({ registration_open: false }, 'Inscripciones cerradas correctamente.', cerrarInscripcionesButton);
 });
 
 abrirRostersButton?.addEventListener('click', () => {
-  cambiarEstadoTorneo({ rosters_open: true }, 'Rosters abiertos correctamente.');
+  cambiarEstadoTorneo({ rosters_open: true }, 'Rosters abiertos correctamente.', abrirRostersButton);
 });
 
 cerrarRostersButton?.addEventListener('click', () => {
-  cambiarEstadoTorneo({ rosters_open: false }, 'Rosters cerrados correctamente.');
+  cambiarEstadoTorneo({ rosters_open: false }, 'Rosters cerrados correctamente.', cerrarRostersButton);
 });
 
 finalizarTorneoButton?.addEventListener('click', () => {
@@ -412,7 +424,8 @@ finalizarTorneoButton?.addEventListener('click', () => {
       rosters_open: false,
       finished_at: new Date().toISOString()
     },
-    'Torneo finalizado correctamente.'
+    'Torneo finalizado correctamente.',
+    finalizarTorneoButton
   );
 });
 
