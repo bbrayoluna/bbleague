@@ -857,20 +857,32 @@ function agregarJugador(event) {
   mostrarMensaje('', 'blue');
 }
 
-function envolverTexto(context, text, maxWidth) {
-  const words = String(text).split(/\s+/).filter(Boolean);
-  const lines = [];
-  let line = '';
-  words.forEach(word => {
-    const candidate = line ? `${line} ${word}` : word;
-    if (line && context.measureText(candidate).width > maxWidth) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = candidate;
-    }
+function envolverSegmentos(context, segments, maxWidth) {
+  const lines = [[]];
+  let lineWidth = 0;
+
+  segments.forEach(segment => {
+    segment.text.split(/\s+/).filter(Boolean).forEach(word => {
+      const currentLine = lines[lines.length - 1];
+      const separator = currentLine.length && !/^[,.;:!?)]/.test(word) ? ' ' : '';
+      const wordWidth = context.measureText(`${separator}${word}`).width;
+      if (lineWidth + wordWidth > maxWidth && currentLine.length) {
+        lines.push([]);
+        lineWidth = 0;
+      }
+
+      const nextLine = lines[lines.length - 1];
+      const nextSeparator = nextLine.length && !/^[,.;:!?)]/.test(word) ? ' ' : '';
+      const lastSegment = nextLine[nextLine.length - 1];
+      if (lastSegment?.color === segment.color) {
+        lastSegment.text += `${nextSeparator}${word}`;
+      } else {
+        nextLine.push({ text: `${nextSeparator}${word}`, color: segment.color });
+      }
+      lineWidth += context.measureText(`${nextSeparator}${word}`).width;
+    });
   });
-  if (line) lines.push(line);
+
   return lines;
 }
 
@@ -886,23 +898,30 @@ function crearPaginasRoster() {
   measurementContext.font = '10px Arial';
 
   const rows = rosterPlayers.map((player, index) => {
-    const initialSkills = player.position.baseSkills.length
-      ? player.position.baseSkills.join(', ')
-      : 'Ninguna';
-    const addedSkills = player.skills.length
-      ? player.skills.map(skill => `${skill.name} (${skill.primary ? 'primaria' : 'secundaria'}${skill.elite ? ', élite' : ''})`).join(', ')
-      : 'Ninguna';
-    const improvements = playerStatFields
-      .filter(({ id }) => player.statImprovements[id])
-      .map(({ id, label }) => `${label} +${player.statImprovements[id]}`)
-      .join(', ') || 'Ninguna';
-    const detailLines = [
-      ...envolverTexto(measurementContext, `Características: ${textoEstadisticas(obtenerEstadisticas(player))}`, 505),
-      ...envolverTexto(measurementContext, `Iniciales: ${initialSkills}`, 505),
-      ...envolverTexto(measurementContext, `Añadidas: ${addedSkills}`, 505),
-      ...envolverTexto(measurementContext, `Mejoras de características: ${improvements}`, 505)
-    ];
-    return { type: 'player', player, index, detailLines, height: 23 + detailLines.length * 13 + 8 };
+    const skillSegments = [{ text: 'Habilidades:', color: '#444444' }];
+    const baseSkills = player.position.baseSkills;
+    if (baseSkills.length) {
+      skillSegments.push({ text: baseSkills.join(', '), color: '#444444' });
+    }
+    player.skills.forEach(skill => {
+      const type = skill.primary ? 'primaria' : 'secundaria';
+      skillSegments.push({
+        text: `${baseSkills.length || player.skills.indexOf(skill) ? ', ' : ''}`
+          + `${skill.name} (${type}${skill.elite ? ', élite' : ''})`,
+        color: '#ac342f'
+      });
+    });
+    if (!baseSkills.length && !player.skills.length) {
+      skillSegments.push({ text: 'Ninguna', color: '#444444' });
+    }
+    const skillLines = envolverSegmentos(measurementContext, skillSegments, 505);
+    return {
+      type: 'player',
+      player,
+      index,
+      skillLines,
+      height: 17 + skillLines.length * 12 + 6
+    };
   });
   ['Cuadro técnico', 'Incentivos'].forEach(groupName => {
     const extras = rosterExtras
@@ -1004,10 +1023,39 @@ function crearPaginasRoster() {
         context.textAlign = 'left';
       } else {
         const heading = `Jugador ${row.index + 1} — ${row.player.position.name}`;
-        context.font = 'bold 10px Arial';
+        const stats = obtenerEstadisticas(row.player);
+        const statLabels = playerStatFields.map(({ id, label }) => ({
+          id,
+          text: stats[id] === null
+            ? `${label}—`
+            : `${label}${id === 'ag' || id === 'pa' || id === 'av' ? '+' : ''}${stats[id]}`
+        }));
+        const contentWidth = 400;
+        let fontSize = 10;
+        while (fontSize >= 7) {
+          measurementContext.font = `bold ${fontSize}px Arial`;
+          const headingWidth = measurementContext.measureText(heading).width;
+          measurementContext.font = `${fontSize}px Arial`;
+          const statsWidth = statLabels.reduce(
+            (width, stat) => width + measurementContext.measureText(`  ${stat.text}`).width,
+            0
+          );
+          if (headingWidth + statsWidth <= contentWidth) break;
+          fontSize -= 0.5;
+        }
+        context.font = `bold ${fontSize}px Arial`;
         context.fillStyle = '#25396c';
         context.fillText(heading, 42, y);
+        let statX = 42 + context.measureText(heading).width + 8;
+        context.font = `${fontSize}px Arial`;
+        statLabels.forEach(({ id, text }) => {
+          context.fillStyle = row.player.statImprovements[id] ? '#ac342f' : '#25396c';
+          context.fillText(text, statX, y);
+          statX += context.measureText(`${text}  `).width;
+        });
         context.textAlign = 'right';
+        context.font = '10px Arial';
+        context.fillStyle = '#25396c';
         context.fillText(
           formatearCoste(row.player.position.cost + obtenerCosteMejoras(row.player)),
           553,
@@ -1015,9 +1063,13 @@ function crearPaginasRoster() {
         );
         context.textAlign = 'left';
         context.font = '9px Arial';
-        context.fillStyle = '#444444';
-        row.detailLines.forEach((line, lineIndex) => {
-          context.fillText(line, 48, y + 14 + lineIndex * 13);
+        row.skillLines.forEach((line, lineIndex) => {
+          let skillX = 48;
+          line.forEach(segment => {
+            context.fillStyle = segment.color;
+            context.fillText(segment.text, skillX, y + 13 + lineIndex * 12);
+            skillX += context.measureText(segment.text).width;
+          });
         });
       }
       y += row.height;
