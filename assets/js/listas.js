@@ -683,6 +683,19 @@ function renderizarPlantilla() {
     header.appendChild(removePlayerButton);
     card.appendChild(header);
 
+    const playerNameLabel = crearElemento('label', 'roster-player-note', `Nombre del jugador ${index + 1}`);
+    const playerNameInput = crearElemento('input', 'roster-player-name-input');
+    playerNameInput.type = 'text';
+    playerNameInput.maxLength = 40;
+    playerNameInput.value = player.name;
+    playerNameInput.placeholder = `${player.position.name} (opcional)`;
+    playerNameInput.setAttribute('aria-label', `Nombre del jugador ${index + 1}`);
+    playerNameInput.addEventListener('input', () => {
+      player.name = playerNameInput.value;
+    });
+    playerNameLabel.appendChild(playerNameInput);
+    card.appendChild(playerNameLabel);
+
     const statCost = obtenerCosteMejoras(player);
     const skillCost = obtenerCosteHabilidades(player);
     const totalCost = player.position.cost + statCost + skillCost;
@@ -715,6 +728,10 @@ function crearElementHeading(index, position) {
   const heading = document.createElement('h4');
   heading.textContent = `Jugador ${index + 1} — ${position.name}`;
   return heading;
+}
+
+function obtenerNombreJugador(player) {
+  return player.name.trim() || player.position.name;
 }
 
 function seleccionarEquipo() {
@@ -873,7 +890,7 @@ function agregarJugador(event) {
     return;
   }
 
-  rosterPlayers.push({ id: nextPlayerId++, position, skills: [], statImprovements: {} });
+  rosterPlayers.push({ id: nextPlayerId++, name: '', position, skills: [], statImprovements: {} });
   renderizarPlantilla();
   mostrarMensaje('', 'blue');
 }
@@ -1047,7 +1064,7 @@ function crearPaginasRoster() {
         context.fillText(formatearCoste(row.cost), 553, y);
         context.textAlign = 'left';
       } else {
-        const heading = `Jugador ${row.index + 1} — ${row.player.position.name}`;
+        const heading = `Jugador ${row.index + 1} — ${obtenerNombreJugador(row.player)}`;
         const stats = obtenerEstadisticas(row.player);
         const statLabels = playerStatFields.map(({ id, label }) => ({
           id,

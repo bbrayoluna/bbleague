@@ -614,6 +614,18 @@ tr.partido-propio td {
   font-weight: bold;
 }
 
+.roster-player-name-input {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.45rem;
+  color: #25396c;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 4px;
+  font: inherit;
+}
+
 .roster-stat-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
