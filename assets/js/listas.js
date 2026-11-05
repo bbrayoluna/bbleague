@@ -321,7 +321,7 @@ function actualizarResumen() {
     && rosterNameInput.value.trim()
     && remaining >= 0
   );
-  downloadButton.disabled = !rosterReady;
+  downloadButton.disabled = false;
   const canUploadRoster = Boolean(
     selectedTournament
     && selectedTournament.rosters_open === true
