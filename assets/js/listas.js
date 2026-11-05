@@ -159,6 +159,7 @@ const mostrarMensaje = crearMensaje('listasMensaje');
 let teams = [];
 let tournaments = [];
 let selectedTournament = null;
+let genericListSelected = false;
 let selectedTeam = null;
 let rosterPlayers = [];
 let rosterExtras = [];
@@ -274,7 +275,7 @@ function actualizarResumen() {
 
   document.getElementById('summaryTournament').textContent = selectedTournament
     ? `${selectedTournament.name} (${selectedTournament.year})`
-    : 'Selecciona un torneo';
+    : genericListSelected ? 'Lista genérica (sin torneo)' : 'Selecciona un torneo';
   document.getElementById('summaryRace').textContent = selectedTeam?.name || 'Selecciona un equipo';
   document.getElementById('summaryTeamName').textContent = rosterNameInput.value.trim() || 'Sin nombre';
   document.getElementById('summaryPlayersCost').textContent = formatearCoste(costs.playersCost);
@@ -300,9 +301,14 @@ function actualizarResumen() {
       + `${formatearCoste(skillPrices.elite)} y ${formatearCoste(skillPrices.secondSkill)} `
       + 'por la segunda habilidad. Habilidades élite: Placar, Esquivar, Defensa y Golpe mortífero. '
       + `Máximo: ${etiquetaMaxHabilidades()} por jugador.`
-    : 'Selecciona un torneo para consultar sus tarifas de habilidades.';
+    : genericListSelected
+      ? `Lista genérica: tarifas predeterminadas de ${formatearCoste(skillPrices.primary)} primaria, `
+        + `${formatearCoste(skillPrices.secondary)} secundaria, suplemento élite de `
+        + `${formatearCoste(skillPrices.elite)} y ${formatearCoste(skillPrices.secondSkill)} `
+        + `por segunda habilidad. Máximo: ${etiquetaMaxHabilidades()} por jugador.`
+      : 'Selecciona un modo de lista para consultar sus tarifas de habilidades.';
   const rosterReady = Boolean(
-    selectedTournament
+    (selectedTournament || genericListSelected)
     && selectedTeam
     && rosterPlayers.length
     && rosterNameInput.value.trim()
@@ -342,11 +348,11 @@ function actualizarSelectorExtras() {
     const option = document.createElement('option');
     option.value = extra.id;
     option.textContent = `${extra.name} — ${formatearCoste(obtenerCosteExtra(extra))} (${quantity}/${extra.max})`;
-    option.disabled = !selectedTournament || !selectedTeam || quantity >= extra.max;
+    option.disabled = !(selectedTournament || genericListSelected) || !selectedTeam || quantity >= extra.max;
     rosterExtraSelect.appendChild(option);
   });
-  rosterExtraSelect.disabled = !selectedTournament || !selectedTeam;
-  addRosterExtraButton.disabled = !selectedTournament || !selectedTeam;
+  rosterExtraSelect.disabled = !(selectedTournament || genericListSelected) || !selectedTeam;
+  addRosterExtraButton.disabled = !(selectedTournament || genericListSelected) || !selectedTeam;
 }
 
 function renderizarExtras() {
@@ -415,8 +421,8 @@ function cambiarCantidadExtra(id, amount) {
 
 function agregarExtra(event) {
   event.preventDefault();
-  if (!selectedTournament || !selectedTeam) {
-    mostrarMensaje('Selecciona un torneo y un equipo antes de añadir elementos.', 'red');
+  if ((!selectedTournament && !genericListSelected) || !selectedTeam) {
+    mostrarMensaje('Selecciona un modo de lista y un equipo antes de añadir elementos.', 'red');
     return;
   }
   if (!obtenerDefinicionExtra(rosterExtraSelect.value)) {
@@ -441,7 +447,7 @@ function actualizarSelectorPosiciones() {
   placeholder.textContent = selectedTeam ? 'Selecciona un tipo de jugador' : 'Selecciona primero un equipo';
   positionSelect.appendChild(placeholder);
 
-  if (!selectedTeam || !selectedTournament) {
+  if (!selectedTeam || (!selectedTournament && !genericListSelected)) {
     positionSelect.disabled = true;
     addPlayerButton.disabled = true;
     return;
@@ -714,6 +720,7 @@ function seleccionarEquipo() {
 
 function seleccionarTorneo() {
   selectedTournament = tournaments.find(tournament => String(tournament.id) === tournamentSelect.value) || null;
+  genericListSelected = !tournamentSelect.value;
   if (selectedTournament && !rosterNameInput.value.trim()) {
     rosterNameInput.value = selectedTournament.team_name;
   }
@@ -728,7 +735,9 @@ function seleccionarTorneo() {
   maxSkillsPerPlayer = selectedTournament
     ? Number(selectedTournament.max_added_skills_per_player)
     : defaultMaxSkillsPerPlayer;
-  teamSelect.disabled = !selectedTournament;
+  teamSelect.disabled = !(selectedTournament || genericListSelected);
+  actualizarSelectorPosiciones();
+  actualizarSelectorExtras();
   actualizarResumen();
   renderizarPlantilla();
   renderizarExtras();
@@ -792,9 +801,7 @@ async function cargarCatalogo() {
   tournamentSelect.replaceChildren();
   const tournamentPlaceholder = document.createElement('option');
   tournamentPlaceholder.value = '';
-  tournamentPlaceholder.textContent = tournaments.length
-    ? 'Selecciona un torneo'
-    : 'No estás inscrito en ningún torneo';
+  tournamentPlaceholder.textContent = 'Lista genérica (sin torneo; tarifas predeterminadas)';
   tournamentSelect.appendChild(tournamentPlaceholder);
   tournaments.forEach(tournament => {
     const option = document.createElement('option');
@@ -803,7 +810,7 @@ async function cargarCatalogo() {
       + (tournament.rosters_open === false || tournament.status !== 'active' ? ' — rosters cerrados' : '');
     tournamentSelect.appendChild(option);
   });
-  tournamentSelect.disabled = !tournaments.length;
+  tournamentSelect.disabled = false;
   teamSelect.replaceChildren();
   const placeholder = document.createElement('option');
   placeholder.value = '';
@@ -815,17 +822,20 @@ async function cargarCatalogo() {
     option.textContent = team.name;
     teamSelect.appendChild(option);
   });
-  teamSelect.disabled = true;
-  actualizarResumen();
+  teamSelect.disabled = false;
+  seleccionarTorneo();
   if (!tournaments.length) {
-    mostrarMensaje('Para crear y subir un roster, primero debes estar inscrito en un torneo.', 'blue');
+    mostrarMensaje(
+      'Puedes crear una lista genérica con las tarifas predeterminadas. Para subirla a un torneo, primero debes estar inscrito.',
+      'blue'
+    );
   }
 }
 
 function agregarJugador(event) {
   event.preventDefault();
-  if (!selectedTournament) {
-    mostrarMensaje('Selecciona el torneo para aplicar sus tarifas de habilidades.', 'red');
+  if (!selectedTournament && !genericListSelected) {
+    mostrarMensaje('Selecciona un modo de lista para aplicar las tarifas de habilidades.', 'red');
     return;
   }
   if (!selectedTeam) {
@@ -972,7 +982,11 @@ function crearPaginasRoster() {
     context.fillText(`${selectedTeam.name} — ${rosterNameInput.value.trim()}`, 42, 73);
     context.font = '10px Arial';
     context.fillStyle = '#25396c';
-    context.fillText(`${selectedTournament.name} (${selectedTournament.year})`, 42, 88);
+    context.fillText(
+      selectedTournament ? `${selectedTournament.name} (${selectedTournament.year})` : 'Lista genérica (sin torneo)',
+      42,
+      88
+    );
     context.fillText(`Página ${pageIndex + 1} de ${pageRowsList.length}`, 460, 48);
 
     if (pageIndex === 0) {
@@ -1083,7 +1097,8 @@ function crearPaginasRoster() {
     context.font = '8px Arial';
     context.fillStyle = '#666666';
     context.fillText(
-      `Tarifas ${selectedTournament.name}: ${formatearCoste(skillPrices.primary)} primaria / `
+      `${selectedTournament ? `Tarifas ${selectedTournament.name}` : 'Tarifas predeterminadas'}: `
+      + `${formatearCoste(skillPrices.primary)} primaria / `
       + `${formatearCoste(skillPrices.secondary)} secundaria; +${formatearCoste(skillPrices.elite)} élite.`,
       42,
       810
@@ -1176,8 +1191,8 @@ async function crearPdf(pages) {
 }
 
 function validarRoster() {
-  if (!selectedTournament) {
-    mostrarMensaje('Selecciona uno de tus torneos antes de crear el roster.', 'red');
+  if (!selectedTournament && !genericListSelected) {
+    mostrarMensaje('Selecciona un torneo o el modo de lista genérica antes de continuar.', 'red');
     return false;
   }
   if (!selectedTeam || !rosterPlayers.length) {
@@ -1229,6 +1244,10 @@ async function descargarRoster() {
 }
 
 async function subirRoster() {
+  if (!selectedTournament) {
+    mostrarMensaje('Selecciona un torneo para subir el roster.', 'red');
+    return;
+  }
   if (!validarRoster()) return;
   if (selectedTournament.rosters_open !== true || selectedTournament.status !== 'active') {
     mostrarMensaje('El torneo ha cerrado los rosters. Contacta con el organizador.', 'red');
@@ -1287,6 +1306,7 @@ conectarSesion({
     teams = [];
     selectedTeam = null;
     selectedTournament = null;
+    genericListSelected = false;
     tournaments = [];
     rosterPlayers = [];
     rosterExtras = [];
