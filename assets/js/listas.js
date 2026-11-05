@@ -200,6 +200,13 @@ function obtenerCosteMejoras(player) {
   );
 }
 
+function obtenerCosteHabilidades(player) {
+  return player.skills.reduce((total, skill, index) => total
+    + (skill.primary ? skillPrices.primary : skillPrices.secondary)
+    + (skill.elite ? skillPrices.elite : 0)
+    + (index > 0 ? skillPrices.secondSkill : 0), 0);
+}
+
 function puedeMejorarCaracteristica(player, stat) {
   const currentValue = obtenerEstadisticas(player)[stat];
   if (currentValue === null || (player.statImprovements[stat] || 0) >= maxImprovementsPerStat) return false;
@@ -677,12 +684,16 @@ function renderizarPlantilla() {
     card.appendChild(header);
 
     const statCost = obtenerCosteMejoras(player);
+    const skillCost = obtenerCosteHabilidades(player);
+    const totalCost = player.position.cost + statCost + skillCost;
     card.appendChild(crearElemento(
       'p',
       'roster-player-cost',
-      `Coste: ${formatearCoste(player.position.cost + statCost)}`
+      `Coste: ${formatearCoste(totalCost)}`
         + ` (base ${formatearCoste(player.position.cost)}`
-        + (statCost ? ` + mejoras ${formatearCoste(statCost)})` : ')')
+        + (statCost ? ` + mejoras ${formatearCoste(statCost)}` : '')
+        + (skillCost ? ` + habilidades ${formatearCoste(skillCost)}` : '')
+        + ')'
     ));
     card.appendChild(crearElemento('p', 'roster-player-note', textoEstadisticas(obtenerEstadisticas(player))));
     actualizarEstadisticas(player, card);
@@ -1071,7 +1082,11 @@ function crearPaginasRoster() {
         context.font = '10px Arial';
         context.fillStyle = '#25396c';
         context.fillText(
-          formatearCoste(row.player.position.cost + obtenerCosteMejoras(row.player)),
+          formatearCoste(
+            row.player.position.cost
+            + obtenerCosteMejoras(row.player)
+            + obtenerCosteHabilidades(row.player)
+          ),
           553,
           y
         );
