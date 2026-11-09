@@ -12,12 +12,14 @@ drop trigger if exists results_set_updated_at on public.results;
 -- CASCADE elimina dependencias como políticas RLS, vistas y triggers.
 drop function if exists public.handle_new_user() cascade;
 drop function if exists public.set_updated_at() cascade;
+drop function if exists public.set_roster_activity_context() cascade;
 drop function if exists public.is_admin() cascade;
 drop function if exists public.is_master(uuid) cascade;
 drop function if exists public.grant_master_role(uuid) cascade;
 drop function if exists public.add_default_player_role() cascade;
 
 drop table if exists public.rosters cascade;
+drop table if exists public.roster_activity cascade;
 drop table if exists public.tournament_bases cascade;
 drop table if exists public.results cascade;
 drop table if exists public.matches cascade;

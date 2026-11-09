@@ -1251,6 +1251,23 @@ async function crearArchivoRoster() {
   return new File([pdf], fileName, { type: 'application/pdf' });
 }
 
+async function registrarActividadRoster(action) {
+  const session = getSesion();
+  if (!session?.user?.id) {
+    throw new Error('La sesión ha caducado. Vuelve a iniciar sesión.');
+  }
+
+  await enviarDatos('roster_activity', {
+    prefer: 'return=minimal',
+    body: {
+      team_name: rosterNameInput.value.trim(),
+      team_type: selectedTeam.name,
+      tournament_id: selectedTournament ? Number(selectedTournament.id) : null,
+      action
+    }
+  });
+}
+
 async function descargarRoster() {
   if (!validarRoster()) return;
 
@@ -1266,7 +1283,14 @@ async function descargarRoster() {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    mostrarMensaje('Roster descargado correctamente.', 'blue');
+    try {
+      await registrarActividadRoster('download');
+    } catch (error) {
+      console.error('Error registrando la descarga del roster:', error);
+      mostrarMensaje(`La descarga se inició, pero no se pudo guardar su registro: ${error.message}`, 'red');
+      return;
+    }
+    mostrarMensaje('Descarga del roster registrada correctamente.', 'blue');
   } catch (error) {
     console.error('Error generando el roster PDF:', error);
     mostrarMensaje(`No se pudo generar el PDF: ${error.message}`, 'red');
@@ -1302,6 +1326,13 @@ async function subirRoster() {
         mime_type: 'application/pdf'
       }
     });
+    try {
+      await registrarActividadRoster('upload');
+    } catch (error) {
+      console.error('Error registrando la subida del roster:', error);
+      mostrarMensaje(`El roster se subió correctamente, pero no se pudo guardar el registro de actividad: ${error.message}`, 'red');
+      return;
+    }
     mostrarMensaje('Roster subido correctamente al torneo.', 'blue');
   } catch (error) {
     console.error('Error al subir el roster:', error);
